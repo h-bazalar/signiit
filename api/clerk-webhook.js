@@ -45,16 +45,19 @@ export default async function handler(req, res) {
     const email = data.email_addresses?.[0]?.email_address || "";
     const nombre = `${data.first_name || ""} ${data.last_name || ""}`.trim();
 
-    const { error } = await supabase.from("usuarios").insert({
-      clerk_id: data.id,
-      email,
-      nombre,
-      plan: "free",
-      generaciones_estaticos: 0,
-      generaciones_video: 0,
-      analisis_realizados: 0,
-      creditos_reset_at: new Date().toISOString(),
-    });
+    const { error } = await supabase.from("usuarios").upsert(
+      {
+        clerk_id: data.id,
+        email,
+        nombre,
+        plan: "free",
+        generaciones_estaticos: 0,
+        generaciones_video: 0,
+        analisis_realizados: 0,
+        creditos_reset_at: new Date().toISOString(),
+      },
+      { onConflict: "clerk_id", ignoreDuplicates: true },
+    );
 
     if (error) {
       console.error("Error creando usuario en Supabase:", error);
