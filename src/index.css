@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Signiit CSS Variables ─────────────────────────── */
+:root {
+  --sig-forest:       #0F4A38;
+  --sig-forest-d:     #0D3B2E;
+  --sig-signal:       #1A6B5A;
+  --sig-mid:          #3DAB8E;
+  --sig-mint:         #5EC9AD;
+  --sig-mint-light:   #C8F0E6;
+  --sig-paper:        #F7F5F0;
+  --sig-warm:         #F0EDE6;
+  --sig-stone:        #8C8880;
+  --sig-line:         rgba(15, 74, 56, 0.10);
+  --sig-line-s:       rgba(15, 74, 56, 0.18);
+
+  /* Awareness */
+  --sig-aw-green:     #E4F5EF;
+  --sig-aw-blue:      #EBF0FB;
+  --sig-aw-amber:     #FDF3E4;
+  --sig-aw-green-text:#0F4A38;
+  --sig-aw-blue-text: #1A3A7A;
+  --sig-aw-amber-text:#7A4A10;
+}
+
+/* ── Base ──────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  background-color: var(--sig-paper);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--sig-paper);
+  color: var(--sig-forest);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ── Logo animations ───────────────────────────────── */
+@keyframes sig-pulse-ring {
+  0%   { opacity: 0; transform: scale(0.5); }
+  25%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes sig-heartbeat {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.85; }
+}
+
+@keyframes sig-it-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+.sig-ring {
+  transform-origin: center;
+  animation: sig-pulse-ring 2.8s ease-out infinite;
+}
+.sig-ring-1 { animation-delay: 0s; }
+.sig-ring-2 { animation-delay: 0.7s; }
+.sig-ring-3 { animation-delay: 1.4s; }
+
+.sig-dot-center {
+  transform-origin: center;
+  animation: sig-heartbeat 2.8s ease-in-out infinite;
+}
+
+.sig-it-accent {
+  animation: sig-it-pulse 2.8s ease-in-out infinite;
+  animation-delay: 1.4s;
+  display: inline;
+}
+
+/* ── Scrollbar (opcional, webkit) ──────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--sig-paper); }
+::-webkit-scrollbar-thumb { background: var(--sig-line-s); border-radius: 3px; }
