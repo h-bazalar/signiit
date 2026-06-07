@@ -1,76 +1,80 @@
-import { createClient } from '@supabase/supabase-js'
-import { Webhook } from 'svix'
+import { createClient } from "@supabase/supabase-js";
+import { Webhook } from "svix";
 
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY,
-)
+);
 
-export default async function handler(req) {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET
+  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    return new Response('Webhook secret no configurado', { status: 500 })
+    return res.status(500).json({ error: "Webhook secret no configurado" });
   }
 
-  const svixId        = req.headers['svix-id']
-  const svixTimestamp = req.headers['svix-timestamp']
-  const svixSignature = req.headers['svix-signature']
+  const svixId = req.headers["svix-id"];
+  const svixTimestamp = req.headers["svix-timestamp"];
+  const svixSignature = req.headers["svix-signature"];
 
   if (!svixId || !svixTimestamp || !svixSignature) {
-    return new Response('Headers de Svix faltantes', { status: 400 })
+    return res.status(400).json({ error: "Headers de Svix faltantes" });
   }
 
-  const body = await req.text()
+  const body = JSON.stringify(req.body);
 
-  let event
+  let event;
   try {
-    const wh = new Webhook(webhookSecret)
+    const wh = new Webhook(webhookSecret);
     event = wh.verify(body, {
-      'svix-id': svixId,
-      'svix-timestamp': svixTimestamp,
-      'svix-signature': svixSignature,
-    })
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature,
+    });
   } catch (err) {
-    console.error('Webhook verification failed:', err)
-    return new Response('Firma inválida', { status: 400 })
+    console.error("Webhook verification failed:", err);
+    return res.status(400).json({ error: "Firma inválida" });
   }
 
-  const { type, data } = event
+  const { type, data } = event;
 
-  // ── user.created ─────────────────────────────────
-  if (type === 'user.created') {
-    const email = data.email_addresses?.[0]?.email_address || ''
-    const nombre = `${data.first_name || ''} ${data.last_name || ''}`.trim()
+  if (type === "user.created") {
+    const email = data.email_addresses?.[0]?.email_address || "";
+    const nombre = `${data.first_name || ""} ${data.last_name || ""}`.trim();
 
-    const { error } = await supabase.from('usuarios').insert({
-      clerk_id:               data.id,
+    const { error } = await supabase.from("usuarios").insert({
+      clerk_id: data.id,
       email,
       nombre,
-      plan:                   'free',
+      plan: "free",
       generaciones_estaticos: 0,
-      generaciones_video:     0,
-      analisis_realizados:    0,
-      creditos_reset_at:      new Date().toISOString(),
-    })
+      generaciones_video: 0,
+      analisis_realizados: 0,
+      creditos_reset_at: new Date().toISOString(),
+    });
 
-    if (error) console.error('Error creando usuario en Supabase:', error)
+    if (error) {
+      console.error("Error creando usuario en Supabase:", error);
+      return res.status(500).json({ error: error.message });
+    }
   }
 
-  // ── user.updated ─────────────────────────────────
-  if (type === 'user.updated') {
+  if (type === "user.updated") {
+    const nombre = `${data.first_name || ""} ${data.last_name || ""}`.trim();
+
     const { error } = await supabase
-      .from('usuarios')
-      .update({
-        nombre: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
-      })
-      .eq('clerk_id', data.id)
+      .from("usuarios")
+      .update({ nombre })
+      .eq("clerk_id", data.id);
 
-    if (error) console.error('Error actualizando usuario:', error)
+    if (error) {
+      console.error("Error actualizando usuario:", error);
+      return res.status(500).json({ error: error.message });
+    }
   }
 
-  return new Response('OK', { status: 200 })
+  return res.status(200).json({ ok: true });
 }
