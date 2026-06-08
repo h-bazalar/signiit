@@ -1,5 +1,6 @@
 import { SignIn, SignUp, useAuth } from "@clerk/clerk-react";
 import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import SigniitLogo from "../components/SigniitLogo";
 
 const APPEARANCE = {
@@ -77,6 +78,13 @@ export default function AuthPage() {
   const { isLoaded } = useAuth();
   const location = useLocation();
   const isSignUp = location.pathname.startsWith("/sign-up");
+  const [overlayVisible, setOverlayVisible] = useState(true);
+
+  useEffect(() => {
+    setOverlayVisible(true);
+    const t = setTimeout(() => setOverlayVisible(false), 600);
+    return () => clearTimeout(t);
+  }, [location.pathname]);
 
   return (
     <div
@@ -135,6 +143,8 @@ export default function AuthPage() {
           flexDirection: "column",
           alignItems: "center",
           gap: "12px",
+          position: "relative",
+          zIndex: 2,
         }}
       >
         <SigniitLogo variant="dark" size="lg" />
@@ -152,18 +162,15 @@ export default function AuthPage() {
         </p>
       </div>
 
-      {!isLoaded ? (
+      {isLoaded && (
         <div
           style={{
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: "#5EC9AD",
-            animation: "pulse 1.5s ease-in-out infinite",
+            width: "100%",
+            maxWidth: "400px",
+            position: "relative",
+            zIndex: 2,
           }}
-        />
-      ) : (
-        <div style={{ width: "100%", maxWidth: "400px" }}>
+        >
           <div style={{ display: isSignUp ? "none" : "block" }}>
             <SignIn
               routing="path"
@@ -184,6 +191,38 @@ export default function AuthPage() {
           </div>
         </div>
       )}
+
+      {/* Overlay que cubre el flash de Clerk */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "#0F4A38",
+          zIndex: 10,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "12px",
+          opacity: overlayVisible ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          pointerEvents: overlayVisible ? "all" : "none",
+        }}
+      >
+        <SigniitLogo variant="dark" size="lg" />
+        <p
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "9px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "rgba(240,237,230,0.3)",
+            margin: 0,
+          }}
+        >
+          Creativos con intención para Meta Ads
+        </p>
+      </div>
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }`}</style>
     </div>
