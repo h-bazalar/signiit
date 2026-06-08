@@ -35,6 +35,7 @@ function AppWithLayout() {
   const [planActual, setPlanActual] = useState("free");
   const [supabase, setSupabase] = useState(null);
   const [error, setError] = useState(null);
+  const [inicializado, setInicializado] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -60,16 +61,18 @@ function AppWithLayout() {
 
         console.log("Supabase data:", data, "error:", sbError);
         if (data?.plan) setPlanActual(data.plan);
+        setInicializado(true);
       } catch (e) {
         console.error("Error initSupabase:", e);
         setError(e.message);
+        setInicializado(true);
       }
     };
 
     initSupabase();
   }, [user]);
 
-  if (!isLoaded || !supabase)
+  if (!isLoaded || !supabase || !inicializado)
     return (
       <div
         style={{
