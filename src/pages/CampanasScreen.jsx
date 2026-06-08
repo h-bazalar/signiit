@@ -1623,7 +1623,7 @@ export default function CampanasScreen({ supabase, planActual }) {
                     onClick={anteriorPaso}
                     disabled={paso === 0}
                     style={{
-                      width: '100px',
+                      flex: 1,
                       height: '44px',
                       display: 'flex',
                       alignItems: 'center',
@@ -1637,7 +1637,6 @@ export default function CampanasScreen({ supabase, planActual }) {
                       fontFamily: "'DM Sans', sans-serif",
                       fontSize: '13px',
                       opacity: paso === 0 ? 0.4 : 1,
-                      flexShrink: 0,
                     }}
                   >
                     ← Atrás
