@@ -6,7 +6,7 @@ import {
   useUser,
   useAuth,
 } from "@clerk/clerk-react";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseClient } from "./supabase";
 import { useState, useEffect } from "react";
 import { ToastProvider } from "./context/ToastContext";
 import AppLayout from "./components/AppLayout";
@@ -48,11 +48,7 @@ function AppWithLayout() {
           return;
         }
 
-        const client = createClient(
-          import.meta.env.VITE_SUPABASE_URL,
-          import.meta.env.VITE_SUPABASE_ANON_KEY,
-          { global: { headers: { Authorization: `Bearer ${token}` } } },
-        );
+        const client = createSupabaseClient(token);
         setSupabase(client);
 
         const { data, error: sbError } = await client
