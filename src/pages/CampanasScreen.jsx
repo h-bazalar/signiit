@@ -1625,6 +1625,10 @@ export default function CampanasScreen({ supabase, planActual }) {
                     style={{
                       width: '100px',
                       height: '44px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxSizing: 'border-box',
                       borderRadius: 7,
                       cursor: paso === 0 ? 'not-allowed' : 'pointer',
                       background: 'transparent',
@@ -1645,6 +1649,10 @@ export default function CampanasScreen({ supabase, planActual }) {
                       style={{
                         flex: 1,
                         height: '44px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxSizing: 'border-box',
                         borderRadius: 7,
                         cursor: 'pointer',
                         background: 'var(--sig-forest)',
@@ -1664,6 +1672,10 @@ export default function CampanasScreen({ supabase, planActual }) {
                       style={{
                         flex: 1,
                         height: '44px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxSizing: 'border-box',
                         borderRadius: 7,
                         cursor: puedeGenerar ? 'pointer' : 'not-allowed',
                         background: puedeGenerar ? 'var(--sig-forest)' : 'var(--sig-line)',
