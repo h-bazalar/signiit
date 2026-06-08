@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ClerkProvider, useAuth } from "@clerk/clerk-react";
 import App from "./App.jsx";
+import SigniitLogo from "./components/SigniitLogo.jsx";
 import "./index.css";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -19,25 +20,25 @@ function ClerkGate({ children }) {
           minHeight: "100vh",
           background: "#0F4A38",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          gap: "12px",
         }}
       >
-        <div
+        <SigniitLogo variant="dark" size="lg" />
+        <p
           style={{
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: "#5EC9AD",
-            animation: "pulse 1.5s ease-in-out infinite",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "9px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "rgba(240,237,230,0.3)",
+            margin: 0,
           }}
-        />
-        <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.4; transform: scale(1.4); }
-        }
-      `}</style>
+        >
+          Creativos con intención para Meta Ads
+        </p>
       </div>
     );
   return children;
