@@ -139,17 +139,12 @@ const RUBROS = [
 
 // ── Microcopy por campo ───────────────────────────────────────────────────────
 const MICROCOPY = {
-  nombre:
-    "El nombre que aparecerá en tus creativos. Usa el nombre que tus clientes ya conocen.",
-  rubro:
-    "Nos ayuda a entender el contexto de tu negocio para generar imágenes y copy más precisos.",
-  producto:
-    'Sé específico. No "productos naturales" — mejor "batidos Fuxión para bajar de peso" o "cheesecakes artesanales para regalo".',
-  publico:
-    "Piensa en tu cliente ideal: quién es, qué le duele, qué desea. Eso define el gancho de cada creativo.",
-  diferencial:
-    'Lo que te hace diferente. Si dices "calidad y precio", tu creativo será genérico. Sé honesto y concreto.',
-  tono: "Define cómo le habla tu marca a tu cliente. Esto afecta el registro de todo el copy generado.",
+  nombre: 'El nombre que aparecerá en tus creativos. Usa el nombre que tus clientes ya conocen.',
+  rubro: 'Nos ayuda a contextualizar el tono visual y el copy para tu industria.',
+  producto: 'Ej (productos): "Batidos Fuxión para bajar de peso y ganar energía. Distribución a todo el Perú." — Ej (servicios): "Clases de inglés online para adultos que trabajan, nivel básico a avanzado." — Ej (local): "Pastelería artesanal: tortas personalizadas, cheesecakes y postres por encargo."',
+  publico: 'Ej (masivo): "Mujeres de 30-50 años que quieren bajar de peso sin ir al gimnasio." — Ej (nicho): "Dueños de pymes que necesitan automatizar sus procesos sin saber programar." — Ej (local): "Familias de Miraflores y San Isidro que buscan postres para eventos o regalo."',
+  diferencial: 'Ej (producto): "Distribuidores oficiales con entrega en 24h y asesoría personalizada." — Ej (servicio): "Profesores nativos, clases 1 a 1, horarios flexibles desde las 6am." — Ej (local): "Sin conservantes, ingredientes importados, lista de espera de solo 48h."',
+  tono: 'Define cómo le habla tu marca a tu cliente. Afecta el registro de todo el copy generado.',
 };
 
 // ── Estado vacío del formulario ───────────────────────────────────────────────
@@ -164,61 +159,30 @@ const FORM_VACIO = {
 
 // ── Componente Tooltip ────────────────────────────────────────────────────────
 function Tooltip({ texto }) {
-  const [visible, setVisible] = useState(false);
   return (
-    <span
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => setVisible(!visible)}
-        onBlur={() => setVisible(false)}
+    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <span
         style={{
-          width: "15px",
-          height: "15px",
-          borderRadius: "50%",
-          background: "var(--sig-warm)",
-          border: "0.5px solid var(--sig-line-s)",
-          color: "var(--sig-stone)",
-          fontSize: "9px",
-          fontFamily: "'Space Mono', monospace",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          lineHeight: 1,
-          padding: 0,
+          width: '15px', height: '15px', borderRadius: '50%',
+          background: 'var(--sig-warm)', border: '0.5px solid var(--sig-line-s)',
+          color: 'var(--sig-stone)', fontSize: '9px', fontFamily: "'Space Mono', monospace",
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          lineHeight: 1, cursor: 'default', userSelect: 'none',
         }}
-      >
-        ?
-      </button>
-      {visible && (
-        <span
-          style={{
-            position: "absolute",
-            left: "20px",
-            top: "-4px",
-            zIndex: 10,
-            background: "var(--sig-forest)",
-            color: "var(--sig-warm)",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: "11px",
-            lineHeight: "1.55",
-            padding: "8px 12px",
-            borderRadius: "6px",
-            width: "220px",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-          }}
-        >
-          {texto}
-        </span>
-      )}
+        className="tooltip-trigger"
+      >?</span>
+      <span className="tooltip-box" style={{
+        position: 'absolute', left: '20px', top: '-4px', zIndex: 10,
+        background: 'var(--sig-forest)', color: 'var(--sig-warm)',
+        fontFamily: "'DM Sans', sans-serif", fontSize: '11px', lineHeight: '1.55',
+        padding: '8px 12px', borderRadius: '6px', width: '220px',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+        opacity: 0, pointerEvents: 'none', transition: 'opacity 0.15s ease',
+      }}>
+        {texto}
+      </span>
     </span>
-  );
+  )
 }
 
 // ── Label de campo ────────────────────────────────────────────────────────────
@@ -1388,6 +1352,10 @@ export default function NegociosScreen({ supabase, planActual }) {
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50%       { opacity: 0.4; }
+        }
+        .tooltip-trigger:hover + .tooltip-box,
+        .tooltip-trigger:focus + .tooltip-box {
+          opacity: 1 !important;
         }
       `}</style>
     </div>
