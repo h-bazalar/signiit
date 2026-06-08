@@ -43,7 +43,17 @@ export default function AppLayout({ children, planActual }) {
 
         {/* Logo */}
         <div style={{ padding: '28px 24px 24px', borderBottom: '0.5px solid rgba(240,237,230,0.08)' }}>
-          <SigniitLogo variant="dark" size="sm" />
+          <SigniitLogo variant="dark" size="md" />
+          <p style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: '8px',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: 'rgba(240,237,230,0.25)',
+            margin: '8px 0 0 0',
+          }}>
+            Creativos con intención
+          </p>
         </div>
 
         {/* Nav */}
