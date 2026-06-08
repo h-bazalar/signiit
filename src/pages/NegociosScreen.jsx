@@ -1659,10 +1659,6 @@ export default function NegociosScreen({ supabase, planActual, negociosIniciales
     }
   };
 
-  useEffect(() => {
-    cargarNegocios();
-  }, [supabase, user]);
-
   const mostrarToast = (mensaje, tipo = "ok") => {
     setToast({ mensaje, tipo });
     setTimeout(() => setToast(null), 3500);
