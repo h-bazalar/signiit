@@ -1641,6 +1641,7 @@ export default function CampanasScreen({ supabase, planActual }) {
                       opacity: paso === 0 ? 0.4 : 1,
                       whiteSpace: 'nowrap',
                       flexShrink: 0,
+                      width: '100px',
                     }}
                   >
                     ← Atrás
