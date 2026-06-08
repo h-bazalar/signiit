@@ -928,6 +928,7 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
   const [resultado, setResultado] = useState(null);
   const [errorGen, setErrorGen] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
+  const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState([]);
 
   const pollingRef = useRef(null);
   const progresoRef = useRef(null);
@@ -974,6 +975,12 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
     if (paso === 2) {
       if (angulo.ofertaActiva && !angulo.ofertaDetalle.trim()) {
         addToast("Describe la oferta activa.", "error");
+        return false;
+      }
+    }
+    if (paso === 3) {
+      if (angulo.modoImagen !== "ia_pura" && imagenesSeleccionadas.length === 0) {
+        addToast("Selecciona al menos una foto para usar.", "error");
         return false;
       }
     }
@@ -1087,7 +1094,7 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
         angulo,
         formato: angulo.formato,
         modoImagen: angulo.modoImagen,
-        imagenesReferencia: imagenesNegocio.map((i) => i.url),
+        imagenesReferencia: imagenesNegocio.filter(i => imagenesSeleccionadas.includes(i.id)).map(i => i.url),
       }),
       signal: AbortSignal.timeout(30000),
     });
@@ -1484,7 +1491,7 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
                     <button
                       key={m.id}
                       type="button"
-                      onClick={() => setA("modoImagen", m.id)}
+                      onClick={() => { setA("modoImagen", m.id); if (m.id === "ia_pura") setImagenesSeleccionadas([]); }}
                       style={opcionBtn(activo)}
                     >
                       <div style={puntito(activo)} />
@@ -1496,43 +1503,69 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
                   );
                 })}
               </div>
-              {/* Preview de imágenes cargadas */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: 8,
-                  marginTop: 10,
-                  flexWrap: "wrap",
-                }}
-              >
-                {imagenesNegocio.map((img) => (
-                  <img
-                    key={img.id}
-                    src={img.url}
-                    alt={img.nombre || "Referencia"}
-                    style={{
-                      width: 52,
-                      height: 52,
-                      objectFit: "cover",
-                      borderRadius: 6,
-                      border: "0.5px solid var(--sig-line)",
-                    }}
-                  />
-                ))}
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <span
-                    style={{
-                      fontFamily: "'Space Mono', monospace",
-                      fontSize: "9px",
-                      color: "var(--sig-stone)",
-                    }}
-                  >
-                    {imagenesNegocio.length} foto
-                    {imagenesNegocio.length !== 1 ? "s" : ""} cargada
-                    {imagenesNegocio.length !== 1 ? "s" : ""}
+              {angulo.modoImagen !== "ia_pura" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--sig-stone)" }}>
+                    Selecciona las fotos a usar
                   </span>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {imagenesNegocio.map((img) => {
+                      const seleccionada = imagenesSeleccionadas.includes(img.id);
+                      return (
+                        <div
+                          key={img.id}
+                          onClick={() => {
+                            setImagenesSeleccionadas(prev =>
+                              prev.includes(img.id)
+                                ? prev.filter(id => id !== img.id)
+                                : [...prev, img.id]
+                            );
+                          }}
+                          style={{
+                            position: "relative",
+                            cursor: "pointer",
+                            borderRadius: 8,
+                            border: seleccionada ? "2px solid var(--sig-mid)" : "1.5px solid var(--sig-line-s)",
+                            overflow: "hidden",
+                            width: 64,
+                            height: 64,
+                            flexShrink: 0,
+                            transition: "border 0.15s",
+                          }}
+                        >
+                          <img
+                            src={img.url}
+                            alt={img.nombre || "Referencia"}
+                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                          />
+                          {seleccionada && (
+                            <div style={{
+                              position: "absolute", inset: 0,
+                              background: "rgba(61,171,142,0.18)",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                            }}>
+                              <div style={{
+                                width: 20, height: 20, borderRadius: "50%",
+                                background: "var(--sig-mid)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                              }}>
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                  <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {imagenesSeleccionadas.length === 0 && (
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#C07820", margin: 0 }}>
+                      Selecciona al menos una foto para continuar.
+                    </p>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -1939,6 +1972,7 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
                     formato: "feed_1_1",
                     modoImagen: "ia_pura",
                   });
+                  setImagenesSeleccionadas([]);
                 }}
                 style={{
                   padding: "8px 16px",
