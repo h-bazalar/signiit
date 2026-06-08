@@ -184,15 +184,6 @@ const FORM_VACIO = {
 };
 
 // ── Helpers de archivo ────────────────────────────────────────────────────────
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 function validarArchivo(file) {
   const tiposValidos = ["image/jpeg", "image/png", "image/webp"];
   if (!tiposValidos.includes(file.type)) {
@@ -365,31 +356,38 @@ function UploadLogo({ negocioId, logoUrl, onLogoChange, getToken }) {
     const file = e.target.files[0];
     if (!file) return;
     const errorValidacion = validarArchivo(file);
-    if (errorValidacion) {
-      setError(errorValidacion);
-      return;
-    }
+    if (errorValidacion) { setError(errorValidacion); return; }
     setError("");
     setSubiendo(true);
     try {
-      const base64 = await fileToBase64(file);
       const token = await getToken();
-      const res = await fetch("/api/upload", {
+      // Paso 1: obtener presigned URL
+      const resUrl = await fetch("/api/upload-url", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          tipo: "logo",
-          negocioId,
-          base64,
-          contentType: file.type,
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tipo: "logo", negocioId, contentType: file.type }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error subiendo logo");
-      onLogoChange(data.url);
+      const urlData = await resUrl.json();
+      if (!resUrl.ok) throw new Error(urlData.error || "Error obteniendo URL de subida");
+
+      // Paso 2: PUT directo a MinIO
+      const resPut = await fetch(urlData.presignedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!resPut.ok) throw new Error("Error subiendo archivo a MinIO");
+
+      // Paso 3: confirmar en Supabase
+      const resConfirm = await fetch("/api/upload-confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tipo: "logo", negocioId, finalUrl: urlData.finalUrl }),
+      });
+      const confirmData = await resConfirm.json();
+      if (!resConfirm.ok) throw new Error(confirmData.error || "Error confirmando subida");
+
+      onLogoChange(urlData.finalUrl);
     } catch (err) {
       setError(err.message || "Error subiendo el logo");
     } finally {
@@ -580,37 +578,40 @@ function UploadImagenesReferencia({
     const file = e.target.files[0];
     if (!file) return;
     const errorValidacion = validarArchivo(file);
-    if (errorValidacion) {
-      setError(errorValidacion);
-      return;
-    }
+    if (errorValidacion) { setError(errorValidacion); return; }
     setError("");
     setSubiendo(true);
     try {
       const imagenId = crypto.randomUUID();
-      const base64 = await fileToBase64(file);
       const token = await getToken();
-      const res = await fetch("/api/upload", {
+
+      // Paso 1: obtener presigned URL
+      const resUrl = await fetch("/api/upload-url", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          tipo: "imagen_referencia",
-          negocioId,
-          imagenId,
-          base64,
-          contentType: file.type,
-          nombre: file.name,
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tipo: "imagen_referencia", negocioId, imagenId, contentType: file.type, nombre: file.name }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error subiendo imagen");
-      onImagenesChange([
-        ...imagenes,
-        { id: imagenId, url: data.url, nombre: file.name },
-      ]);
+      const urlData = await resUrl.json();
+      if (!resUrl.ok) throw new Error(urlData.error || "Error obteniendo URL de subida");
+
+      // Paso 2: PUT directo a MinIO
+      const resPut = await fetch(urlData.presignedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!resPut.ok) throw new Error("Error subiendo archivo a MinIO");
+
+      // Paso 3: confirmar en Supabase
+      const resConfirm = await fetch("/api/upload-confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tipo: "imagen_referencia", negocioId, imagenId, finalUrl: urlData.finalUrl, nombre: file.name }),
+      });
+      const confirmData = await resConfirm.json();
+      if (!resConfirm.ok) throw new Error(confirmData.error || "Error confirmando subida");
+
+      onImagenesChange([...imagenes, { id: imagenId, url: urlData.finalUrl, nombre: file.name }]);
     } catch (err) {
       setError(err.message || "Error subiendo la imagen");
     } finally {
