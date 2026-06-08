@@ -37,9 +37,12 @@ function AppWithLayout() {
   const [inicializado, setInicializado] = useState(false);
   const [error, setError] = useState(null);
 
-  // Negocio e imágenes centralizados
+  // Datos centralizados
   const [negocio, setNegocio] = useState(null);
   const [imagenesNegocio, setImagenesNegocio] = useState([]);
+  const [negocios, setNegocios] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [historial, setHistorial] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -55,30 +58,48 @@ function AppWithLayout() {
         const client = createSupabaseClient(token);
         setSupabase(client);
 
-        // Cargar plan + negocio + imágenes en paralelo
-        const [{ data: userData }, { data: negocioData }] = await Promise.all([
+        // Todo en paralelo
+        const [
+          { data: userData },
+          { data: negociosData },
+          { data: statsData },
+          { data: historialData },
+        ] = await Promise.all([
+          client.from("usuarios").select("*").eq("clerk_id", user.id).single(),
+          client
+            .from("negocios")
+            .select("*")
+            .eq("usuario_id", user.id)
+            .order("created_at", { ascending: false }),
           client
             .from("usuarios")
-            .select("plan")
+            .select(
+              "generaciones_estaticos, generaciones_video, analisis_realizados, negocios_count",
+            )
             .eq("clerk_id", user.id)
             .single(),
           client
-            .from("negocios")
-            .select("id, nombre, rubro, logo_url")
+            .from("campanas_generadas")
+            .select("*")
             .eq("usuario_id", user.id)
             .order("created_at", { ascending: false })
-            .limit(1)
-            .single(),
+            .limit(10),
         ]);
 
         if (userData?.plan) setPlanActual(userData.plan);
+        if (statsData) setStats(statsData);
+        if (historialData) setHistorial(historialData);
 
-        if (negocioData) {
-          setNegocio(negocioData);
+        const lista = negociosData || [];
+        setNegocios(lista);
+
+        if (lista.length > 0) {
+          const principal = lista[0];
+          setNegocio(principal);
           const { data: imgs } = await client
             .from("negocio_imagenes")
             .select("id, url, nombre")
-            .eq("negocio_id", negocioData.id)
+            .eq("negocio_id", principal.id)
             .order("created_at", { ascending: true });
           setImagenesNegocio(imgs || []);
         }
@@ -93,24 +114,26 @@ function AppWithLayout() {
     init();
   }, [user]);
 
-  // Función para refrescar negocio desde pantallas hijas
-  const refetchNegocio = async () => {
+  // Refetch negocio + imágenes (llamado desde NegociosScreen tras cambios)
+  const refetchNegocios = async () => {
     if (!supabase || !user) return;
     try {
-      const { data: negocioData } = await supabase
+      const { data: lista } = await supabase
         .from("negocios")
-        .select("id, nombre, rubro, logo_url")
+        .select("*")
         .eq("usuario_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+        .order("created_at", { ascending: false });
 
-      if (negocioData) {
-        setNegocio(negocioData);
+      const negociosActualizados = lista || [];
+      setNegocios(negociosActualizados);
+
+      if (negociosActualizados.length > 0) {
+        const principal = negociosActualizados[0];
+        setNegocio(principal);
         const { data: imgs } = await supabase
           .from("negocio_imagenes")
           .select("id, url, nombre")
-          .eq("negocio_id", negocioData.id)
+          .eq("negocio_id", principal.id)
           .order("created_at", { ascending: true });
         setImagenesNegocio(imgs || []);
       } else {
@@ -118,7 +141,33 @@ function AppWithLayout() {
         setImagenesNegocio([]);
       }
     } catch (e) {
-      console.error("Error refetchNegocio:", e);
+      console.error("Error refetchNegocios:", e);
+    }
+  };
+
+  // Refetch historial + stats (llamado desde HomeScreen si se necesita)
+  const refetchHome = async () => {
+    if (!supabase || !user) return;
+    try {
+      const [{ data: statsData }, { data: historialData }] = await Promise.all([
+        supabase
+          .from("usuarios")
+          .select(
+            "generaciones_estaticos, generaciones_video, analisis_realizados, negocios_count",
+          )
+          .eq("clerk_id", user.id)
+          .single(),
+        supabase
+          .from("campanas_generadas")
+          .select("*")
+          .eq("usuario_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(10),
+      ]);
+      if (statsData) setStats(statsData);
+      if (historialData) setHistorial(historialData);
+    } catch (e) {
+      console.error("Error refetchHome:", e);
     }
   };
 
@@ -164,7 +213,15 @@ function AppWithLayout() {
       <Routes>
         <Route
           path="/"
-          element={<HomeScreen supabase={supabase} planActual={planActual} />}
+          element={
+            <HomeScreen
+              supabase={supabase}
+              planActual={planActual}
+              stats={stats}
+              historial={historial}
+              onRefetch={refetchHome}
+            />
+          }
         />
         <Route
           path="/negocios"
@@ -172,8 +229,8 @@ function AppWithLayout() {
             <NegociosScreen
               supabase={supabase}
               planActual={planActual}
-              negocio={negocio}
-              onNegocioChange={refetchNegocio}
+              negociosIniciales={negocios}
+              onNegociosChange={refetchNegocios}
             />
           }
         />
