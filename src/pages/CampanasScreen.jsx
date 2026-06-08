@@ -1628,18 +1628,20 @@ export default function CampanasScreen({ supabase, planActual }) {
                 >
                   <button
                     onClick={anteriorPaso}
-                    style={{
-                      padding: "10px 18px",
-                      borderRadius: 7,
-                      cursor: paso === 0 ? "not-allowed" : "pointer",
-                      background: "transparent",
-                      border: "0.5px solid var(--sig-line-s)",
-                      color: "var(--sig-stone)",
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "13px",
-                      opacity: paso === 0 ? 0.4 : 1,
-                    }}
                     disabled={paso === 0}
+                    style={{
+                      padding: '11px 20px',
+                      borderRadius: 7,
+                      cursor: paso === 0 ? 'not-allowed' : 'pointer',
+                      background: 'transparent',
+                      border: '0.5px solid var(--sig-line-s)',
+                      color: 'var(--sig-stone)',
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '13px',
+                      opacity: paso === 0 ? 0.4 : 1,
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                    }}
                   >
                     ← Atrás
                   </button>
@@ -1649,14 +1651,14 @@ export default function CampanasScreen({ supabase, planActual }) {
                       onClick={siguientePaso}
                       style={{
                         flex: 1,
-                        padding: "10px 18px",
+                        padding: '11px 18px',
                         borderRadius: 7,
-                        cursor: "pointer",
-                        background: "var(--sig-forest)",
-                        border: "none",
-                        color: "var(--sig-warm)",
+                        cursor: 'pointer',
+                        background: 'var(--sig-forest)',
+                        border: 'none',
+                        color: 'var(--sig-warm)',
                         fontFamily: "'DM Sans', sans-serif",
-                        fontSize: "13px",
+                        fontSize: '13px',
                         fontWeight: 500,
                       }}
                     >
@@ -1668,18 +1670,14 @@ export default function CampanasScreen({ supabase, planActual }) {
                       disabled={!puedeGenerar}
                       style={{
                         flex: 1,
-                        padding: "10px 18px",
+                        padding: '11px 18px',
                         borderRadius: 7,
-                        cursor: puedeGenerar ? "pointer" : "not-allowed",
-                        background: puedeGenerar
-                          ? "var(--sig-forest)"
-                          : "var(--sig-line)",
-                        border: "none",
-                        color: puedeGenerar
-                          ? "var(--sig-warm)"
-                          : "var(--sig-stone)",
+                        cursor: puedeGenerar ? 'pointer' : 'not-allowed',
+                        background: puedeGenerar ? 'var(--sig-forest)' : 'var(--sig-line)',
+                        border: 'none',
+                        color: puedeGenerar ? 'var(--sig-warm)' : 'var(--sig-stone)',
                         fontFamily: "'DM Sans', sans-serif",
-                        fontSize: "13px",
+                        fontSize: '13px',
                         fontWeight: 500,
                       }}
                     >
