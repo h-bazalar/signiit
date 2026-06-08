@@ -1811,7 +1811,7 @@ export default function NegociosScreen({ supabase, planActual }) {
                 lineHeight: 1.1,
               }}
             >
-              {negocios.length === 0 ? "Empieza aquí" : "Tus negocios"}
+              {cargando ? "" : negocios.length === 0 ? "Empieza aquí" : "Tus negocios"}
             </h1>
             <p
               style={{
@@ -1822,7 +1822,7 @@ export default function NegociosScreen({ supabase, planActual }) {
                 lineHeight: "1.5",
               }}
             >
-              {negocios.length === 0
+              {cargando ? "" : negocios.length === 0
                 ? "Registra tu negocio para generar creativos con intención."
                 : `${negocios.length} de ${limiteNegocios} negocios en tu plan ${plan.nombre}.`}
             </p>
