@@ -185,72 +185,49 @@ function Toggle({ value, onChange }) {
 function Progreso({ pasoActual }) {
   return (
     <div style={{ marginBottom: 24 }}>
-      {/* Línea con puntos */}
-      <div style={{ display: "flex", alignItems: "center" }}>
-        {PASOS.map((_, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flex: i < PASOS.length - 1 ? 1 : 0,
-            }}
-          >
-            <div
-              style={{
-                width: i === pasoActual ? 10 : 8,
-                height: i === pasoActual ? 10 : 8,
-                borderRadius: "50%",
-                flexShrink: 0,
-                transition: "all 0.2s",
-                background:
-                  i < pasoActual
-                    ? "var(--sig-mid)"
-                    : i === pasoActual
-                      ? "var(--sig-forest)"
-                      : "rgba(15,74,56,0.15)",
-                boxShadow:
-                  i === pasoActual ? "0 0 0 3px rgba(61,171,142,0.2)" : "none",
-              }}
-            />
-            {i < PASOS.length - 1 && (
-              <div
-                style={{
-                  flex: 1,
-                  height: "0.5px",
-                  transition: "background 0.3s",
-                  background:
-                    i < pasoActual ? "var(--sig-mid)" : "rgba(15,74,56,0.15)",
-                }}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-      {/* Labels centrados bajo cada punto */}
-      <div style={{ display: 'flex', marginTop: 7 }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
         {PASOS.map((label, i) => (
           <div key={i} style={{
             flex: i < PASOS.length - 1 ? 1 : 0,
             display: 'flex',
-            justifyContent: i === 0 ? 'flex-start' : i === PASOS.length - 1 ? 'flex-end' : 'center',
-            transform: i === 0 ? 'none' : i === PASOS.length - 1 ? 'none' : 'translateX(-50%)',
-            marginLeft: i === PASOS.length - 1 ? '0' : i === 0 ? '0' : 'calc(50%)',
+            alignItems: 'center',
+            position: 'relative',
           }}>
-            <span style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: '8px', letterSpacing: '0.06em',
-              textTransform: 'uppercase', transition: 'color 0.2s',
-              color: i < pasoActual ? 'var(--sig-mid)' : i === pasoActual ? 'var(--sig-forest)' : 'rgba(15,74,56,0.3)',
-              fontWeight: i === pasoActual ? 700 : 400,
-            }}>
-              {label}
-            </span>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{
+                width: i === pasoActual ? 10 : 8,
+                height: i === pasoActual ? 10 : 8,
+                borderRadius: '50%', flexShrink: 0, transition: 'all 0.2s',
+                background: i < pasoActual ? 'var(--sig-mid)' : i === pasoActual ? 'var(--sig-forest)' : 'rgba(15,74,56,0.15)',
+                boxShadow: i === pasoActual ? '0 0 0 3px rgba(61,171,142,0.2)' : 'none',
+              }} />
+              <span style={{
+                position: 'absolute',
+                top: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontFamily: "'Space Mono', monospace",
+                fontSize: '8px', letterSpacing: '0.06em',
+                textTransform: 'uppercase', transition: 'color 0.2s',
+                whiteSpace: 'nowrap',
+                color: i < pasoActual ? 'var(--sig-mid)' : i === pasoActual ? 'var(--sig-forest)' : 'rgba(15,74,56,0.3)',
+                fontWeight: i === pasoActual ? 700 : 400,
+              }}>
+                {label}
+              </span>
+            </div>
+            {i < PASOS.length - 1 && (
+              <div style={{
+                flex: 1, height: '0.5px', transition: 'background 0.3s',
+                background: i < pasoActual ? 'var(--sig-mid)' : 'rgba(15,74,56,0.15)',
+              }} />
+            )}
           </div>
         ))}
       </div>
+      <div style={{ height: 20 }} />
     </div>
-  );
+  )
 }
 
 // ── Burbuja educativa ─────────────────────────────────────────────────────────
