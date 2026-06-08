@@ -780,23 +780,32 @@ export default function CampanasScreen({ supabase, planActual }) {
   const videoDisponible = planActual !== "free";
 
   // ── Cargar negocios ──
-  useEffect(() => {
-    if (!supabase || !user) return;
-    const cargar = async () => {
-      setCargandoNegocios(true);
-      const { data } = await supabase
-        .from("negocios")
-        .select("id, nombre, rubro")
-        .eq("usuario_id", user.id)
-        .order("created_at", { ascending: false });
+  const cargarNegocios = async () => {
+    if (!user) return;
+    setCargandoNegocios(true);
+    try {
+      const token = await getToken({ template: 'supabase' });
+      const { createSupabaseClient } = await import('../supabase.js');
+      const client = createSupabaseClient(token);
+      const { data } = await client
+        .from('negocios')
+        .select('id, nombre, rubro')
+        .eq('usuario_id', user.id)
+        .order('created_at', { ascending: false });
       if (data?.length) {
         setNegocios(data);
         setNegocioId(data[0].id);
       }
+    } catch (e) {
+      console.error('Error cargando negocios:', e);
+    } finally {
       setCargandoNegocios(false);
-    };
-    cargar();
-  }, [supabase, user]);
+    }
+  };
+
+  useEffect(() => {
+    cargarNegocios();
+  }, [user]);
 
   // ── Cleanup al desmontar ──
   useEffect(() => {
