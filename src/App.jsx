@@ -145,8 +145,7 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/sign-in/*" element={<AuthPage />} />
-          <Route path="/sign-up/*" element={<AuthPage />} />
+          <Route path="/sign-*" element={<AuthPage />} />
           <Route
             path="/*"
             element={
