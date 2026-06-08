@@ -228,37 +228,22 @@ function Progreso({ pasoActual }) {
         ))}
       </div>
       {/* Labels centrados bajo cada punto */}
-      <div style={{ display: "flex", marginTop: 7 }}>
+      <div style={{ display: 'flex', marginTop: 7 }}>
         {PASOS.map((label, i) => (
-          <div
-            key={i}
-            style={{
-              flex: i < PASOS.length - 1 ? 1 : 0,
-              display: "flex",
-              justifyContent:
-                i === 0
-                  ? "flex-start"
-                  : i === PASOS.length - 1
-                    ? "flex-end"
-                    : "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'Space Mono', monospace",
-                fontSize: "8px",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                transition: "color 0.2s",
-                color:
-                  i < pasoActual
-                    ? "var(--sig-mid)"
-                    : i === pasoActual
-                      ? "var(--sig-forest)"
-                      : "rgba(15,74,56,0.3)",
-                fontWeight: i === pasoActual ? 700 : 400,
-              }}
-            >
+          <div key={i} style={{
+            flex: i < PASOS.length - 1 ? 1 : 0,
+            display: 'flex',
+            justifyContent: i === 0 ? 'flex-start' : i === PASOS.length - 1 ? 'flex-end' : 'center',
+            transform: i === 0 ? 'none' : i === PASOS.length - 1 ? 'none' : 'translateX(-50%)',
+            marginLeft: i === PASOS.length - 1 ? '0' : i === 0 ? '0' : 'calc(50%)',
+          }}>
+            <span style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: '8px', letterSpacing: '0.06em',
+              textTransform: 'uppercase', transition: 'color 0.2s',
+              color: i < pasoActual ? 'var(--sig-mid)' : i === pasoActual ? 'var(--sig-forest)' : 'rgba(15,74,56,0.3)',
+              fontWeight: i === pasoActual ? 700 : 400,
+            }}>
               {label}
             </span>
           </div>
@@ -280,7 +265,10 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
       top: esMobil ? 'auto' : '24px',
       width: esMobil ? '100%' : '240px',
       flexShrink: 0,
-      alignSelf: 'flex-start',
+      alignSelf: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
     }}>
       <div
         style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: esMobil ? 'pointer' : 'default', marginBottom: colapsada ? 0 : 10 }}
@@ -1627,7 +1615,7 @@ export default function CampanasScreen({ supabase, planActual }) {
             style={{
               display: "flex",
               gap: 20,
-              alignItems: "flex-start",
+              alignItems: "stretch",
               flexDirection: esMobil ? "column" : "row",
             }}
           >
