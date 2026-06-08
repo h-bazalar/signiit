@@ -85,17 +85,6 @@ const IconDownload = () => (
     />
   </svg>
 );
-const IconCheck = () => (
-  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-    <path
-      d="M1.5 4l2 2 3-3"
-      stroke="#3DAB8E"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 const IconChevron = ({ dir = "down" }) => (
   <svg
     width="12"
@@ -113,6 +102,30 @@ const IconChevron = ({ dir = "down" }) => (
     />
   </svg>
 );
+
+// Icono de proporción para formatos
+const IconAspect = ({ ratio }) => {
+  const configs = {
+    "1:1": { w: 16, h: 16 },
+    "4:5": { w: 14, h: 17 },
+    "9:16": { w: 10, h: 18 },
+  };
+  const c = configs[ratio] || { w: 16, h: 16 };
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect
+        x={(20 - c.w) / 2}
+        y={(20 - c.h) / 2}
+        width={c.w}
+        height={c.h}
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        fill="none"
+      />
+    </svg>
+  );
+};
 
 // ── Awareness labels ──────────────────────────────────────────────────────────
 const AWARENESS_LABELS = {
@@ -181,116 +194,248 @@ function Toggle({ value, onChange }) {
   );
 }
 
-// ── Indicador de progreso Opción A ────────────────────────────────────────────
+// ── Indicador de progreso ─────────────────────────────────────────────────────
 function Progreso({ pasoActual }) {
   return (
     <div style={{ marginBottom: 24 }}>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <div
+        style={{ position: "relative", display: "flex", alignItems: "center" }}
+      >
         {PASOS.map((label, i) => (
-          <div key={i} style={{
-            flex: i < PASOS.length - 1 ? 1 : 0,
-            display: 'flex',
-            alignItems: 'center',
-            position: 'relative',
-          }}>
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{
-                width: i === pasoActual ? 10 : 8,
-                height: i === pasoActual ? 10 : 8,
-                borderRadius: '50%', flexShrink: 0, transition: 'all 0.2s',
-                background: i < pasoActual ? 'var(--sig-mid)' : i === pasoActual ? 'var(--sig-forest)' : 'rgba(15,74,56,0.15)',
-                boxShadow: i === pasoActual ? '0 0 0 3px rgba(61,171,142,0.2)' : 'none',
-              }} />
-              <span style={{
-                position: 'absolute',
-                top: 16,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                fontFamily: "'Space Mono', monospace",
-                fontSize: '8px', letterSpacing: '0.06em',
-                textTransform: 'uppercase', transition: 'color 0.2s',
-                whiteSpace: 'nowrap',
-                color: i < pasoActual ? 'var(--sig-mid)' : i === pasoActual ? 'var(--sig-forest)' : 'rgba(15,74,56,0.3)',
-                fontWeight: i === pasoActual ? 700 : 400,
-              }}>
+          <div
+            key={i}
+            style={{
+              flex: i < PASOS.length - 1 ? 1 : 0,
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  width: i === pasoActual ? 10 : 8,
+                  height: i === pasoActual ? 10 : 8,
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                  transition: "all 0.2s",
+                  background:
+                    i < pasoActual
+                      ? "var(--sig-mid)"
+                      : i === pasoActual
+                        ? "var(--sig-forest)"
+                        : "rgba(15,74,56,0.15)",
+                  boxShadow:
+                    i === pasoActual
+                      ? "0 0 0 3px rgba(61,171,142,0.2)"
+                      : "none",
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  top: 16,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  transition: "color 0.2s",
+                  whiteSpace: "nowrap",
+                  color:
+                    i < pasoActual
+                      ? "var(--sig-mid)"
+                      : i === pasoActual
+                        ? "var(--sig-forest)"
+                        : "rgba(15,74,56,0.3)",
+                  fontWeight: i === pasoActual ? 700 : 400,
+                }}
+              >
                 {label}
               </span>
             </div>
             {i < PASOS.length - 1 && (
-              <div style={{
-                flex: 1, height: '0.5px', transition: 'background 0.3s',
-                background: i < pasoActual ? 'var(--sig-mid)' : 'rgba(15,74,56,0.15)',
-              }} />
+              <div
+                style={{
+                  flex: 1,
+                  height: "0.5px",
+                  transition: "background 0.3s",
+                  background:
+                    i < pasoActual ? "var(--sig-mid)" : "rgba(15,74,56,0.15)",
+                }}
+              />
             )}
           </div>
         ))}
       </div>
       <div style={{ height: 20 }} />
     </div>
-  )
+  );
 }
 
 // ── Burbuja educativa ─────────────────────────────────────────────────────────
 function BurbujaInfo({ colapsada, onToggle, esMobil }) {
   return (
-    <div style={{
-      background: 'white',
-      border: '0.5px solid rgba(15,74,56,0.15)',
-      borderRadius: esMobil ? '10px' : '12px 12px 2px 12px',
-      padding: '18px 18px',
-      position: esMobil ? 'relative' : 'sticky',
-      top: esMobil ? 'auto' : '24px',
-      width: esMobil ? '100%' : '240px',
-      flexShrink: 0,
-      alignSelf: 'auto',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-    }}>
+    <div
+      style={{
+        background: "white",
+        border: "0.5px solid rgba(15,74,56,0.15)",
+        borderRadius: esMobil ? "10px" : "12px 12px 2px 12px",
+        padding: "18px 18px",
+        position: esMobil ? "relative" : "sticky",
+        top: esMobil ? "auto" : "24px",
+        width: esMobil ? "100%" : "240px",
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
       <div
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: esMobil ? 'pointer' : 'default', marginBottom: colapsada ? 0 : 10 }}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          cursor: esMobil ? "pointer" : "default",
+          marginBottom: colapsada ? 0 : 10,
+        }}
         onClick={esMobil ? onToggle : undefined}
       >
-        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--sig-mid)', fontWeight: 700 }}>
+        <span
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "9px",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--sig-mid)",
+            fontWeight: 700,
+          }}
+        >
           Cómo funciona
         </span>
-        {esMobil && <IconChevron dir={colapsada ? 'down' : 'up'} />}
+        {esMobil && <IconChevron dir={colapsada ? "down" : "up"} />}
       </div>
 
       {!colapsada && (
         <>
-          <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '14px', color: '#0F4A38', lineHeight: 1.4, margin: '0 0 12px', fontWeight: 400 }}>
+          <p
+            style={{
+              fontFamily: "'DM Serif Display', serif",
+              fontSize: "14px",
+              color: "#0F4A38",
+              lineHeight: 1.4,
+              margin: "0 0 12px",
+              fontWeight: 400,
+            }}
+          >
             El creativo que convierte sabe exactamente a quién le habla.
           </p>
-
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: 'var(--sig-stone)', lineHeight: 1.65, margin: '0 0 14px' }}>
-            Cada generación produce <strong style={{ color: 'var(--sig-forest)', fontWeight: 500 }}>3 creativos</strong> — uno por tipo de cliente. <strong style={{ color: 'var(--sig-forest)', fontWeight: 500 }}>Un solo producto</strong> por campaña.
+          <p
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "12px",
+              color: "var(--sig-stone)",
+              lineHeight: 1.65,
+              margin: "0 0 14px",
+            }}
+          >
+            Cada generación produce{" "}
+            <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
+              3 creativos
+            </strong>{" "}
+            — uno por tipo de cliente.{" "}
+            <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
+              Un solo producto
+            </strong>{" "}
+            por campaña.
           </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              marginBottom: 14,
+            }}
+          >
             {[
-              { bold: 'Tortas y alfajores', resto: ' — genera una campaña para cada uno.' },
-              { bold: 'Oferta activa', resto: ' — actívala en el paso 3. Cambia el creativo de cierre.' },
-              { bold: 'Sé específico', resto: ' — mejor input, mejor creativo.' },
+              {
+                bold: "Tortas y alfajores",
+                resto: " — genera una campaña para cada uno.",
+              },
+              {
+                bold: "Oferta activa",
+                resto:
+                  " — actívala en el paso 3. Cambia el creativo de cierre.",
+              },
+              {
+                bold: "Sé específico",
+                resto: " — mejor input, mejor creativo.",
+              },
             ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--sig-mid)', flexShrink: 0, marginTop: 6 }} />
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: 'var(--sig-stone)', lineHeight: 1.55, margin: 0 }}>
-                  <strong style={{ fontWeight: 500, color: 'var(--sig-forest)' }}>{item.bold}</strong>{item.resto}
+              <div
+                key={i}
+                style={{ display: "flex", alignItems: "flex-start", gap: 8 }}
+              >
+                <div
+                  style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    background: "var(--sig-mid)",
+                    flexShrink: 0,
+                    marginTop: 6,
+                  }}
+                />
+                <p
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "12px",
+                    color: "var(--sig-stone)",
+                    lineHeight: 1.55,
+                    margin: 0,
+                  }}
+                >
+                  <strong
+                    style={{ fontWeight: 500, color: "var(--sig-forest)" }}
+                  >
+                    {item.bold}
+                  </strong>
+                  {item.resto}
                 </p>
               </div>
             ))}
           </div>
-
-          <div style={{ borderTop: '0.5px solid rgba(15,74,56,0.10)', paddingTop: 12 }}>
-            <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '13px', fontStyle: 'italic', color: 'var(--sig-forest)', margin: 0, lineHeight: 1.4 }}>
+          <div
+            style={{
+              borderTop: "0.5px solid rgba(15,74,56,0.10)",
+              paddingTop: 12,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "'DM Serif Display', serif",
+                fontSize: "13px",
+                fontStyle: "italic",
+                color: "var(--sig-forest)",
+                margin: 0,
+                lineHeight: 1.4,
+              }}
+            >
               No es magia — es criterio.
             </p>
           </div>
         </>
       )}
     </div>
-  )
+  );
 }
 
 // ── Cards de resultado ────────────────────────────────────────────────────────
@@ -755,25 +900,27 @@ export default function CampanasScreen({ supabase, planActual }) {
   const plan = PLANES[planActual] || PLANES.free;
   const videoDisponible = planActual !== "free";
 
-  // Negocio
+  // Negocio e imágenes de referencia
   const [negocio, setNegocio] = useState(null);
   const [cargandoNegocio, setCargandoNegocio] = useState(true);
+  const [imagenesNegocio, setImagenesNegocio] = useState([]);
 
   // Wizard
   const [paso, setPaso] = useState(0);
   const [burbujaColapsada, setBurbujaColapsada] = useState(true);
   const [esMobil, setEsMobil] = useState(false);
 
-  // Formulario ángulo
+  // Formulario
   const [angulo, setAngulo] = useState({
     promocionar: "",
     problema: "",
     diferencial: "",
-    destino: "meta_ads",
     tipoGeneracion: "imagenes",
     ofertaActiva: false,
     ofertaDetalle: "",
     ofertaPrecio: "",
+    formato: "feed_1_1",
+    modoImagen: "ia_pura",
   });
 
   // Generación
@@ -805,7 +952,7 @@ export default function CampanasScreen({ supabase, planActual }) {
     [],
   );
 
-  // Cargar negocio
+  // Cargar negocio + imágenes de referencia
   useEffect(() => {
     if (!user) return;
     const cargar = async () => {
@@ -814,14 +961,33 @@ export default function CampanasScreen({ supabase, planActual }) {
         const token = await getToken({ template: "supabase" });
         const { createSupabaseClient } = await import("../supabase.js");
         const client = createSupabaseClient(token);
-        const { data } = await client
+
+        const { data: negocioData } = await client
           .from("negocios")
           .select("id, nombre, rubro")
           .eq("usuario_id", user.id)
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
-        if (data) setNegocio(data);
+
+        if (negocioData) {
+          setNegocio(negocioData);
+
+          // Cargar imágenes de referencia del negocio
+          const { data: imgs } = await client
+            .from("negocio_imagenes")
+            .select("id, url, nombre")
+            .eq("negocio_id", negocioData.id)
+            .order("created_at", { ascending: true });
+
+          const listaImagenes = imgs || [];
+          setImagenesNegocio(listaImagenes);
+
+          // Si no tiene imágenes, asegurar modoImagen = ia_pura
+          if (listaImagenes.length === 0) {
+            setAngulo((a) => ({ ...a, modoImagen: "ia_pura" }));
+          }
+        }
       } catch (e) {
         console.error("Error cargando negocio:", e);
       } finally {
@@ -866,14 +1032,6 @@ export default function CampanasScreen({ supabase, planActual }) {
   };
 
   const anteriorPaso = () => setPaso((p) => Math.max(p - 1, 0));
-
-  // Costo en créditos según tipo
-  const creditosTipo =
-    angulo.tipoGeneracion === "ambos"
-      ? { imagenes: tieneCredito.imagenes, videos: tieneCredito.videos }
-      : angulo.tipoGeneracion === "video"
-        ? { videos: tieneCredito.videos }
-        : { imagenes: tieneCredito.imagenes };
 
   const puedeGenerar =
     angulo.tipoGeneracion === "ambos"
@@ -923,7 +1081,7 @@ export default function CampanasScreen({ supabase, planActual }) {
     [supabase],
   );
 
-  // Iniciar progreso
+  // Progreso simulado
   const iniciarProgreso = () => {
     setProgreso(0);
     clearInterval(progresoRef.current);
@@ -970,7 +1128,13 @@ export default function CampanasScreen({ supabase, planActual }) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ negocioId: negocio.id, angulo }),
+      body: JSON.stringify({
+        negocioId: negocio.id,
+        angulo,
+        formato: angulo.formato,
+        modoImagen: angulo.modoImagen,
+        imagenesReferencia: imagenesNegocio.map((i) => i.url),
+      }),
       signal: AbortSignal.timeout(30000),
     });
     if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
@@ -985,15 +1149,12 @@ export default function CampanasScreen({ supabase, planActual }) {
       addToast("Sin créditos suficientes para esta generación.", "error");
       return;
     }
-
     setGenerando(true);
     setResultado(null);
     setErrorGen(null);
     iniciarProgreso();
-
     try {
       let resultados = [];
-
       if (angulo.tipoGeneracion === "ambos") {
         const [resImg, resVid] = await Promise.all([
           generarUna("imagenes"),
@@ -1004,7 +1165,6 @@ export default function CampanasScreen({ supabase, planActual }) {
         const res = await generarUna(angulo.tipoGeneracion);
         resultados = [res];
       }
-
       clearInterval(progresoRef.current);
       setProgreso(100);
       setTimeout(() => setProgreso(0), 800);
@@ -1057,7 +1217,49 @@ export default function CampanasScreen({ supabase, planActual }) {
     display: "block",
   };
 
-  // ── Contenido de cada paso ──
+  // ── Helpers del paso 4 ────────────────────────────────────────────────────────
+  const tieneImagenes = imagenesNegocio.length > 0;
+
+  const opcionBtn = (activo, bloqueado = false) => ({
+    padding: "10px 14px",
+    borderRadius: 8,
+    textAlign: "left",
+    cursor: bloqueado ? "not-allowed" : "pointer",
+    transition: "all 0.15s",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    background: activo ? "var(--sig-forest)" : "white",
+    border: activo
+      ? "0.5px solid var(--sig-forest)"
+      : "0.5px solid var(--sig-line-s)",
+    opacity: bloqueado ? 0.5 : 1,
+  });
+
+  const opcionLabel = (activo) => ({
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: "13px",
+    fontWeight: 500,
+    margin: 0,
+    color: activo ? "var(--sig-warm)" : "var(--sig-forest)",
+  });
+
+  const opcionSub = (activo) => ({
+    fontFamily: "'Space Mono', monospace",
+    fontSize: "8px",
+    margin: 0,
+    color: activo ? "rgba(240,237,230,0.5)" : "var(--sig-stone)",
+  });
+
+  const puntito = (activo) => ({
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    flexShrink: 0,
+    background: activo ? "var(--sig-mint)" : "var(--sig-line-s)",
+  });
+
+  // ── Contenido de cada paso ────────────────────────────────────────────────────
   const renderPaso = () => {
     if (paso === 0)
       return (
@@ -1262,95 +1464,136 @@ export default function CampanasScreen({ supabase, planActual }) {
     if (paso === 3)
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Destino */}
+          {/* ── Selector de formato ── */}
           <div>
-            <span style={labelStyle}>¿Dónde vas a publicar?</span>
+            <span style={labelStyle}>Formato</span>
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
               {[
                 {
-                  id: "meta_ads",
-                  label: "Meta Ads",
-                  sub: "Feed · imagen limpia + títulos y copies separados",
+                  id: "feed_1_1",
+                  ratio: "1:1",
+                  label: "Feed cuadrado",
+                  sub: "1:1 · Meta Ads Feed",
                 },
                 {
-                  id: "9_16",
+                  id: "feed_4_5",
+                  ratio: "4:5",
+                  label: "Feed vertical",
+                  sub: "4:5 · Meta Ads Feed",
+                },
+                {
+                  id: "stories_9_16",
+                  ratio: "9:16",
                   label: "Stories / Reels / WhatsApp",
-                  sub: "Vertical 9:16 · el mensaje va dentro de la imagen",
+                  sub: "9:16 · vertical · mensaje integrado en la imagen",
                 },
-                {
-                  id: "ambos",
-                  label: "Ambos formatos",
-                  sub: "Genera versiones para cada destino",
-                },
-              ].map((d) => (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={() => setA("destino", d.id)}
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    transition: "all 0.15s",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    background:
-                      angulo.destino === d.id ? "var(--sig-forest)" : "white",
-                    border:
-                      angulo.destino === d.id
-                        ? "0.5px solid var(--sig-forest)"
-                        : "0.5px solid var(--sig-line-s)",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      background:
-                        angulo.destino === d.id
-                          ? "var(--sig-mint)"
-                          : "var(--sig-line-s)",
-                    }}
-                  />
-                  <div>
-                    <p
+              ].map((f) => {
+                const activo = angulo.formato === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setA("formato", f.id)}
+                    style={opcionBtn(activo)}
+                  >
+                    <div
                       style={{
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        margin: 0,
-                        color:
-                          angulo.destino === d.id
-                            ? "var(--sig-warm)"
-                            : "var(--sig-forest)",
+                        color: activo ? "var(--sig-mint)" : "var(--sig-stone)",
+                        flexShrink: 0,
                       }}
                     >
-                      {d.label}
-                    </p>
-                    <p
-                      style={{
-                        fontFamily: "'Space Mono', monospace",
-                        fontSize: "8px",
-                        margin: 0,
-                        color:
-                          angulo.destino === d.id
-                            ? "rgba(240,237,230,0.5)"
-                            : "var(--sig-stone)",
-                      }}
-                    >
-                      {d.sub}
-                    </p>
-                  </div>
-                </button>
-              ))}
+                      <IconAspect ratio={f.ratio} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={opcionLabel(activo)}>{f.label}</p>
+                      <p style={opcionSub(activo)}>{f.sub}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Tipo generación */}
+          {/* ── Selector de modo imagen (solo si tiene imágenes cargadas) ── */}
+          {tieneImagenes && (
+            <div>
+              <span style={labelStyle}>Cómo usar tus fotos de producto</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                {[
+                  {
+                    id: "foto_directa",
+                    label: "Usar mi foto tal cual",
+                    sub: "Tu imagen se usa directamente como base del creativo",
+                  },
+                  {
+                    id: "foto_referencia",
+                    label: "Usar como referencia visual",
+                    sub: "La IA recrea el estilo de tu foto con mejor composición",
+                  },
+                  {
+                    id: "ia_pura",
+                    label: "Solo IA",
+                    sub: "Ignora mis fotos — genera imágenes desde cero",
+                  },
+                ].map((m) => {
+                  const activo = angulo.modoImagen === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setA("modoImagen", m.id)}
+                      style={opcionBtn(activo)}
+                    >
+                      <div style={puntito(activo)} />
+                      <div style={{ flex: 1 }}>
+                        <p style={opcionLabel(activo)}>{m.label}</p>
+                        <p style={opcionSub(activo)}>{m.sub}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Preview de imágenes cargadas */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  marginTop: 10,
+                  flexWrap: "wrap",
+                }}
+              >
+                {imagenesNegocio.map((img) => (
+                  <img
+                    key={img.id}
+                    src={img.url}
+                    alt={img.nombre || "Referencia"}
+                    style={{
+                      width: 52,
+                      height: 52,
+                      objectFit: "cover",
+                      borderRadius: 6,
+                      border: "0.5px solid var(--sig-line)",
+                    }}
+                  />
+                ))}
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span
+                    style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "9px",
+                      color: "var(--sig-stone)",
+                    }}
+                  >
+                    {imagenesNegocio.length} foto
+                    {imagenesNegocio.length !== 1 ? "s" : ""} cargada
+                    {imagenesNegocio.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Tipo de generación ── */}
           <div>
             <span style={labelStyle}>¿Qué quieres generar?</span>
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -1375,75 +1618,24 @@ export default function CampanasScreen({ supabase, planActual }) {
                   sub: "3 creativos + 3 videos · 2 créditos",
                   bloqueado: !videoDisponible,
                 },
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => !t.bloqueado && setA("tipoGeneracion", t.id)}
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: 8,
-                    textAlign: "left",
-                    cursor: t.bloqueado ? "not-allowed" : "pointer",
-                    transition: "all 0.15s",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    background:
-                      angulo.tipoGeneracion === t.id && !t.bloqueado
-                        ? "var(--sig-forest)"
-                        : "white",
-                    border:
-                      angulo.tipoGeneracion === t.id && !t.bloqueado
-                        ? "0.5px solid var(--sig-forest)"
-                        : "0.5px solid var(--sig-line-s)",
-                    opacity: t.bloqueado ? 0.5 : 1,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      background:
-                        angulo.tipoGeneracion === t.id && !t.bloqueado
-                          ? "var(--sig-mint)"
-                          : "var(--sig-line-s)",
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        margin: 0,
-                        color:
-                          angulo.tipoGeneracion === t.id && !t.bloqueado
-                            ? "var(--sig-warm)"
-                            : "var(--sig-forest)",
-                      }}
-                    >
-                      {t.label}
-                    </p>
-                    <p
-                      style={{
-                        fontFamily: "'Space Mono', monospace",
-                        fontSize: "8px",
-                        margin: 0,
-                        color:
-                          angulo.tipoGeneracion === t.id && !t.bloqueado
-                            ? "rgba(240,237,230,0.5)"
-                            : "var(--sig-stone)",
-                      }}
-                    >
-                      {t.sub}
-                    </p>
-                  </div>
-                  {t.bloqueado && <IconLock />}
-                </button>
-              ))}
+              ].map((t) => {
+                const activo = angulo.tipoGeneracion === t.id && !t.bloqueado;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => !t.bloqueado && setA("tipoGeneracion", t.id)}
+                    style={opcionBtn(activo, t.bloqueado)}
+                  >
+                    <div style={puntito(activo)} />
+                    <div style={{ flex: 1 }}>
+                      <p style={opcionLabel(activo)}>{t.label}</p>
+                      <p style={opcionSub(activo)}>{t.sub}</p>
+                    </div>
+                    {t.bloqueado && <IconLock />}
+                  </button>
+                );
+              })}
             </div>
             {!videoDisponible && (
               <p
@@ -1459,7 +1651,7 @@ export default function CampanasScreen({ supabase, planActual }) {
             )}
           </div>
 
-          {/* Resumen créditos */}
+          {/* ── Resumen de créditos ── */}
           <div
             style={{
               background: "var(--sig-aware-green)",
@@ -1490,11 +1682,11 @@ export default function CampanasScreen({ supabase, planActual }) {
       );
   };
 
-  // ── Sin negocio ──
+  // ── Sin negocio ───────────────────────────────────────────────────────────────
   if (!cargandoNegocio && !negocio)
     return (
       <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
-        <div style={{ maxWidth: '900px', padding: '0' }}>
+        <div style={{ maxWidth: "900px", padding: "0" }}>
           <p
             style={{
               fontFamily: "'Space Mono', monospace",
@@ -1536,10 +1728,10 @@ export default function CampanasScreen({ supabase, planActual }) {
       </div>
     );
 
-  // ── Render principal ──
+  // ── Render principal ──────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
-      <div style={{ maxWidth: '900px', padding: '0' }}>
+      <div style={{ maxWidth: "900px", padding: "0" }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <p
@@ -1596,14 +1788,11 @@ export default function CampanasScreen({ supabase, planActual }) {
               flexDirection: esMobil ? "column" : "row",
             }}
           >
-            {/* Burbuja */}
             <BurbujaInfo
               colapsada={esMobil ? burbujaColapsada : false}
               onToggle={() => setBurbujaColapsada((c) => !c)}
               esMobil={esMobil}
             />
-
-            {/* Wizard */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
                 style={{
@@ -1614,51 +1803,48 @@ export default function CampanasScreen({ supabase, planActual }) {
                 }}
               >
                 <Progreso pasoActual={paso} />
-
                 <div style={{ minHeight: 220 }}>{renderPaso()}</div>
-
                 {/* Botones de navegación */}
-                <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+                <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
                   <button
                     onClick={anteriorPaso}
                     disabled={paso === 0}
                     style={{
                       flex: 1,
-                      height: '44px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxSizing: 'border-box',
+                      height: "44px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxSizing: "border-box",
                       borderRadius: 7,
-                      cursor: paso === 0 ? 'not-allowed' : 'pointer',
-                      background: 'transparent',
-                      border: '0.5px solid var(--sig-line-s)',
-                      color: 'var(--sig-stone)',
+                      cursor: paso === 0 ? "not-allowed" : "pointer",
+                      background: "transparent",
+                      border: "0.5px solid var(--sig-line-s)",
+                      color: "var(--sig-stone)",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: '13px',
+                      fontSize: "13px",
                       opacity: paso === 0 ? 0.4 : 1,
                     }}
                   >
                     ← Atrás
                   </button>
-
                   {paso < PASOS.length - 1 ? (
                     <button
                       onClick={siguientePaso}
                       style={{
                         flex: 1,
-                        height: '44px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxSizing: 'border-box',
+                        height: "44px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxSizing: "border-box",
                         borderRadius: 7,
-                        cursor: 'pointer',
-                        background: 'var(--sig-forest)',
-                        border: 'none',
-                        color: 'var(--sig-warm)',
+                        cursor: "pointer",
+                        background: "var(--sig-forest)",
+                        border: "none",
+                        color: "var(--sig-warm)",
                         fontFamily: "'DM Sans', sans-serif",
-                        fontSize: '13px',
+                        fontSize: "13px",
                         fontWeight: 500,
                       }}
                     >
@@ -1670,18 +1856,22 @@ export default function CampanasScreen({ supabase, planActual }) {
                       disabled={!puedeGenerar}
                       style={{
                         flex: 1,
-                        height: '44px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxSizing: 'border-box',
+                        height: "44px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxSizing: "border-box",
                         borderRadius: 7,
-                        cursor: puedeGenerar ? 'pointer' : 'not-allowed',
-                        background: puedeGenerar ? 'var(--sig-forest)' : 'var(--sig-line)',
-                        border: 'none',
-                        color: puedeGenerar ? 'var(--sig-warm)' : 'var(--sig-stone)',
+                        cursor: puedeGenerar ? "pointer" : "not-allowed",
+                        background: puedeGenerar
+                          ? "var(--sig-forest)"
+                          : "var(--sig-line)",
+                        border: "none",
+                        color: puedeGenerar
+                          ? "var(--sig-warm)"
+                          : "var(--sig-stone)",
                         fontFamily: "'DM Sans', sans-serif",
-                        fontSize: '13px',
+                        fontSize: "13px",
                         fontWeight: 500,
                       }}
                     >
@@ -1799,11 +1989,12 @@ export default function CampanasScreen({ supabase, planActual }) {
                     promocionar: "",
                     problema: "",
                     diferencial: "",
-                    destino: "meta_ads",
                     tipoGeneracion: "imagenes",
                     ofertaActiva: false,
                     ofertaDetalle: "",
                     ofertaPrecio: "",
+                    formato: "feed_1_1",
+                    modoImagen: "ia_pura",
                   });
                 }}
                 style={{
@@ -1821,7 +2012,6 @@ export default function CampanasScreen({ supabase, planActual }) {
                 + Nueva campaña
               </button>
             </div>
-
             {resultado.map((res, ri) => (
               <div key={ri}>
                 {res.tipo === "video"
@@ -1849,9 +2039,7 @@ export default function CampanasScreen({ supabase, planActual }) {
         />
       )}
 
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      `}</style>
+      <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
     </div>
   );
 }
