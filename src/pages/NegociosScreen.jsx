@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { PLANES, TONOS_MARCA } from "../utils/constants";
 
 // ── Iconos inline ─────────────────────────────────────────────────────────────
@@ -950,6 +950,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
 // ── Pantalla principal ────────────────────────────────────────────────────────
 export default function NegociosScreen({ supabase, planActual }) {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const [negocios, setNegocios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [panelAbierto, setPanelAbierto] = useState(false);
@@ -963,19 +964,22 @@ export default function NegociosScreen({ supabase, planActual }) {
 
   // ── Cargar negocios ──
   const cargarNegocios = async () => {
-    if (!supabase || !user) return;
+    if (!user) return;
     setCargando(true);
     try {
-      const { data, error } = await supabase
-        .from("negocios")
-        .select("*")
-        .eq("usuario_id", user.id)
-        .order("created_at", { ascending: false });
+      const token = await getToken({ template: 'supabase' });
+      const { createSupabaseClient } = await import('../supabase.js');
+      const client = createSupabaseClient(token);
+      const { data, error } = await client
+        .from('negocios')
+        .select('*')
+        .eq('usuario_id', user.id)
+        .order('created_at', { ascending: false });
       if (error) throw error;
       setNegocios(data || []);
     } catch (e) {
-      console.error("Error cargando negocios:", e);
-      mostrarToast("No se pudieron cargar los negocios.", "error");
+      console.error('Error cargando negocios:', e);
+      mostrarToast('No se pudieron cargar los negocios.', 'error');
     } finally {
       setCargando(false);
     }
@@ -993,13 +997,15 @@ export default function NegociosScreen({ supabase, planActual }) {
 
   // ── Guardar (crear o editar) ──
   const handleGuardar = async (formData) => {
-    if (!supabase || !user) return;
+    if (!user) return;
     setGuardando(true);
     try {
+      const token = await getToken({ template: 'supabase' });
+      const { createSupabaseClient } = await import('../supabase.js');
+      const client = createSupabaseClient(token);
       if (formData.id) {
-        // Editar
-        const { error } = await supabase
-          .from("negocios")
+        const { error } = await client
+          .from('negocios')
           .update({
             nombre: formData.nombre,
             rubro: formData.rubro,
@@ -1008,30 +1014,31 @@ export default function NegociosScreen({ supabase, planActual }) {
             diferencial: formData.diferencial,
             tono: formData.tono,
           })
-          .eq("id", formData.id)
-          .eq("usuario_id", user.id);
+          .eq('id', formData.id)
+          .eq('usuario_id', user.id);
         if (error) throw error;
-        mostrarToast("Negocio actualizado.");
+        mostrarToast('Negocio actualizado.');
       } else {
-        // Crear
-        const { error } = await supabase.from("negocios").insert({
-          usuario_id: user.id,
-          nombre: formData.nombre,
-          rubro: formData.rubro,
-          producto: formData.producto,
-          publico: formData.publico,
-          diferencial: formData.diferencial,
-          tono: formData.tono,
-        });
+        const { error } = await client
+          .from('negocios')
+          .insert({
+            usuario_id: user.id,
+            nombre: formData.nombre,
+            rubro: formData.rubro,
+            producto: formData.producto,
+            publico: formData.publico,
+            diferencial: formData.diferencial,
+            tono: formData.tono,
+          });
         if (error) throw error;
-        mostrarToast("Negocio creado.");
+        mostrarToast('Negocio creado.');
       }
       setPanelAbierto(false);
       setNegocioEditando(null);
       await cargarNegocios();
     } catch (e) {
-      console.error("Error guardando negocio:", e);
-      mostrarToast("Ocurrió un error. Intenta nuevamente.", "error");
+      console.error('Error guardando negocio:', e);
+      mostrarToast('Ocurrió un error. Intenta nuevamente.', 'error');
     } finally {
       setGuardando(false);
     }
@@ -1039,19 +1046,22 @@ export default function NegociosScreen({ supabase, planActual }) {
 
   // ── Eliminar ──
   const handleEliminar = async (id) => {
-    if (!supabase || !user) return;
+    if (!user) return;
     try {
-      const { error } = await supabase
-        .from("negocios")
+      const token = await getToken({ template: 'supabase' });
+      const { createSupabaseClient } = await import('../supabase.js');
+      const client = createSupabaseClient(token);
+      const { error } = await client
+        .from('negocios')
         .delete()
-        .eq("id", id)
-        .eq("usuario_id", user.id);
+        .eq('id', id)
+        .eq('usuario_id', user.id);
       if (error) throw error;
-      mostrarToast("Negocio eliminado.");
+      mostrarToast('Negocio eliminado.');
       await cargarNegocios();
     } catch (e) {
-      console.error("Error eliminando negocio:", e);
-      mostrarToast("No se pudo eliminar. Intenta nuevamente.", "error");
+      console.error('Error eliminando negocio:', e);
+      mostrarToast('No se pudo eliminar. Intenta nuevamente.', 'error');
     }
   };
 
