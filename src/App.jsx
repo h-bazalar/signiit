@@ -5,6 +5,7 @@ import {
   RedirectToSignIn,
   useUser,
   useAuth,
+  AuthenticateWithRedirectCallback,
 } from "@clerk/clerk-react";
 import { createSupabaseClient } from "./supabase";
 import { useState, useEffect } from "react";
@@ -145,6 +146,7 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
           <Route path="/sign-in/*" element={<AuthPage />} />
           <Route path="/sign-up/*" element={<AuthPage />} />
           <Route
