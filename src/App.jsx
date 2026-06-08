@@ -7,7 +7,7 @@ import {
   useAuth,
 } from "@clerk/clerk-react";
 import { createClient } from "@supabase/supabase-js";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ToastProvider } from "./context/ToastContext";
 import AppLayout from "./components/AppLayout";
 import AuthPage from "./pages/AuthPage";
@@ -33,32 +33,40 @@ function AppWithLayout() {
   const { isLoaded, getToken } = useAuth();
   const [planActual, setPlanActual] = useState("free");
   const [supabase, setSupabase] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!user) return;
 
     const initSupabase = async () => {
-      const token = await getToken({ template: "supabase" });
-      const client = createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY,
-        {
-          global: {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        },
-      );
-      setSupabase(client);
+      try {
+        const token = await getToken({ template: "supabase" });
+        console.log("Token obtenido:", token ? "OK" : "NULL");
 
-      const { data } = await client
-        .from("usuarios")
-        .select("plan")
-        .eq("clerk_id", user.id)
-        .single();
+        if (!token) {
+          setError("No se pudo obtener token de Clerk");
+          return;
+        }
 
-      if (data?.plan) setPlanActual(data.plan);
+        const client = createClient(
+          import.meta.env.VITE_SUPABASE_URL,
+          import.meta.env.VITE_SUPABASE_ANON_KEY,
+          { global: { headers: { Authorization: `Bearer ${token}` } } },
+        );
+        setSupabase(client);
+
+        const { data, error: sbError } = await client
+          .from("usuarios")
+          .select("plan")
+          .eq("clerk_id", user.id)
+          .single();
+
+        console.log("Supabase data:", data, "error:", sbError);
+        if (data?.plan) setPlanActual(data.plan);
+      } catch (e) {
+        console.error("Error initSupabase:", e);
+        setError(e.message);
+      }
     };
 
     initSupabase();
@@ -71,8 +79,10 @@ function AppWithLayout() {
           minHeight: "100vh",
           background: "#F7F5F0",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          gap: "12px",
         }}
       >
         <div
@@ -84,6 +94,17 @@ function AppWithLayout() {
             animation: "pulse 1.5s ease-in-out infinite",
           }}
         />
+        {error && (
+          <p
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "13px",
+              color: "#C0392B",
+            }}
+          >
+            {error}
+          </p>
+        )}
         <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }`}</style>
       </div>
     );
