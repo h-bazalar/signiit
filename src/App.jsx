@@ -7,7 +7,7 @@ import {
   useAuth,
 } from "@clerk/clerk-react";
 import { createClient } from "@supabase/supabase-js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ToastProvider } from "./context/ToastContext";
 import AppLayout from "./components/AppLayout";
 import AuthPage from "./pages/AuthPage";
@@ -16,11 +16,6 @@ import NegociosScreen from "./pages/NegociosScreen";
 import CampanasScreen from "./pages/CampanasScreen";
 import AnalisisScreen from "./pages/AnalisisScreen";
 import PlanesScreen from "./pages/PlanesScreen";
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-);
 
 function ProtectedRoute({ children }) {
   return (
@@ -35,23 +30,41 @@ function ProtectedRoute({ children }) {
 
 function AppWithLayout() {
   const { user } = useUser();
-  const { isLoaded } = useAuth();
+  const { isLoaded, getToken } = useAuth();
   const [planActual, setPlanActual] = useState("free");
+  const [supabase, setSupabase] = useState(null);
 
   useEffect(() => {
-    if (user) {
-      supabase
+    if (!user) return;
+
+    const initSupabase = async () => {
+      const token = await getToken({ template: "supabase" });
+      const client = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        },
+      );
+      setSupabase(client);
+
+      const { data } = await client
         .from("usuarios")
         .select("plan")
         .eq("clerk_id", user.id)
-        .single()
-        .then(({ data }) => {
-          if (data?.plan) setPlanActual(data.plan);
-        });
-    }
+        .single();
+
+      if (data?.plan) setPlanActual(data.plan);
+    };
+
+    initSupabase();
   }, [user]);
 
-  if (!isLoaded)
+  if (!isLoaded || !supabase)
     return (
       <div
         style={{
