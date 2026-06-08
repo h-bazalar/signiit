@@ -46,21 +46,14 @@ export default function HomeScreen({ supabase, planActual }) {
 
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
-        <h1 style={{
-          fontFamily: "'DM Serif Display', serif",
-          fontSize: '28px',
-          fontWeight: '400',
-          color: '#0F4A38',
-          marginBottom: '6px',
-        }}>
-          Hola, {nombre}
+        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8C8880', marginBottom: '6px' }}>
+          Resumen
+        </p>
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '28px', fontWeight: '400', color: '#0F4A38', marginBottom: '6px' }}>
+          {cargando ? ' ' : `Hola, ${nombre}`}
         </h1>
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: '14px',
-          color: '#8C8880',
-        }}>
-          Este es tu resumen del mes actual.
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#8C8880' }}>
+          {cargando ? ' ' : 'Este es tu resumen del mes actual.'}
         </p>
       </div>
 

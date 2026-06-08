@@ -1824,8 +1824,8 @@ export default function NegociosScreen({ supabase, planActual, negocio: negocioP
                 lineHeight: "1.5",
               }}
             >
-              {cargando ? "" : negocios.length === 0
-                ? "Registra tu negocio para generar creativos con intención."
+              {cargando ? ' ' : negocios.length === 0
+                ? 'Registra tu negocio para generar creativos con intención.'
                 : `${negocios.length} de ${limiteNegocios} negocios en tu plan ${plan.nombre}.`}
             </p>
           </div>
