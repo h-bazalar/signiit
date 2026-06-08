@@ -23,7 +23,7 @@ export default function SignUpPage() {
         <line x1="10"  y1="250" x2="490" y2="250" stroke="#5EC9AD" strokeWidth="0.3"/>
       </svg>
       <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-        <SigniitLogo variant="dark" size="md" />
+        <SigniitLogo variant="dark" size="lg" />
         <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.3)', margin: 0 }}>
           Creativos con intención para Meta Ads
         </p>
@@ -41,7 +41,9 @@ export default function SignUpPage() {
             colorDanger: '#C0392B', borderRadius: '8px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px',
           },
           elements: {
-            card: { boxShadow: 'none', border: '0.5px solid rgba(15,74,56,0.15)', borderRadius: '12px', padding: '32px', width: '100%', maxWidth: '400px' },
+            card: { boxShadow: 'none', border: '0.5px solid rgba(15,74,56,0.15)', borderRadius: '12px', padding: '32px', width: '100%', maxWidth: '400px', overflow: 'hidden' },
+            cardBox: { boxShadow: 'none' },
+            header: { display: 'none' },
             headerTitle: { display: 'none' },
             headerSubtitle: { display: 'none' },
             socialButtonsBlockButton: { border: '0.5px solid rgba(15,74,56,0.18)', borderRadius: '8px', fontFamily: "'DM Sans', sans-serif", fontWeight: '400', color: '#0F4A38', background: '#ffffff' },
