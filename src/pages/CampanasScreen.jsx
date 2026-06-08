@@ -958,11 +958,7 @@ export default function CampanasScreen({ supabase, planActual }) {
     const cargar = async () => {
       setCargandoNegocio(true);
       try {
-        const token = await getToken({ template: "supabase" });
-        const { createSupabaseClient } = await import("../supabase.js");
-        const client = createSupabaseClient(token);
-
-        const { data: negocioData } = await client
+        const { data: negocioData } = await supabase
           .from("negocios")
           .select("id, nombre, rubro")
           .eq("usuario_id", user.id)
@@ -974,7 +970,7 @@ export default function CampanasScreen({ supabase, planActual }) {
           setNegocio(negocioData);
 
           // Cargar imágenes de referencia del negocio
-          const { data: imgs } = await client
+          const { data: imgs } = await supabase
             .from("negocio_imagenes")
             .select("id, url, nombre")
             .eq("negocio_id", negocioData.id)
