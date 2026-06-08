@@ -1221,34 +1221,23 @@ export default function CampanasScreen({ supabase, planActual }) {
   const tieneImagenes = imagenesNegocio.length > 0;
 
   const opcionBtn = (activo, bloqueado = false) => ({
-    padding: "10px 14px",
-    borderRadius: 8,
-    textAlign: "left",
+    padding: "10px 14px", borderRadius: 8, textAlign: "left",
     cursor: bloqueado ? "not-allowed" : "pointer",
-    transition: "all 0.15s",
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    background: activo ? "var(--sig-forest)" : "white",
-    border: activo
-      ? "0.5px solid var(--sig-forest)"
-      : "0.5px solid var(--sig-line-s)",
+    transition: "all 0.15s", display: "flex", alignItems: "center", gap: 10,
+    background: activo ? "var(--sig-aware-green)" : "white",
+    border: activo ? "1px solid var(--sig-mid)" : "0.5px solid var(--sig-line-s)",
     opacity: bloqueado ? 0.5 : 1,
   });
 
   const opcionLabel = (activo) => ({
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: "13px",
-    fontWeight: 500,
-    margin: 0,
-    color: activo ? "var(--sig-warm)" : "var(--sig-forest)",
+    fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+    fontWeight: activo ? 500 : 400, margin: 0,
+    color: "var(--sig-forest)",
   });
 
   const opcionSub = (activo) => ({
-    fontFamily: "'Space Mono', monospace",
-    fontSize: "8px",
-    margin: 0,
-    color: activo ? "rgba(240,237,230,0.5)" : "var(--sig-stone)",
+    fontFamily: "'Space Mono', monospace", fontSize: "8px", margin: 0,
+    color: activo ? "var(--sig-signal)" : "var(--sig-stone)",
   });
 
   const puntito = (activo) => ({
