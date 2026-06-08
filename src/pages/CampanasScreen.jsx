@@ -299,14 +299,14 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
           </p>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: 'var(--sig-stone)', lineHeight: 1.65, margin: '0 0 14px' }}>
-            Signiit genera <strong style={{ color: 'var(--sig-forest)', fontWeight: 500 }}>3 creativos por campaña</strong> — uno para cada momento del proceso de compra de tu cliente. Por eso cada generación debe enfocarse en un solo producto o servicio.
+            Cada generación produce <strong style={{ color: 'var(--sig-forest)', fontWeight: 500 }}>3 creativos</strong> — uno por tipo de cliente. <strong style={{ color: 'var(--sig-forest)', fontWeight: 500 }}>Un solo producto</strong> por campaña.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
             {[
-              { bold: 'Tortas y alfajores', resto: ' — genera primero los creativos de tortas. Cuando estés listo, lanza una nueva campaña para los alfajores.' },
-              { bold: 'Varios servicios', resto: ' — elige el que quieres impulsar esta semana. Un solo foco por generación.' },
-              { bold: 'Oferta activa', resto: ' — actívala en el formulario. Eso cambia el tono del creativo que cierra la venta.' },
+              { bold: 'Tortas y alfajores', resto: ' — genera una campaña para cada uno.' },
+              { bold: 'Oferta activa', resto: ' — actívala abajo. Cambia el creativo de cierre.' },
+              { bold: 'Sé específico', resto: ' — mejor input, mejor creativo.' },
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                 <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--sig-mid)', flexShrink: 0, marginTop: 6 }} />
@@ -318,11 +318,8 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
           </div>
 
           <div style={{ borderTop: '0.5px solid rgba(15,74,56,0.10)', paddingTop: 12 }}>
-            <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '13px', fontStyle: 'italic', color: 'var(--sig-forest)', margin: '0 0 4px', lineHeight: 1.4 }}>
+            <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '13px', fontStyle: 'italic', color: 'var(--sig-forest)', margin: 0, lineHeight: 1.4 }}>
               No es magia — es criterio.
-            </p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '11px', color: 'var(--sig-stone)', margin: 0, lineHeight: 1.5 }}>
-              Mientras más específico seas al llenar el formulario, más poderoso será el creativo.
             </p>
           </div>
         </>
