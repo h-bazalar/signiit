@@ -270,7 +270,7 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
             {[
               { bold: 'Tortas y alfajores', resto: ' — genera una campaña para cada uno.' },
-              { bold: 'Oferta activa', resto: ' — actívala abajo. Cambia el creativo de cierre.' },
+              { bold: 'Oferta activa', resto: ' — actívala en el paso 3. Cambia el creativo de cierre.' },
               { bold: 'Sé específico', resto: ' — mejor input, mejor creativo.' },
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
