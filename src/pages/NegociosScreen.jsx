@@ -1754,8 +1754,7 @@ export default function NegociosScreen({ supabase, planActual }) {
     setNegocioEditando(null);
   };
 
-  // getToken sin template para los handlers de API (JWT estándar de Clerk)
-  const getTokenApi = () => getToken();
+  const getTokenApi = () => getToken({ template: 'supabase' });
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
