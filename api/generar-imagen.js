@@ -11,11 +11,29 @@ export default async function handler(req) {
 
   try {
     const body = await req.json();
-    const { negocioId, angulo } = body;
+    const { negocioId, formato, modoImagen, imagenesReferencia } = body;
 
     if (!negocioId) return errorResponse("negocioId requerido", 400);
 
-    // Crear registro en campanas_generadas con estado 'pendiente'
+    const formatosValidos = ["feed_1_1", "feed_4_5", "stories_9_16"];
+    if (!formato || !formatosValidos.includes(formato)) {
+      return errorResponse(
+        "formato inválido. Debe ser: feed_1_1, feed_4_5, stories_9_16",
+        400,
+      );
+    }
+
+    const modosValidos = ["ia_pura", "foto_directa", "foto_referencia"];
+    const modoFinal = modosValidos.includes(modoImagen)
+      ? modoImagen
+      : "ia_pura";
+
+    // imagenesReferencia solo aplica para foto_directa y foto_referencia
+    const urlsReferencia =
+      modoFinal !== "ia_pura" && Array.isArray(imagenesReferencia)
+        ? imagenesReferencia.slice(0, 3)
+        : [];
+
     const supabaseAdmin = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_SERVICE_KEY,
@@ -27,6 +45,7 @@ export default async function handler(req) {
         usuario_id: auth.userId,
         negocio_id: negocioId,
         tipo: "imagen",
+        formato,
         estado: "pendiente",
       })
       .select("id")
@@ -37,7 +56,6 @@ export default async function handler(req) {
 
     const campanaId = campana.id;
 
-    // Disparar n8n sin esperar respuesta (fire and forget)
     const n8nUrl = process.env.N8N_WEBHOOK_IMAGENES;
     if (!n8nUrl)
       return errorResponse("N8N_WEBHOOK_IMAGENES no configurado", 500);
@@ -49,11 +67,13 @@ export default async function handler(req) {
         campanaId,
         negocioId,
         clerkUserId: auth.userId,
-        angulo: angulo || {},
+        formato,
+        modoImagen: modoFinal,
+        imagenesReferencia: urlsReferencia,
       }),
+      signal: AbortSignal.timeout(5000),
     }).catch((err) => console.error("Error disparando n8n imágenes:", err));
 
-    // Retornar inmediatamente con el id para polling
     return jsonResponse({ status: "processing", campanaId });
   } catch (err) {
     console.error("Error en generar-imagen:", err);
