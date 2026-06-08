@@ -53,10 +53,9 @@ export async function POST(req) {
     const campanaId = campana.id;
 
     const n8nUrl = process.env.N8N_WEBHOOK_IMAGENES;
-    if (!n8nUrl)
-      return errorResponse("N8N_WEBHOOK_IMAGENES no configurado", 500);
+    if (!n8nUrl) return errorResponse("N8N_WEBHOOK_IMAGENES no configurado", 500);
 
-    fetch(n8nUrl, {
+    const n8nRes = await fetch(n8nUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -66,10 +65,19 @@ export async function POST(req) {
         formato,
         modoImagen: modoFinal,
         imagenesReferencia: urlsReferencia,
+        angulo: body.angulo,
       }),
-    }).catch((err) => console.error("Error disparando n8n imágenes:", err));
+      signal: AbortSignal.timeout(120000),
+    });
 
-    return jsonResponse({ status: "processing", campanaId });
+    if (!n8nRes.ok) {
+      const errorText = await n8nRes.text();
+      console.error("[Imagen] n8n respondió con error:", n8nRes.status, errorText);
+      return errorResponse("Error en el pipeline de generación", 502);
+    }
+
+    const n8nData = await n8nRes.json();
+    return jsonResponse({ status: "processing", campanaId: n8nData.campanaId || campanaId });
   } catch (err) {
     console.error("Error en generar-imagen:", err);
     return errorResponse(err.message || "Error interno", 500);
