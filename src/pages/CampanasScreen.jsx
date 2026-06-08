@@ -1618,19 +1618,13 @@ export default function CampanasScreen({ supabase, planActual }) {
                 <div style={{ minHeight: 220 }}>{renderPaso()}</div>
 
                 {/* Botones de navegación */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginTop: 24,
-                    justifyContent: "space-between",
-                  }}
-                >
+                <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
                   <button
                     onClick={anteriorPaso}
                     disabled={paso === 0}
                     style={{
-                      padding: '11px 20px',
+                      width: '100px',
+                      height: '44px',
                       borderRadius: 7,
                       cursor: paso === 0 ? 'not-allowed' : 'pointer',
                       background: 'transparent',
@@ -1639,9 +1633,7 @@ export default function CampanasScreen({ supabase, planActual }) {
                       fontFamily: "'DM Sans', sans-serif",
                       fontSize: '13px',
                       opacity: paso === 0 ? 0.4 : 1,
-                      whiteSpace: 'nowrap',
                       flexShrink: 0,
-                      width: '100px',
                     }}
                   >
                     ← Atrás
@@ -1652,7 +1644,7 @@ export default function CampanasScreen({ supabase, planActual }) {
                       onClick={siguientePaso}
                       style={{
                         flex: 1,
-                        padding: '11px 18px',
+                        height: '44px',
                         borderRadius: 7,
                         cursor: 'pointer',
                         background: 'var(--sig-forest)',
@@ -1671,7 +1663,7 @@ export default function CampanasScreen({ supabase, planActual }) {
                       disabled={!puedeGenerar}
                       style={{
                         flex: 1,
-                        padding: '11px 18px',
+                        height: '44px',
                         borderRadius: 7,
                         cursor: puedeGenerar ? 'pointer' : 'not-allowed',
                         background: puedeGenerar ? 'var(--sig-forest)' : 'var(--sig-line)',
