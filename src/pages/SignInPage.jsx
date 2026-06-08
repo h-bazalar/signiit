@@ -1,7 +1,10 @@
-import { SignIn } from '@clerk/clerk-react'
+import { SignIn, useAuth } from '@clerk/clerk-react'
 import SigniitLogo from '../components/SigniitLogo'
 
 export default function SignInPage() {
+  const { isLoaded } = useAuth()
+  if (!isLoaded) return null
+
   return (
     <div style={{
       minHeight: '100vh',

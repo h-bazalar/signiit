@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { SignedIn, SignedOut, RedirectToSignIn, useUser } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, RedirectToSignIn, useUser, useAuth } from '@clerk/clerk-react'
 import { createClient } from '@supabase/supabase-js'
 import { useState, useEffect } from 'react'
 import { ToastProvider } from './context/ToastContext'
@@ -28,7 +28,14 @@ function ProtectedRoute({ children }) {
 
 function AppWithLayout() {
   const { user } = useUser()
+  const { isLoaded } = useAuth()
   const [planActual, setPlanActual] = useState('free')
+
+  if (!isLoaded) return (
+    <div style={{ minHeight: '100vh', background: '#F7F5F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3DAB8E', animation: 'pulse 1.5s ease-in-out infinite' }} />
+    </div>
+  )
 
   useEffect(() => {
     if (user) {
