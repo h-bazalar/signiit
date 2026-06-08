@@ -1187,24 +1187,14 @@ export default function NegociosScreen({ supabase, planActual }) {
               Nuevo negocio
             </button>
             {limitAlcanzado && (
-              <p
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  right: 0,
-                  marginTop: "6px",
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.06em",
-                  color: "var(--sig-stone)",
-                  whiteSpace: "nowrap",
-                  textAlign: "right",
-                }}
-              >
-                Límite de tu plan ·{" "}
-                <span style={{ color: "var(--sig-mid)", cursor: "pointer" }}>
-                  Ver planes
-                </span>
+              <p style={{
+                position: 'absolute', top: '100%', right: 0, marginTop: '6px',
+                fontFamily: "'Space Mono', monospace", fontSize: '9px',
+                letterSpacing: '0.06em', color: 'var(--sig-stone)',
+                whiteSpace: 'nowrap', textAlign: 'right', lineHeight: '1.6',
+              }}>
+                Signiit es para un negocio por cuenta.<br/>
+                ¿Tienes otro negocio? Abre una cuenta separada.
               </p>
             )}
           </div>
