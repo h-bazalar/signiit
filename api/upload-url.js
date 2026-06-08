@@ -100,11 +100,7 @@ async function generarPresignedUrl({
   return { presignedUrl, finalUrl };
 }
 
-export default async function handler(req) {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
-  }
-
+export async function POST(req) {
   const auth = await verificarAuth(req);
   if (!auth.ok) return errorResponse(auth.error, auth.status);
 

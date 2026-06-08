@@ -1,11 +1,7 @@
 import { verificarAuth, jsonResponse, errorResponse } from "./middleware.js";
 import { createClient } from "@supabase/supabase-js";
 
-export default async function handler(req) {
-  if (req.method !== "GET") {
-    return new Response("Method not allowed", { status: 405 });
-  }
-
+export async function GET(req) {
   const auth = await verificarAuth(req);
   if (!auth.ok) return errorResponse(auth.error, auth.status);
 
