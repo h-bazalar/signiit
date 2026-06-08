@@ -1231,7 +1231,7 @@ export default function CampanasScreen({ supabase, planActual }) {
 
   const opcionLabel = (activo) => ({
     fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
-    fontWeight: activo ? 600 : 400, margin: 0,
+    fontWeight: activo ? 500 : 400, margin: 0,
     color: activo ? "var(--sig-forest)" : "var(--sig-forest)",
   });
 
