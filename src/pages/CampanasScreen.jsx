@@ -887,7 +887,7 @@ function ModalImagen({ src, onClose }) {
 }
 
 // ── Pantalla principal ────────────────────────────────────────────────────────
-export default function CampanasScreen({ supabase, planActual }) {
+export default function CampanasScreen({ supabase, planActual, negocio: negocioProp, imagenesNegocio: imagenesNegocioProp }) {
   const { user } = useUser();
   const { getToken } = useAuth();
   const { addToast } = useToast();
@@ -901,9 +901,8 @@ export default function CampanasScreen({ supabase, planActual }) {
   const videoDisponible = planActual !== "free";
 
   // Negocio e imágenes de referencia
-  const [negocio, setNegocio] = useState(null);
-  const [cargandoNegocio, setCargandoNegocio] = useState(true);
-  const [imagenesNegocio, setImagenesNegocio] = useState([]);
+  const [negocio, setNegocio] = useState(negocioProp ?? null);
+  const [imagenesNegocio, setImagenesNegocio] = useState(imagenesNegocioProp ?? []);
 
   // Wizard
   const [paso, setPaso] = useState(0);
@@ -951,47 +950,6 @@ export default function CampanasScreen({ supabase, planActual }) {
     },
     [],
   );
-
-  // Cargar negocio + imágenes de referencia
-  useEffect(() => {
-    if (!user) return;
-    const cargar = async () => {
-      setCargandoNegocio(true);
-      try {
-        const { data: negocioData } = await supabase
-          .from("negocios")
-          .select("id, nombre, rubro")
-          .eq("usuario_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        if (negocioData) {
-          setNegocio(negocioData);
-
-          // Cargar imágenes de referencia del negocio
-          const { data: imgs } = await supabase
-            .from("negocio_imagenes")
-            .select("id, url, nombre")
-            .eq("negocio_id", negocioData.id)
-            .order("created_at", { ascending: true });
-
-          const listaImagenes = imgs || [];
-          setImagenesNegocio(listaImagenes);
-
-          // Si no tiene imágenes, asegurar modoImagen = ia_pura
-          if (listaImagenes.length === 0) {
-            setAngulo((a) => ({ ...a, modoImagen: "ia_pura" }));
-          }
-        }
-      } catch (e) {
-        console.error("Error cargando negocio:", e);
-      } finally {
-        setCargandoNegocio(false);
-      }
-    };
-    cargar();
-  }, [user]);
 
   const setA = (campo, valor) => setAngulo((a) => ({ ...a, [campo]: valor }));
 
@@ -1668,13 +1626,6 @@ export default function CampanasScreen({ supabase, planActual }) {
   };
 
   // ── Sin negocio ───────────────────────────────────────────────────────────────
-  if (cargandoNegocio) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#3DAB8E', animation: 'pulse 1.5s ease-in-out infinite' }} />
-      <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }`}</style>
-    </div>
-  );
-
   if (!negocio)
     return (
       <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>

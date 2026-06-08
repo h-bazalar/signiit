@@ -34,17 +34,19 @@ function AppWithLayout() {
   const { isLoaded, getToken } = useAuth();
   const [planActual, setPlanActual] = useState("free");
   const [supabase, setSupabase] = useState(null);
-  const [error, setError] = useState(null);
   const [inicializado, setInicializado] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Negocio e imágenes centralizados
+  const [negocio, setNegocio] = useState(null);
+  const [imagenesNegocio, setImagenesNegocio] = useState([]);
 
   useEffect(() => {
     if (!user) return;
 
-    const initSupabase = async () => {
+    const init = async () => {
       try {
         const token = await getToken({ template: "supabase" });
-        console.log("Token obtenido:", token ? "OK" : "NULL");
-
         if (!token) {
           setError("No se pudo obtener token de Clerk");
           return;
@@ -53,24 +55,72 @@ function AppWithLayout() {
         const client = createSupabaseClient(token);
         setSupabase(client);
 
-        const { data, error: sbError } = await client
-          .from("usuarios")
-          .select("plan")
-          .eq("clerk_id", user.id)
-          .single();
+        // Cargar plan + negocio + imágenes en paralelo
+        const [{ data: userData }, { data: negocioData }] = await Promise.all([
+          client
+            .from("usuarios")
+            .select("plan")
+            .eq("clerk_id", user.id)
+            .single(),
+          client
+            .from("negocios")
+            .select("id, nombre, rubro, logo_url")
+            .eq("usuario_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single(),
+        ]);
 
-        console.log("Supabase data:", data, "error:", sbError);
-        if (data?.plan) setPlanActual(data.plan);
-        setInicializado(true);
+        if (userData?.plan) setPlanActual(userData.plan);
+
+        if (negocioData) {
+          setNegocio(negocioData);
+          const { data: imgs } = await client
+            .from("negocio_imagenes")
+            .select("id, url, nombre")
+            .eq("negocio_id", negocioData.id)
+            .order("created_at", { ascending: true });
+          setImagenesNegocio(imgs || []);
+        }
       } catch (e) {
-        console.error("Error initSupabase:", e);
+        console.error("Error init:", e);
         setError(e.message);
+      } finally {
         setInicializado(true);
       }
     };
 
-    initSupabase();
+    init();
   }, [user]);
+
+  // Función para refrescar negocio desde pantallas hijas
+  const refetchNegocio = async () => {
+    if (!supabase || !user) return;
+    try {
+      const { data: negocioData } = await supabase
+        .from("negocios")
+        .select("id, nombre, rubro, logo_url")
+        .eq("usuario_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (negocioData) {
+        setNegocio(negocioData);
+        const { data: imgs } = await supabase
+          .from("negocio_imagenes")
+          .select("id, url, nombre")
+          .eq("negocio_id", negocioData.id)
+          .order("created_at", { ascending: true });
+        setImagenesNegocio(imgs || []);
+      } else {
+        setNegocio(null);
+        setImagenesNegocio([]);
+      }
+    } catch (e) {
+      console.error("Error refetchNegocio:", e);
+    }
+  };
 
   if (!isLoaded || !supabase || !inicializado)
     return (
@@ -119,13 +169,23 @@ function AppWithLayout() {
         <Route
           path="/negocios"
           element={
-            <NegociosScreen supabase={supabase} planActual={planActual} />
+            <NegociosScreen
+              supabase={supabase}
+              planActual={planActual}
+              negocio={negocio}
+              onNegocioChange={refetchNegocio}
+            />
           }
         />
         <Route
           path="/campanas"
           element={
-            <CampanasScreen supabase={supabase} planActual={planActual} />
+            <CampanasScreen
+              supabase={supabase}
+              planActual={planActual}
+              negocio={negocio}
+              imagenesNegocio={imagenesNegocio}
+            />
           }
         />
         <Route
@@ -149,7 +209,10 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
+          <Route
+            path="/sso-callback"
+            element={<AuthenticateWithRedirectCallback />}
+          />
           <Route path="/sign-in/*" element={<AuthPage />} />
           <Route path="/sign-up/*" element={<AuthPage />} />
           <Route

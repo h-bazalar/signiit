@@ -1623,7 +1623,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken }) {
 }
 
 // ── Pantalla principal ────────────────────────────────────────────────────────
-export default function NegociosScreen({ supabase, planActual }) {
+export default function NegociosScreen({ supabase, planActual, negocio: negocioProp, onNegocioChange }) {
   const { user } = useUser();
   const { getToken } = useAuth();
   const [negocios, setNegocios] = useState([]);
@@ -1710,6 +1710,7 @@ export default function NegociosScreen({ supabase, planActual }) {
       setPanelAbierto(false);
       setNegocioEditando(null);
       await cargarNegocios();
+      if (onNegocioChange) await onNegocioChange();
     } catch (e) {
       console.error("Error guardando negocio:", e);
       mostrarToast("Ocurrió un error. Intenta nuevamente.", "error");
@@ -1732,6 +1733,7 @@ export default function NegociosScreen({ supabase, planActual }) {
       if (error) throw error;
       mostrarToast("Negocio eliminado.");
       await cargarNegocios();
+      if (onNegocioChange) await onNegocioChange();
     } catch (e) {
       console.error("Error eliminando negocio:", e);
       mostrarToast("No se pudo eliminar. Intenta nuevamente.", "error");
