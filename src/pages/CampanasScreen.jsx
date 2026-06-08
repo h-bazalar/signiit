@@ -1604,7 +1604,7 @@ export default function CampanasScreen({ supabase, planActual }) {
   if (!cargandoNegocio && !negocio)
     return (
       <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px" }}>
+        <div style={{ maxWidth: '900px', padding: '0' }}>
           <p
             style={{
               fontFamily: "'Space Mono', monospace",
@@ -1649,7 +1649,7 @@ export default function CampanasScreen({ supabase, planActual }) {
   // ── Render principal ──
   return (
     <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
-      <div style={{ maxWidth: 820, margin: "0 auto", padding: "32px 24px" }}>
+      <div style={{ maxWidth: '900px', padding: '0' }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <p

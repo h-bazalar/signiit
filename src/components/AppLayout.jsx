@@ -155,7 +155,7 @@ export default function AppLayout({ children, planActual }) {
         marginLeft: '220px',
         flex: 1,
         minHeight: '100vh',
-        padding: '40px 48px',
+        padding: '40px 40px',
       }}>
         {children}
       </main>

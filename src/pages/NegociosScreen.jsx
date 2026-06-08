@@ -1109,7 +1109,7 @@ export default function NegociosScreen({ supabase, planActual }) {
       )}
 
       <div
-        style={{ maxWidth: "760px", margin: "0 auto", padding: "32px 24px" }}
+        style={{ maxWidth: '900px', padding: '0' }}
       >
         {/* Header */}
         <div

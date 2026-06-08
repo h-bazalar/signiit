@@ -42,7 +42,7 @@ export default function HomeScreen({ supabase, planActual }) {
   const nombre = user?.firstName || user?.fullName?.split(' ')[0] || 'Usuario'
 
   return (
-    <div style={{ maxWidth: '860px' }}>
+    <div style={{ maxWidth: '900px' }}>
 
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
