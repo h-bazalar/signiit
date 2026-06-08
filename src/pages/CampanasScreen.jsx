@@ -271,136 +271,64 @@ function Progreso({ pasoActual }) {
 // ── Burbuja educativa ─────────────────────────────────────────────────────────
 function BurbujaInfo({ colapsada, onToggle, esMobil }) {
   return (
-    <div
-      style={{
-        background: "white",
-        border: "0.5px solid rgba(15,74,56,0.15)",
-        borderRadius: esMobil ? "10px" : "12px 12px 2px 12px",
-        padding: "14px 16px",
-        position: esMobil ? "relative" : "sticky",
-        top: esMobil ? "auto" : "24px",
-        width: esMobil ? "100%" : "210px",
-        flexShrink: 0,
-      }}
-    >
-      {/* Header burbuja */}
+    <div style={{
+      background: 'white',
+      border: '0.5px solid rgba(15,74,56,0.15)',
+      borderRadius: esMobil ? '10px' : '12px 12px 2px 12px',
+      padding: '18px 18px',
+      position: esMobil ? 'relative' : 'sticky',
+      top: esMobil ? 'auto' : '24px',
+      width: esMobil ? '100%' : '240px',
+      flexShrink: 0,
+      alignSelf: 'flex-start',
+    }}>
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          cursor: esMobil ? "pointer" : "default",
-          marginBottom: colapsada ? 0 : 8,
-        }}
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: esMobil ? 'pointer' : 'default', marginBottom: colapsada ? 0 : 10 }}
         onClick={esMobil ? onToggle : undefined}
       >
-        <span
-          style={{
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "9px",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--sig-mid)",
-            fontWeight: 700,
-          }}
-        >
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--sig-mid)', fontWeight: 700 }}>
           Cómo funciona
         </span>
-        {esMobil && <IconChevron dir={colapsada ? "down" : "up"} />}
+        {esMobil && <IconChevron dir={colapsada ? 'down' : 'up'} />}
       </div>
 
       {!colapsada && (
         <>
-          <p
-            style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "13px",
-              color: "#3D6457",
-              lineHeight: 1.35,
-              margin: "0 0 10px",
-            }}
-          >
-            El creativo que convierte sabe a quién le habla.
+          <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '14px', color: '#0F4A38', lineHeight: 1.4, margin: '0 0 12px', fontWeight: 400 }}>
+            El creativo que convierte sabe exactamente a quién le habla.
           </p>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 7,
-              marginBottom: 12,
-            }}
-          >
+
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: 'var(--sig-stone)', lineHeight: 1.65, margin: '0 0 14px' }}>
+            Signiit genera <strong style={{ color: 'var(--sig-forest)', fontWeight: 500 }}>3 creativos por campaña</strong> — uno para cada momento del proceso de compra de tu cliente. Por eso cada generación debe enfocarse en un solo producto o servicio.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
             {[
-              <>
-                <strong style={{ fontWeight: 500, color: "var(--sig-forest)" }}>
-                  3 creativos
-                </strong>{" "}
-                — uno por tipo de cliente.
-              </>,
-              <>
-                <strong style={{ fontWeight: 500, color: "var(--sig-forest)" }}>
-                  Un solo producto
-                </strong>{" "}
-                por campaña. Si tienes varios, genera uno por cada campaña.
-              </>,
-              <>
-                Más{" "}
-                <strong style={{ fontWeight: 500, color: "var(--sig-forest)" }}>
-                  específico
-                </strong>{" "}
-                el formulario, más{" "}
-                <strong style={{ fontWeight: 500, color: "var(--sig-forest)" }}>
-                  poderoso
-                </strong>{" "}
-                el resultado.
-              </>,
-            ].map((texto, i) => (
-              <div
-                key={i}
-                style={{ display: "flex", alignItems: "flex-start", gap: 7 }}
-              >
-                <div
-                  style={{
-                    width: 4,
-                    height: 4,
-                    borderRadius: "50%",
-                    background: "var(--sig-mid)",
-                    flexShrink: 0,
-                    marginTop: 5,
-                  }}
-                />
-                <p
-                  style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "11px",
-                    color: "var(--sig-stone)",
-                    lineHeight: 1.55,
-                    margin: 0,
-                  }}
-                >
-                  {texto}
+              { bold: 'Tortas y alfajores', resto: ' — genera primero los creativos de tortas. Cuando estés listo, lanza una nueva campaña para los alfajores.' },
+              { bold: 'Varios servicios', resto: ' — elige el que quieres impulsar esta semana. Un solo foco por generación.' },
+              { bold: 'Oferta activa', resto: ' — actívala en el formulario. Eso cambia el tono del creativo que cierra la venta.' },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--sig-mid)', flexShrink: 0, marginTop: 6 }} />
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: 'var(--sig-stone)', lineHeight: 1.55, margin: 0 }}>
+                  <strong style={{ fontWeight: 500, color: 'var(--sig-forest)' }}>{item.bold}</strong>{item.resto}
                 </p>
               </div>
             ))}
           </div>
-          <p
-            style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "12px",
-              fontStyle: "italic",
-              color: "var(--sig-forest)",
-              margin: 0,
-              borderTop: "0.5px solid rgba(15,74,56,0.10)",
-              paddingTop: 10,
-              lineHeight: 1.5,
-            }}
-          >
-            No es magia — es criterio.
-          </p>
+
+          <div style={{ borderTop: '0.5px solid rgba(15,74,56,0.10)', paddingTop: 12 }}>
+            <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '13px', fontStyle: 'italic', color: 'var(--sig-forest)', margin: '0 0 4px', lineHeight: 1.4 }}>
+              No es magia — es criterio.
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '11px', color: 'var(--sig-stone)', margin: 0, lineHeight: 1.5 }}>
+              Mientras más específico seas al llenar el formulario, más poderoso será el creativo.
+            </p>
+          </div>
         </>
       )}
     </div>
-  );
+  )
 }
 
 // ── Cards de resultado ────────────────────────────────────────────────────────
