@@ -1224,20 +1224,20 @@ export default function CampanasScreen({ supabase, planActual }) {
     padding: "10px 14px", borderRadius: 8, textAlign: "left",
     cursor: bloqueado ? "not-allowed" : "pointer",
     transition: "all 0.15s", display: "flex", alignItems: "center", gap: 10,
-    background: activo ? "var(--sig-aware-green)" : "white",
-    border: activo ? "1px solid var(--sig-mid)" : "0.5px solid var(--sig-line-s)",
+    background: activo ? "rgba(61,171,142,0.06)" : "white",
+    border: activo ? "1.5px solid var(--sig-mid)" : "0.5px solid var(--sig-line-s)",
     opacity: bloqueado ? 0.5 : 1,
   });
 
   const opcionLabel = (activo) => ({
     fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
-    fontWeight: activo ? 500 : 400, margin: 0,
-    color: "var(--sig-forest)",
+    fontWeight: activo ? 600 : 400, margin: 0,
+    color: activo ? "var(--sig-forest)" : "var(--sig-forest)",
   });
 
   const opcionSub = (activo) => ({
     fontFamily: "'Space Mono', monospace", fontSize: "8px", margin: 0,
-    color: activo ? "var(--sig-signal)" : "var(--sig-stone)",
+    color: activo ? "var(--sig-mid)" : "var(--sig-stone)",
   });
 
   const puntito = (activo) => ({
