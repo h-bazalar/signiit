@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ClerkProvider, useAuth } from "@clerk/clerk-react";
 import App from "./App.jsx";
@@ -45,11 +44,9 @@ function ClerkGate({ children }) {
 }
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <ClerkGate>
-        <App />
-      </ClerkGate>
-    </ClerkProvider>
-  </StrictMode>,
+  <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    <ClerkGate>
+      <App />
+    </ClerkGate>
+  </ClerkProvider>,
 );
