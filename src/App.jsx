@@ -64,7 +64,7 @@ function AppWithLayout() {
           { data: negociosData },
           { data: historialData },
         ] = await Promise.all([
-          client.from("usuarios").select("*, generaciones_estaticos, generaciones_video, analisis_realizados, negocios_count").eq("clerk_id", user.id).single(),
+          client.from("usuarios").select("*").eq("clerk_id", user.id).single(),
           client
             .from("negocios")
             .select("*")
@@ -79,9 +79,6 @@ function AppWithLayout() {
         ]);
 
         if (userData?.plan) setPlanActual(userData.plan);
-        console.log("userData:", userData);
-        console.log("historialData:", historialData);
-        console.log("negociosData:", negociosData);
         setStats(userData);
         if (historialData) setHistorial(historialData);
 
@@ -91,12 +88,13 @@ function AppWithLayout() {
         if (lista.length > 0) {
           const principal = lista[0];
           setNegocio(principal);
-          const { data: imgs } = await client
-            .from("negocio_imagenes")
-            .select("id, url, nombre")
-            .eq("negocio_id", principal.id)
-            .order("created_at", { ascending: true });
-          setImagenesNegocio(imgs || []);
+          const tokenApi = await getToken();
+          const resImgs = await fetch(`/api/imagenes-negocio?negocioId=${principal.id}`, {
+            headers: { Authorization: `Bearer ${tokenApi}` },
+          });
+          const imgsData = resImgs.ok ? await resImgs.json() : { imagenes: [] };
+          const imgs = imgsData.imagenes || [];
+          setImagenesNegocio(imgs);
         }
       } catch (e) {
         console.error("Error init:", e);
