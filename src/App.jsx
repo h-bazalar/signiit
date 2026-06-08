@@ -79,6 +79,9 @@ function AppWithLayout() {
         ]);
 
         if (userData?.plan) setPlanActual(userData.plan);
+        console.log("userData:", userData);
+        console.log("historialData:", historialData);
+        console.log("negociosData:", negociosData);
         setStats(userData);
         if (historialData) setHistorial(historialData);
 
