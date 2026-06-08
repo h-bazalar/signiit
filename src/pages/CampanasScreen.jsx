@@ -1672,7 +1672,9 @@ export default function CampanasScreen({ supabase, planActual }) {
   };
 
   // ── Sin negocio ───────────────────────────────────────────────────────────────
-  if (!cargandoNegocio && !negocio)
+  if (cargandoNegocio) return null;
+
+  if (!negocio)
     return (
       <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
         <div style={{ maxWidth: "900px", padding: "0" }}>
