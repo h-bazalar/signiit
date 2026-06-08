@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react'
 import { ToastProvider } from './context/ToastContext'
-
-// Pages
+import SignInPage from './pages/SignInPage'
+import SignUpPage from './pages/SignUpPage'
 import HomeScreen     from './pages/HomeScreen'
 import NegociosScreen from './pages/NegociosScreen'
 import CampanasScreen from './pages/CampanasScreen'
@@ -13,7 +13,7 @@ function ProtectedRoute({ children }) {
   return (
     <>
       <SignedIn>{children}</SignedIn>
-      <SignedOut><RedirectToSignIn /></SignedOut>
+      <SignedOut><RedirectToSignIn redirectUrl="/sign-in" /></SignedOut>
     </>
   )
 }
@@ -23,24 +23,13 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
-          {/* Rutas protegidas */}
-          <Route path="/" element={
-            <ProtectedRoute><HomeScreen /></ProtectedRoute>
-          } />
-          <Route path="/negocios" element={
-            <ProtectedRoute><NegociosScreen /></ProtectedRoute>
-          } />
-          <Route path="/campanas" element={
-            <ProtectedRoute><CampanasScreen /></ProtectedRoute>
-          } />
-          <Route path="/analisis" element={
-            <ProtectedRoute><AnalisisScreen /></ProtectedRoute>
-          } />
-          <Route path="/planes" element={
-            <ProtectedRoute><PlanesScreen /></ProtectedRoute>
-          } />
-
-          {/* Fallback */}
+          <Route path="/sign-in/*" element={<SignInPage />} />
+          <Route path="/sign-up/*" element={<SignUpPage />} />
+          <Route path="/" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
+          <Route path="/negocios" element={<ProtectedRoute><NegociosScreen /></ProtectedRoute>} />
+          <Route path="/campanas" element={<ProtectedRoute><CampanasScreen /></ProtectedRoute>} />
+          <Route path="/analisis" element={<ProtectedRoute><AnalisisScreen /></ProtectedRoute>} />
+          <Route path="/planes" element={<ProtectedRoute><PlanesScreen /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
