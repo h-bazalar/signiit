@@ -62,22 +62,14 @@ function AppWithLayout() {
         const [
           { data: userData },
           { data: negociosData },
-          { data: statsData },
           { data: historialData },
         ] = await Promise.all([
-          client.from("usuarios").select("*").eq("clerk_id", user.id).single(),
+          client.from("usuarios").select("*, generaciones_estaticos, generaciones_video, analisis_realizados, negocios_count").eq("clerk_id", user.id).single(),
           client
             .from("negocios")
             .select("*")
             .eq("usuario_id", user.id)
             .order("created_at", { ascending: false }),
-          client
-            .from("usuarios")
-            .select(
-              "generaciones_estaticos, generaciones_video, analisis_realizados, negocios_count",
-            )
-            .eq("clerk_id", user.id)
-            .single(),
           client
             .from("campanas_generadas")
             .select("*")
@@ -87,7 +79,7 @@ function AppWithLayout() {
         ]);
 
         if (userData?.plan) setPlanActual(userData.plan);
-        if (statsData) setStats(statsData);
+        setStats(userData);
         if (historialData) setHistorial(historialData);
 
         const lista = negociosData || [];
