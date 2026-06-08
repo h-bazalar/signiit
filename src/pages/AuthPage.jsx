@@ -82,7 +82,7 @@ export default function AuthPage() {
 
   useEffect(() => {
     setOverlayVisible(true);
-    const t = setTimeout(() => setOverlayVisible(false), isSignUp ? 150 : 200);
+    const t = setTimeout(() => setOverlayVisible(false), isSignUp ? 150 : 180);
     return () => clearTimeout(t);
   }, [location.pathname]);
 
