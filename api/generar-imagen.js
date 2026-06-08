@@ -67,7 +67,6 @@ export async function POST(req) {
         modoImagen: modoFinal,
         imagenesReferencia: urlsReferencia,
       }),
-      signal: AbortSignal.timeout(5000),
     }).catch((err) => console.error("Error disparando n8n imágenes:", err));
 
     return jsonResponse({ status: "processing", campanaId });
