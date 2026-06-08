@@ -1013,39 +1013,56 @@ export default function CampanasScreen({ supabase, planActual }) {
         style={{ maxWidth: "820px", margin: "0 auto", padding: "32px 24px" }}
       >
         {/* Header */}
-        <div style={{ marginBottom: "28px" }}>
-          <p
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "9px",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--sig-stone)",
-              marginBottom: 6,
-            }}
-          >
-            Generar creativos
-          </p>
-          <h1
-            style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "26px",
-              color: "var(--sig-forest)",
-              lineHeight: 1.1,
-            }}
-          >
-            Nueva campaña
-          </h1>
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "13px",
-              color: "var(--sig-stone)",
-              marginTop: 6,
-            }}
-          >
-            Creativos diseñados para cada momento del proceso de compra.
-          </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', marginBottom: '28px', flexWrap: 'wrap' }}>
+
+          <div>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--sig-stone)', marginBottom: 6 }}>
+              Generar creativos
+            </p>
+            <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '26px', color: 'var(--sig-forest)', lineHeight: 1.1 }}>
+              Nueva campaña
+            </h1>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', color: 'var(--sig-stone)', marginTop: 6 }}>
+              Creativos diseñados para cada momento del proceso de compra.
+            </p>
+          </div>
+
+          <div className="burbuja-wrap" style={{
+            background: 'white',
+            border: '0.5px solid rgba(15,74,56,0.15)',
+            borderRadius: '12px 12px 2px 12px',
+            padding: '14px 16px',
+            maxWidth: '234px',
+            flexShrink: 0,
+            position: 'relative',
+          }}>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--sig-mid)', marginBottom: 6, display: 'block', fontWeight: 700 }}>
+              Cómo funciona
+            </span>
+            <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '13px', color: '#3D6457', lineHeight: 1.35, margin: '0 0 10px' }}>
+              El creativo que convierte sabe a quién le habla.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 12 }}>
+              {[
+                { bold: '3 creativos', resto: ' — uno por tipo de cliente.' },
+                { bold: 'Un solo producto', resto: ' por campaña. Si tienes varios, genera uno por cada campaña.' },
+                { bold: null, pre: 'Más ', bold2: 'específico', mid: ' el formulario, más ', bold3: 'poderoso', resto: ' el resultado.' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 7 }}>
+                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--sig-mid)', flexShrink: 0, marginTop: 5 }} />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '11px', color: 'var(--sig-stone)', lineHeight: 1.55, margin: 0 }}>
+                    {i === 0 && <><strong style={{ fontWeight: 500, color: 'var(--sig-forest)' }}>{item.bold}</strong>{item.resto}</>}
+                    {i === 1 && <><strong style={{ fontWeight: 500, color: 'var(--sig-forest)' }}>{item.bold}</strong>{item.resto}</>}
+                    {i === 2 && <>{item.pre}<strong style={{ fontWeight: 500, color: 'var(--sig-forest)' }}>{item.bold2}</strong>{item.mid}<strong style={{ fontWeight: 500, color: 'var(--sig-forest)' }}>{item.bold3}</strong>{item.resto}</>}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '12px', fontStyle: 'italic', color: 'var(--sig-forest)', margin: 0, borderTop: '0.5px solid rgba(15,74,56,0.10)', paddingTop: 10, lineHeight: 1.5 }}>
+              No es magia — es criterio.
+            </p>
+          </div>
+
         </div>
 
         {/* Sin negocios */}
@@ -1807,6 +1824,23 @@ export default function CampanasScreen({ supabase, planActual }) {
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .burbuja::after {
+          content: '';
+          position: absolute;
+          bottom: -7px;
+          right: 0;
+          width: 0;
+          height: 0;
+          border-left: 7px solid transparent;
+          border-top: 7px solid white;
+        }
+        @media (max-width: 520px) {
+          .burbuja-wrap {
+            max-width: 100% !important;
+            border-radius: 2px 12px 12px 12px !important;
+          }
+          .burbuja::after { display: none; }
+        }
       `}</style>
     </div>
   );
