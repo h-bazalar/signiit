@@ -1672,7 +1672,12 @@ export default function CampanasScreen({ supabase, planActual }) {
   };
 
   // ── Sin negocio ───────────────────────────────────────────────────────────────
-  if (cargandoNegocio) return null;
+  if (cargandoNegocio) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#3DAB8E', animation: 'pulse 1.5s ease-in-out infinite' }} />
+      <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }`}</style>
+    </div>
+  );
 
   if (!negocio)
     return (
