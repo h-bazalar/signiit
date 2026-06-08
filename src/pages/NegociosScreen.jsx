@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { PLANES, TONOS_MARCA } from "../utils/constants";
 
@@ -117,6 +117,28 @@ const IconLock = () => (
   </svg>
 );
 
+const IconImage = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <rect
+      x="2"
+      y="2"
+      width="14"
+      height="14"
+      rx="3"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <circle cx="6.5" cy="6.5" r="1.5" stroke="currentColor" strokeWidth="1" />
+    <path
+      d="M2 12l4-3.5 3 2.5 2.5-2 4.5 4"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 // ── Rubros ────────────────────────────────────────────────────────────────────
 const RUBROS = [
   "Alimentación y bebidas",
@@ -137,17 +159,21 @@ const RUBROS = [
   "Otro",
 ];
 
-// ── Microcopy por campo ───────────────────────────────────────────────────────
+// ── Microcopy ─────────────────────────────────────────────────────────────────
 const MICROCOPY = {
-  nombre: 'El nombre que aparecerá en tus creativos. Usa el nombre que tus clientes ya conocen.',
-  rubro: 'Nos ayuda a contextualizar el tono visual y el copy para tu industria.',
-  producto: 'Ej (productos): "Batidos Fuxión para bajar de peso y ganar energía. Distribución a todo el Perú." — Ej (servicios): "Clases de inglés online para adultos que trabajan, nivel básico a avanzado." — Ej (local): "Pastelería artesanal: tortas personalizadas, cheesecakes y postres por encargo."',
-  publico: 'Ej (masivo): "Mujeres de 30-50 años que quieren bajar de peso sin ir al gimnasio." — Ej (nicho): "Dueños de pymes que necesitan automatizar sus procesos sin saber programar." — Ej (local): "Familias de Miraflores y San Isidro que buscan postres para eventos o regalo."',
-  diferencial: 'Ej (producto): "Distribuidores oficiales con entrega en 24h y asesoría personalizada." — Ej (servicio): "Profesores nativos, clases 1 a 1, horarios flexibles desde las 6am." — Ej (local): "Sin conservantes, ingredientes importados, lista de espera de solo 48h."',
-  tono: 'Define cómo le habla tu marca a tu cliente. Afecta el registro de todo el copy generado.',
+  nombre:
+    "El nombre que aparecerá en tus creativos. Usa el nombre que tus clientes ya conocen.",
+  rubro:
+    "Nos ayuda a contextualizar el tono visual y el copy para tu industria.",
+  producto:
+    'Ej (productos): "Batidos Fuxión para bajar de peso y ganar energía. Distribución a todo el Perú." — Ej (servicios): "Clases de inglés online para adultos que trabajan, nivel básico a avanzado." — Ej (local): "Pastelería artesanal: tortas personalizadas, cheesecakes y postres por encargo."',
+  publico:
+    'Ej (masivo): "Mujeres de 30-50 años que quieren bajar de peso sin ir al gimnasio." — Ej (nicho): "Dueños de pymes que necesitan automatizar sus procesos sin saber programar." — Ej (local): "Familias de Miraflores y San Isidro que buscan postres para eventos o regalo."',
+  diferencial:
+    'Ej (producto): "Distribuidores oficiales con entrega en 24h y asesoría personalizada." — Ej (servicio): "Profesores nativos, clases 1 a 1, horarios flexibles desde las 6am." — Ej (local): "Sin conservantes, ingredientes importados, lista de espera de solo 48h."',
+  tono: "Define cómo le habla tu marca a tu cliente. Afecta el registro de todo el copy generado.",
 };
 
-// ── Estado vacío del formulario ───────────────────────────────────────────────
 const FORM_VACIO = {
   nombre: "",
   rubro: "",
@@ -157,35 +183,86 @@ const FORM_VACIO = {
   tono: "",
 };
 
-// ── Componente Tooltip ────────────────────────────────────────────────────────
+// ── Helpers de archivo ────────────────────────────────────────────────────────
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function validarArchivo(file) {
+  const tiposValidos = ["image/jpeg", "image/png", "image/webp"];
+  if (!tiposValidos.includes(file.type)) {
+    return "Solo se permiten imágenes JPG, PNG o WEBP.";
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return "El archivo no puede superar 5MB.";
+  }
+  return null;
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
 function Tooltip({ texto }) {
   return (
-    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+    <span
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+      }}
+    >
       <span
         style={{
-          width: '15px', height: '15px', borderRadius: '50%',
-          background: 'var(--sig-warm)', border: '0.5px solid var(--sig-line-s)',
-          color: 'var(--sig-stone)', fontSize: '9px', fontFamily: "'Space Mono', monospace",
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          lineHeight: 1, cursor: 'default', userSelect: 'none',
+          width: "15px",
+          height: "15px",
+          borderRadius: "50%",
+          background: "var(--sig-warm)",
+          border: "0.5px solid var(--sig-line-s)",
+          color: "var(--sig-stone)",
+          fontSize: "9px",
+          fontFamily: "'Space Mono', monospace",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          lineHeight: 1,
+          cursor: "default",
+          userSelect: "none",
         }}
         className="tooltip-trigger"
-      >?</span>
-      <span className="tooltip-box" style={{
-        position: 'absolute', left: '20px', top: '-4px', zIndex: 10,
-        background: 'var(--sig-forest)', color: 'var(--sig-warm)',
-        fontFamily: "'DM Sans', sans-serif", fontSize: '11px', lineHeight: '1.55',
-        padding: '8px 12px', borderRadius: '6px', width: '220px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-        opacity: 0, pointerEvents: 'none', transition: 'opacity 0.15s ease',
-      }}>
+      >
+        ?
+      </span>
+      <span
+        className="tooltip-box"
+        style={{
+          position: "absolute",
+          left: "20px",
+          top: "-4px",
+          zIndex: 10,
+          background: "var(--sig-forest)",
+          color: "var(--sig-warm)",
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "11px",
+          lineHeight: "1.55",
+          padding: "8px 12px",
+          borderRadius: "6px",
+          width: "220px",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+          opacity: 0,
+          pointerEvents: "none",
+          transition: "opacity 0.15s ease",
+        }}
+      >
         {texto}
       </span>
     </span>
-  )
+  );
 }
 
-// ── Label de campo ────────────────────────────────────────────────────────────
+// ── FieldLabel ────────────────────────────────────────────────────────────────
 function FieldLabel({ children, microcopy }) {
   return (
     <div
@@ -212,7 +289,535 @@ function FieldLabel({ children, microcopy }) {
   );
 }
 
-// ── Card de negocio ───────────────────────────────────────────────────────────
+// ── Bloque de sección en el panel ─────────────────────────────────────────────
+function BloquePanel({ numero, titulo, subtitulo, children }) {
+  return (
+    <div
+      style={{
+        background: "white",
+        borderRadius: "10px",
+        border: "0.5px solid var(--sig-line)",
+        padding: "20px",
+        marginBottom: "16px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          marginBottom: "18px",
+        }}
+      >
+        <div
+          style={{
+            width: "20px",
+            height: "20px",
+            borderRadius: "50%",
+            background: "var(--sig-forest)",
+            color: "var(--sig-mint)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "9px",
+            flexShrink: 0,
+          }}
+        >
+          {numero}
+        </div>
+        <div>
+          <p
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "13px",
+              fontWeight: 500,
+              color: "var(--sig-forest)",
+            }}
+          >
+            {titulo}
+          </p>
+          <p
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "8px",
+              letterSpacing: "0.08em",
+              color: "var(--sig-stone)",
+            }}
+          >
+            {subtitulo}
+          </p>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Upload de logo ────────────────────────────────────────────────────────────
+function UploadLogo({ negocioId, logoUrl, onLogoChange, getToken }) {
+  const inputRef = useRef(null);
+  const [subiendo, setSubiendo] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSeleccionar = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const errorValidacion = validarArchivo(file);
+    if (errorValidacion) {
+      setError(errorValidacion);
+      return;
+    }
+    setError("");
+    setSubiendo(true);
+    try {
+      const base64 = await fileToBase64(file);
+      const token = await getToken();
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo: "logo",
+          negocioId,
+          base64,
+          contentType: file.type,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error subiendo logo");
+      onLogoChange(data.url);
+    } catch (err) {
+      setError(err.message || "Error subiendo el logo");
+    } finally {
+      setSubiendo(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const handleEliminar = async () => {
+    setEliminando(true);
+    setError("");
+    try {
+      const token = await getToken();
+      const res = await fetch("/api/delete-imagen", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ tipo: "logo", negocioId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error eliminando logo");
+      onLogoChange(null);
+    } catch (err) {
+      setError(err.message || "Error eliminando el logo");
+    } finally {
+      setEliminando(false);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        style={{ display: "none" }}
+        onChange={handleSeleccionar}
+      />
+
+      {logoUrl ? (
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "8px",
+              border: "0.5px solid var(--sig-line-s)",
+              overflow: "hidden",
+              background: "var(--sig-warm)",
+              flexShrink: 0,
+            }}
+          >
+            <img
+              src={logoUrl}
+              alt="Logo"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => inputRef.current?.click()}
+              disabled={subiendo}
+              style={{
+                padding: "7px 14px",
+                borderRadius: "6px",
+                cursor: subiendo ? "not-allowed" : "pointer",
+                background: "transparent",
+                border: "0.5px solid var(--sig-line-s)",
+                color: "var(--sig-forest)",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px",
+              }}
+            >
+              {subiendo ? "Subiendo..." : "Cambiar"}
+            </button>
+            <button
+              onClick={handleEliminar}
+              disabled={eliminando}
+              style={{
+                padding: "7px 14px",
+                borderRadius: "6px",
+                cursor: eliminando ? "not-allowed" : "pointer",
+                background: "transparent",
+                border: "0.5px solid var(--sig-line-s)",
+                color: "var(--sig-stone)",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px",
+              }}
+            >
+              {eliminando ? "..." : "Eliminar"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={subiendo}
+          style={{
+            width: "100%",
+            padding: "20px",
+            borderRadius: "8px",
+            cursor: subiendo ? "not-allowed" : "pointer",
+            background: "var(--sig-paper)",
+            border: "1px dashed var(--sig-line-s)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "8px",
+            transition: "border-color 0.15s",
+          }}
+          onMouseEnter={(e) =>
+            !subiendo && (e.currentTarget.style.borderColor = "var(--sig-mid)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.borderColor = "var(--sig-line-s)")
+          }
+        >
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "6px",
+              background: "var(--sig-aware-green)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--sig-forest)",
+            }}
+          >
+            <IconImage />
+          </div>
+          <p
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "12px",
+              color: "var(--sig-forest)",
+              fontWeight: 500,
+            }}
+          >
+            {subiendo ? "Subiendo..." : "Subir logo"}
+          </p>
+          <p
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "11px",
+              color: "var(--sig-stone)",
+            }}
+          >
+            JPG, PNG o WEBP · máx 5MB
+          </p>
+        </button>
+      )}
+
+      {error && (
+        <p
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "11px",
+            color: "#C0392B",
+            marginTop: "6px",
+          }}
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Upload de imágenes de referencia ──────────────────────────────────────────
+function UploadImagenesReferencia({
+  negocioId,
+  imagenes,
+  onImagenesChange,
+  getToken,
+}) {
+  const inputRef = useRef(null);
+  const [subiendo, setSubiendo] = useState(false);
+  const [eliminandoId, setEliminandoId] = useState(null);
+  const [error, setError] = useState("");
+
+  const MAX = 3;
+  const puedeAgregar = imagenes.length < MAX;
+
+  const handleSeleccionar = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const errorValidacion = validarArchivo(file);
+    if (errorValidacion) {
+      setError(errorValidacion);
+      return;
+    }
+    setError("");
+    setSubiendo(true);
+    try {
+      const imagenId = crypto.randomUUID();
+      const base64 = await fileToBase64(file);
+      const token = await getToken();
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo: "imagen_referencia",
+          negocioId,
+          imagenId,
+          base64,
+          contentType: file.type,
+          nombre: file.name,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error subiendo imagen");
+      onImagenesChange([
+        ...imagenes,
+        { id: imagenId, url: data.url, nombre: file.name },
+      ]);
+    } catch (err) {
+      setError(err.message || "Error subiendo la imagen");
+    } finally {
+      setSubiendo(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const handleEliminar = async (imagen) => {
+    setEliminandoId(imagen.id);
+    setError("");
+    try {
+      const token = await getToken();
+      const res = await fetch("/api/delete-imagen", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo: "imagen_referencia",
+          imagenId: imagen.id,
+          negocioId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error eliminando imagen");
+      onImagenesChange(imagenes.filter((img) => img.id !== imagen.id));
+    } catch (err) {
+      setError(err.message || "Error eliminando la imagen");
+    } finally {
+      setEliminandoId(null);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        style={{ display: "none" }}
+        onChange={handleSeleccionar}
+      />
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "8px",
+        }}
+      >
+        {/* Slots ocupados */}
+        {imagenes.map((img) => (
+          <div
+            key={img.id}
+            style={{
+              position: "relative",
+              aspectRatio: "1",
+              borderRadius: "8px",
+              overflow: "hidden",
+              border: "0.5px solid var(--sig-line-s)",
+            }}
+          >
+            <img
+              src={img.url}
+              alt={img.nombre || "Referencia"}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+            <button
+              onClick={() => handleEliminar(img)}
+              disabled={eliminandoId === img.id}
+              style={{
+                position: "absolute",
+                top: "4px",
+                right: "4px",
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                background: "rgba(0,0,0,0.55)",
+                border: "none",
+                color: "white",
+                cursor: eliminandoId === img.id ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                lineHeight: 1,
+              }}
+            >
+              {eliminandoId === img.id ? "·" : "×"}
+            </button>
+          </div>
+        ))}
+
+        {/* Slot para agregar */}
+        {puedeAgregar && (
+          <button
+            onClick={() => inputRef.current?.click()}
+            disabled={subiendo}
+            style={{
+              aspectRatio: "1",
+              borderRadius: "8px",
+              cursor: subiendo ? "not-allowed" : "pointer",
+              background: "var(--sig-paper)",
+              border: "1px dashed var(--sig-line-s)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
+              transition: "border-color 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              !subiendo &&
+              (e.currentTarget.style.borderColor = "var(--sig-mid)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.borderColor = "var(--sig-line-s)")
+            }
+          >
+            {subiendo ? (
+              <p
+                style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "11px",
+                  color: "var(--sig-stone)",
+                }}
+              >
+                Subiendo...
+              </p>
+            ) : (
+              <>
+                <div
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    background: "var(--sig-aware-green)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--sig-forest)",
+                  }}
+                >
+                  <IconPlus />
+                </div>
+                <p
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "10px",
+                    color: "var(--sig-stone)",
+                  }}
+                >
+                  Agregar
+                </p>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Slots vacíos decorativos cuando hay imágenes pero no llegó a 3 */}
+        {Array.from({
+          length: Math.max(0, MAX - imagenes.length - (puedeAgregar ? 1 : 0)),
+        }).map((_, i) => (
+          <div
+            key={`empty-${i}`}
+            style={{
+              aspectRatio: "1",
+              borderRadius: "8px",
+              background: "var(--sig-paper)",
+              border: "0.5px solid var(--sig-line)",
+            }}
+          />
+        ))}
+      </div>
+
+      <p
+        style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "11px",
+          color: "var(--sig-stone)",
+          marginTop: "8px",
+          lineHeight: "1.5",
+        }}
+      >
+        Sube hasta 3 fotos de tu producto o servicio. La IA las usará como
+        referencia visual al generar tus creativos.
+      </p>
+
+      {error && (
+        <p
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "11px",
+            color: "#C0392B",
+            marginTop: "6px",
+          }}
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── NegocioCard ───────────────────────────────────────────────────────────────
 function NegocioCard({ negocio, onEdit, onDelete }) {
   const [confirmando, setConfirmando] = useState(false);
 
@@ -246,16 +851,31 @@ function NegocioCard({ negocio, onEdit, onDelete }) {
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div
             style={{
-              width: "32px",
-              height: "32px",
+              width: "36px",
+              height: "36px",
               borderRadius: "8px",
-              background: "var(--sig-aware-green)",
+              background: negocio.logo_url
+                ? "transparent"
+                : "var(--sig-aware-green)",
+              border: negocio.logo_url
+                ? "0.5px solid var(--sig-line-s)"
+                : "none",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              overflow: "hidden",
+              flexShrink: 0,
             }}
           >
-            <IconSignal />
+            {negocio.logo_url ? (
+              <img
+                src={negocio.logo_url}
+                alt="Logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            ) : (
+              <IconSignal />
+            )}
           </div>
           <div>
             <p
@@ -428,9 +1048,10 @@ function NegocioCard({ negocio, onEdit, onDelete }) {
   );
 }
 
-// ── Panel lateral formulario ──────────────────────────────────────────────────
-function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
+// ── PanelNegocio ──────────────────────────────────────────────────────────────
+function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken }) {
   const esEdicion = !!negocio?.id;
+
   const [form, setForm] = useState(
     negocio
       ? {
@@ -443,8 +1064,36 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
         }
       : FORM_VACIO,
   );
-
   const [errores, setErrores] = useState({});
+  const [logoUrl, setLogoUrl] = useState(negocio?.logo_url || null);
+  const [imagenes, setImagenes] = useState([]);
+  const [cargandoImagenes, setCargandoImagenes] = useState(false);
+
+  // Cargar imágenes de referencia existentes al abrir en modo edición
+  useEffect(() => {
+    if (!esEdicion) return;
+    const cargarImagenes = async () => {
+      setCargandoImagenes(true);
+      try {
+        const token = await getToken();
+        const res = await fetch(
+          `/api/imagenes-negocio?negocioId=${negocio.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.imagenes)) {
+          setImagenes(data.imagenes);
+        }
+      } catch (err) {
+        console.error("Error cargando imágenes:", err);
+      } finally {
+        setCargandoImagenes(false);
+      }
+    };
+    cargarImagenes();
+  }, [negocio?.id]);
 
   const set = (campo, valor) => {
     setForm((f) => ({ ...f, [campo]: valor }));
@@ -484,7 +1133,6 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
 
   return (
     <>
-      {/* Overlay */}
       <div
         onClick={onClose}
         style={{
@@ -496,7 +1144,6 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
         }}
       />
 
-      {/* Panel */}
       <div
         style={{
           position: "fixed",
@@ -512,7 +1159,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
           boxShadow: "-8px 0 32px rgba(0,0,0,0.08)",
         }}
       >
-        {/* Header del panel */}
+        {/* Header */}
         <div
           style={{
             padding: "20px 24px",
@@ -569,65 +1216,12 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
 
         {/* Cuerpo scrollable */}
         <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
-          {/* ── BLOQUE 1 ── */}
-          <div
-            style={{
-              background: "white",
-              borderRadius: "10px",
-              border: "0.5px solid var(--sig-line)",
-              padding: "20px",
-              marginBottom: "16px",
-            }}
+          {/* ── BLOQUE 1 — Datos del negocio ── */}
+          <BloquePanel
+            numero="1"
+            titulo="Tu negocio"
+            subtitulo="Se guarda una vez — edita cuando quieras"
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "18px",
-              }}
-            >
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
-                  background: "var(--sig-forest)",
-                  color: "var(--sig-mint)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: "9px",
-                  flexShrink: 0,
-                }}
-              >
-                1
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    color: "var(--sig-forest)",
-                  }}
-                >
-                  Tu negocio
-                </p>
-                <p
-                  style={{
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: "8px",
-                    letterSpacing: "0.08em",
-                    color: "var(--sig-stone)",
-                  }}
-                >
-                  Se guarda una vez — edita cuando quieras
-                </p>
-              </div>
-            </div>
-
             {/* Nombre */}
             <div style={{ marginBottom: "14px" }}>
               <FieldLabel microcopy={MICROCOPY.nombre}>
@@ -777,7 +1371,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
               </FieldLabel>
               <textarea
                 style={{ ...inputStyle("diferencial"), minHeight: "60px" }}
-                placeholder="Ej: Somos distribuidores oficiales con entrega en 24h y acompañamiento personalizado. No vendemos solo el producto, vendemos resultados."
+                placeholder="Ej: Somos distribuidores oficiales con entrega en 24h y acompañamiento personalizado."
                 value={form.diferencial}
                 onChange={(e) => set("diferencial", e.target.value)}
                 onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
@@ -866,9 +1460,89 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
                 </p>
               )}
             </div>
-          </div>
+          </BloquePanel>
 
-          {/* Nota sobre Bloque 2 */}
+          {/* ── BLOQUE 2 — Logo (solo en edición) ── */}
+          {esEdicion && (
+            <BloquePanel
+              numero="2"
+              titulo="Logo del negocio"
+              subtitulo="Aparecerá en todos tus creativos generados"
+            >
+              <UploadLogo
+                negocioId={negocio.id}
+                logoUrl={logoUrl}
+                onLogoChange={setLogoUrl}
+                getToken={getToken}
+              />
+            </BloquePanel>
+          )}
+
+          {/* ── BLOQUE 3 — Imágenes de referencia (solo en edición) ── */}
+          {esEdicion && (
+            <BloquePanel
+              numero="3"
+              titulo="Imágenes de referencia"
+              subtitulo="La IA las usará para generar creativos más fieles a tu producto"
+            >
+              {cargandoImagenes ? (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: "8px",
+                  }}
+                >
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      style={{
+                        aspectRatio: "1",
+                        borderRadius: "8px",
+                        background: "var(--sig-warm)",
+                        animation: "pulse 1.5s ease-in-out infinite",
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <UploadImagenesReferencia
+                  negocioId={negocio.id}
+                  imagenes={imagenes}
+                  onImagenesChange={setImagenes}
+                  getToken={getToken}
+                />
+              )}
+            </BloquePanel>
+          )}
+
+          {/* Nota si es creación nueva */}
+          {!esEdicion && (
+            <div
+              style={{
+                background: "var(--sig-aware-green)",
+                borderRadius: "8px",
+                padding: "12px 14px",
+                border: "0.5px solid var(--sig-aware-green-border)",
+                marginBottom: "16px",
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.08em",
+                  color: "var(--sig-aware-green-text)",
+                  lineHeight: "1.6",
+                }}
+              >
+                Después de crear tu negocio podrás subir tu logo e imágenes de
+                referencia desde esta misma pantalla.
+              </p>
+            </div>
+          )}
+
+          {/* Nota campaña */}
           <div
             style={{
               background: "var(--sig-aware-green)",
@@ -892,7 +1566,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando }) {
           </div>
         </div>
 
-        {/* Footer con acción */}
+        {/* Footer */}
         <div
           style={{
             padding: "16px 24px",
@@ -962,24 +1636,23 @@ export default function NegociosScreen({ supabase, planActual }) {
   const limiteNegocios = plan.negocios;
   const limitAlcanzado = negocios.length >= limiteNegocios;
 
-  // ── Cargar negocios ──
   const cargarNegocios = async () => {
     if (!user) return;
     setCargando(true);
     try {
-      const token = await getToken({ template: 'supabase' });
-      const { createSupabaseClient } = await import('../supabase.js');
+      const token = await getToken({ template: "supabase" });
+      const { createSupabaseClient } = await import("../supabase.js");
       const client = createSupabaseClient(token);
       const { data, error } = await client
-        .from('negocios')
-        .select('*')
-        .eq('usuario_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("negocios")
+        .select("*")
+        .eq("usuario_id", user.id)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       setNegocios(data || []);
     } catch (e) {
-      console.error('Error cargando negocios:', e);
-      mostrarToast('No se pudieron cargar los negocios.', 'error');
+      console.error("Error cargando negocios:", e);
+      mostrarToast("No se pudieron cargar los negocios.", "error");
     } finally {
       setCargando(false);
     }
@@ -989,23 +1662,21 @@ export default function NegociosScreen({ supabase, planActual }) {
     cargarNegocios();
   }, [supabase, user]);
 
-  // ── Toast ──
   const mostrarToast = (mensaje, tipo = "ok") => {
     setToast({ mensaje, tipo });
     setTimeout(() => setToast(null), 3500);
   };
 
-  // ── Guardar (crear o editar) ──
   const handleGuardar = async (formData) => {
     if (!user) return;
     setGuardando(true);
     try {
-      const token = await getToken({ template: 'supabase' });
-      const { createSupabaseClient } = await import('../supabase.js');
+      const token = await getToken({ template: "supabase" });
+      const { createSupabaseClient } = await import("../supabase.js");
       const client = createSupabaseClient(token);
       if (formData.id) {
         const { error } = await client
-          .from('negocios')
+          .from("negocios")
           .update({
             nombre: formData.nombre,
             rubro: formData.rubro,
@@ -1014,13 +1685,13 @@ export default function NegociosScreen({ supabase, planActual }) {
             diferencial: formData.diferencial,
             tono: formData.tono,
           })
-          .eq('id', formData.id)
-          .eq('usuario_id', user.id);
+          .eq("id", formData.id)
+          .eq("usuario_id", user.id);
         if (error) throw error;
-        mostrarToast('Negocio actualizado.');
+        mostrarToast("Negocio actualizado.");
       } else {
         const { error } = await client
-          .from('negocios')
+          .from("negocios")
           .insert({
             usuario_id: user.id,
             nombre: formData.nombre,
@@ -1031,41 +1702,41 @@ export default function NegociosScreen({ supabase, planActual }) {
             tono: formData.tono,
           });
         if (error) throw error;
-        mostrarToast('Negocio creado.');
+        mostrarToast(
+          "Negocio creado. Ahora puedes subir tu logo e imágenes de referencia.",
+        );
       }
       setPanelAbierto(false);
       setNegocioEditando(null);
       await cargarNegocios();
     } catch (e) {
-      console.error('Error guardando negocio:', e);
-      mostrarToast('Ocurrió un error. Intenta nuevamente.', 'error');
+      console.error("Error guardando negocio:", e);
+      mostrarToast("Ocurrió un error. Intenta nuevamente.", "error");
     } finally {
       setGuardando(false);
     }
   };
 
-  // ── Eliminar ──
   const handleEliminar = async (id) => {
     if (!user) return;
     try {
-      const token = await getToken({ template: 'supabase' });
-      const { createSupabaseClient } = await import('../supabase.js');
+      const token = await getToken({ template: "supabase" });
+      const { createSupabaseClient } = await import("../supabase.js");
       const client = createSupabaseClient(token);
       const { error } = await client
-        .from('negocios')
+        .from("negocios")
         .delete()
-        .eq('id', id)
-        .eq('usuario_id', user.id);
+        .eq("id", id)
+        .eq("usuario_id", user.id);
       if (error) throw error;
-      mostrarToast('Negocio eliminado.');
+      mostrarToast("Negocio eliminado.");
       await cargarNegocios();
     } catch (e) {
-      console.error('Error eliminando negocio:', e);
-      mostrarToast('No se pudo eliminar. Intenta nuevamente.', 'error');
+      console.error("Error eliminando negocio:", e);
+      mostrarToast("No se pudo eliminar. Intenta nuevamente.", "error");
     }
   };
 
-  // ── Abrir panel ──
   const abrirNuevo = () => {
     if (limitAlcanzado) return;
     setNegocioEditando(null);
@@ -1082,10 +1753,11 @@ export default function NegociosScreen({ supabase, planActual }) {
     setNegocioEditando(null);
   };
 
-  // ── Render ──
+  // getToken sin template para los handlers de API (JWT estándar de Clerk)
+  const getTokenApi = () => getToken();
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
-      {/* Toast */}
       {toast && (
         <div
           style={{
@@ -1108,9 +1780,7 @@ export default function NegociosScreen({ supabase, planActual }) {
         </div>
       )}
 
-      <div
-        style={{ maxWidth: '900px', padding: '0' }}
-      >
+      <div style={{ maxWidth: "900px", padding: "0" }}>
         {/* Header */}
         <div
           style={{
@@ -1157,8 +1827,6 @@ export default function NegociosScreen({ supabase, planActual }) {
                 : `${negocios.length} de ${limiteNegocios} negocios en tu plan ${plan.nombre}.`}
             </p>
           </div>
-
-          {/* Botón nuevo */}
           <div style={{ position: "relative" }}>
             <button
               onClick={abrirNuevo}
@@ -1187,13 +1855,23 @@ export default function NegociosScreen({ supabase, planActual }) {
               Nuevo negocio
             </button>
             {limitAlcanzado && (
-              <p style={{
-                position: 'absolute', top: '100%', right: 0, marginTop: '6px',
-                fontFamily: "'Space Mono', monospace", fontSize: '9px',
-                letterSpacing: '0.06em', color: 'var(--sig-stone)',
-                whiteSpace: 'nowrap', textAlign: 'right', lineHeight: '1.6',
-              }}>
-                Signiit es para un negocio por cuenta.<br/>
+              <p
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  right: 0,
+                  marginTop: "6px",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.06em",
+                  color: "var(--sig-stone)",
+                  whiteSpace: "nowrap",
+                  textAlign: "right",
+                  lineHeight: "1.6",
+                }}
+              >
+                Signiit es para un negocio por cuenta.
+                <br />
                 ¿Tienes otro negocio? Abre una cuenta separada.
               </p>
             )}
@@ -1202,7 +1880,6 @@ export default function NegociosScreen({ supabase, planActual }) {
 
         {/* Contenido */}
         {cargando ? (
-          // Skeletons
           <div
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
           >
@@ -1221,7 +1898,6 @@ export default function NegociosScreen({ supabase, planActual }) {
             ))}
           </div>
         ) : negocios.length === 0 ? (
-          // Estado vacío
           <div
             style={{
               background: "white",
@@ -1318,7 +1994,6 @@ export default function NegociosScreen({ supabase, planActual }) {
             </button>
           </div>
         ) : (
-          // Lista de negocios
           <div
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
           >
@@ -1334,29 +2009,20 @@ export default function NegociosScreen({ supabase, planActual }) {
         )}
       </div>
 
-      {/* Panel lateral */}
       {panelAbierto && (
         <PanelNegocio
           negocio={negocioEditando}
           onClose={cerrarPanel}
           onGuardar={handleGuardar}
           guardando={guardando}
+          getToken={getTokenApi}
         />
       )}
 
       <style>{`
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.4; }
-        }
-        .tooltip-trigger:hover + .tooltip-box,
-        .tooltip-trigger:focus + .tooltip-box {
-          opacity: 1 !important;
-        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .tooltip-trigger:hover + .tooltip-box, .tooltip-trigger:focus + .tooltip-box { opacity: 1 !important; }
       `}</style>
     </div>
   );
