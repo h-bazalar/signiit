@@ -887,7 +887,12 @@ function ModalImagen({ src, onClose }) {
 }
 
 // ── Pantalla principal ────────────────────────────────────────────────────────
-export default function CampanasScreen({ supabase, planActual, negocio: negocioProp, imagenesNegocio: imagenesNegocioProp }) {
+export default function CampanasScreen({
+  supabase,
+  planActual,
+  negocio: negocioProp,
+  imagenesNegocio: imagenesNegocioProp,
+}) {
   const { user } = useUser();
   const { getToken } = useAuth();
   const { addToast } = useToast();
@@ -902,7 +907,9 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
 
   // Negocio e imágenes de referencia
   const [negocio, setNegocio] = useState(negocioProp ?? null);
-  const [imagenesNegocio, setImagenesNegocio] = useState(imagenesNegocioProp ?? []);
+  const [imagenesNegocio, setImagenesNegocio] = useState(
+    imagenesNegocioProp ?? [],
+  );
 
   // Wizard
   const [paso, setPaso] = useState(0);
@@ -979,7 +986,10 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
       }
     }
     if (paso === 3) {
-      if (angulo.modoImagen !== "ia_pura" && imagenesSeleccionadas.length === 0) {
+      if (
+        angulo.modoImagen !== "ia_pura" &&
+        imagenesSeleccionadas.length === 0
+      ) {
         addToast("Selecciona al menos una foto para usar.", "error");
         return false;
       }
@@ -1094,9 +1104,11 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
         angulo,
         formato: angulo.formato,
         modoImagen: angulo.modoImagen,
-        imagenesReferencia: imagenesNegocio.filter(i => imagenesSeleccionadas.includes(i.id)).map(i => i.url),
+        imagenesReferencia: imagenesNegocio
+          .filter((i) => imagenesSeleccionadas.includes(i.id))
+          .map((i) => i.url),
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(120000),
     });
     if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
     const { campanaId } = await res.json();
@@ -1182,22 +1194,33 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
   const tieneImagenes = imagenesNegocio.length > 0;
 
   const opcionBtn = (activo, bloqueado = false) => ({
-    padding: "10px 14px", borderRadius: 8, textAlign: "left",
+    padding: "10px 14px",
+    borderRadius: 8,
+    textAlign: "left",
     cursor: bloqueado ? "not-allowed" : "pointer",
-    transition: "all 0.15s", display: "flex", alignItems: "center", gap: 10,
+    transition: "all 0.15s",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
     background: activo ? "rgba(61,171,142,0.06)" : "white",
-    border: activo ? "1.5px solid var(--sig-mid)" : "0.5px solid var(--sig-line-s)",
+    border: activo
+      ? "1.5px solid var(--sig-mid)"
+      : "0.5px solid var(--sig-line-s)",
     opacity: bloqueado ? 0.5 : 1,
   });
 
   const opcionLabel = (activo) => ({
-    fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
-    fontWeight: activo ? 500 : 400, margin: 0,
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: "13px",
+    fontWeight: activo ? 500 : 400,
+    margin: 0,
     color: activo ? "var(--sig-forest)" : "var(--sig-forest)",
   });
 
   const opcionSub = (activo) => ({
-    fontFamily: "'Space Mono', monospace", fontSize: "8px", margin: 0,
+    fontFamily: "'Space Mono', monospace",
+    fontSize: "8px",
+    margin: 0,
     color: activo ? "var(--sig-mid)" : "var(--sig-stone)",
   });
 
@@ -1491,7 +1514,10 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
                     <button
                       key={m.id}
                       type="button"
-                      onClick={() => { setA("modoImagen", m.id); if (m.id === "ia_pura") setImagenesSeleccionadas([]); }}
+                      onClick={() => {
+                        setA("modoImagen", m.id);
+                        if (m.id === "ia_pura") setImagenesSeleccionadas([]);
+                      }}
                       style={opcionBtn(activo)}
                     >
                       <div style={puntito(activo)} />
@@ -1504,28 +1530,47 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
                 })}
               </div>
               {angulo.modoImagen !== "ia_pura" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--sig-stone)" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    marginTop: 10,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "9px",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: "var(--sig-stone)",
+                    }}
+                  >
                     Selecciona las fotos a usar
                   </span>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {imagenesNegocio.map((img) => {
-                      const seleccionada = imagenesSeleccionadas.includes(img.id);
+                      const seleccionada = imagenesSeleccionadas.includes(
+                        img.id,
+                      );
                       return (
                         <div
                           key={img.id}
                           onClick={() => {
-                            setImagenesSeleccionadas(prev =>
+                            setImagenesSeleccionadas((prev) =>
                               prev.includes(img.id)
-                                ? prev.filter(id => id !== img.id)
-                                : [...prev, img.id]
+                                ? prev.filter((id) => id !== img.id)
+                                : [...prev, img.id],
                             );
                           }}
                           style={{
                             position: "relative",
                             cursor: "pointer",
                             borderRadius: 8,
-                            border: seleccionada ? "2px solid var(--sig-mid)" : "1.5px solid var(--sig-line-s)",
+                            border: seleccionada
+                              ? "2px solid var(--sig-mid)"
+                              : "1.5px solid var(--sig-line-s)",
                             overflow: "hidden",
                             width: 64,
                             height: 64,
@@ -1536,21 +1581,48 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
                           <img
                             src={img.url}
                             alt={img.nombre || "Referencia"}
-                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                            }}
                           />
                           {seleccionada && (
-                            <div style={{
-                              position: "absolute", inset: 0,
-                              background: "rgba(61,171,142,0.18)",
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                            }}>
-                              <div style={{
-                                width: 20, height: 20, borderRadius: "50%",
-                                background: "var(--sig-mid)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                              }}>
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                  <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <div
+                              style={{
+                                position: "absolute",
+                                inset: 0,
+                                background: "rgba(61,171,142,0.18)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 20,
+                                  height: 20,
+                                  borderRadius: "50%",
+                                  background: "var(--sig-mid)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <svg
+                                  width="10"
+                                  height="10"
+                                  viewBox="0 0 10 10"
+                                  fill="none"
+                                >
+                                  <path
+                                    d="M2 5l2 2 4-4"
+                                    stroke="white"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
                                 </svg>
                               </div>
                             </div>
@@ -1560,7 +1632,14 @@ export default function CampanasScreen({ supabase, planActual, negocio: negocioP
                     })}
                   </div>
                   {imagenesSeleccionadas.length === 0 && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#C07820", margin: 0 }}>
+                    <p
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: "11px",
+                        color: "#C07820",
+                        margin: 0,
+                      }}
+                    >
                       Selecciona al menos una foto para continuar.
                     </p>
                   )}
