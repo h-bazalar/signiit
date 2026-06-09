@@ -70,7 +70,7 @@ export default async function handler(req, res) {
         imagenesReferencia: urlsReferencia,
         angulo,
       }),
-      signal: AbortSignal.timeout(120000),
+      signal: AbortSignal.timeout(480000),
     });
 
     if (!n8nRes.ok) {
