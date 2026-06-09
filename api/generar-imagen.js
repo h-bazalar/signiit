@@ -36,6 +36,17 @@ export default async function handler(req, res) {
       process.env.SUPABASE_SERVICE_KEY,
     );
 
+    const { data: negocio, error: negocioError } = await supabaseAdmin
+      .from("negocios")
+      .select("logo_url")
+      .eq("id", negocioId)
+      .single();
+
+    if (negocioError)
+      throw new Error("Error leyendo negocio: " + negocioError.message);
+
+    const negocioLogoUrl = negocio?.logo_url || "";
+
     const { data: campana, error: insertError } = await supabaseAdmin
       .from("campanas_generadas")
       .insert({
@@ -69,6 +80,7 @@ export default async function handler(req, res) {
         modoImagen: modoFinal,
         imagenesReferencia: urlsReferencia,
         angulo,
+        negocioLogoUrl: negocioLogoUrl,
       }),
       signal: AbortSignal.timeout(480000),
     });
