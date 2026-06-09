@@ -58,8 +58,7 @@ export default async function handler(req, res) {
         .status(500)
         .json({ error: "N8N_WEBHOOK_IMAGENES no configurado" });
 
-    // Fire-and-forget — no esperamos respuesta de n8n
-    fetch(n8nUrl, {
+    const n8nRes = await fetch(n8nUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -71,14 +70,28 @@ export default async function handler(req, res) {
         imagenesReferencia: urlsReferencia,
         angulo,
       }),
-      signal: AbortSignal.timeout(300000),
-    }).catch((err) => {
-      console.error("[Imagen] n8n fire-and-forget error:", err);
+      signal: AbortSignal.timeout(120000),
     });
 
-    // Responde inmediatamente — el frontend hace polling a Supabase
-    return res.status(200).json({ status: "processing", campanaId });
+    if (!n8nRes.ok) {
+      const errorText = await n8nRes.text();
+      console.error("[Imagen] n8n error:", n8nRes.status, errorText);
+      return res
+        .status(502)
+        .json({ error: "Error en el pipeline de generación" });
+    }
+
+    const n8nData = await n8nRes.json();
+    return res.status(200).json({
+      status: "processing",
+      campanaId: n8nData.campanaId || campanaId,
+    });
   } catch (err) {
+    if (err.name === "TimeoutError") {
+      return res
+        .status(504)
+        .json({ error: "El proceso tardó demasiado. Intenta de nuevo." });
+    }
     console.error("[Imagen] Error:", err);
     return res.status(500).json({ error: err.message || "Error interno" });
   }
