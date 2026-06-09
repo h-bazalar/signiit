@@ -1017,6 +1017,7 @@ export default function CampanasScreen({
       const inicio = Date.now();
       return new Promise((resolve, reject) => {
         pollingRef.current = setInterval(async () => {
+          console.log('[Polling] consultando campanaId:', campanaId);
           if (Date.now() - inicio > POLLING_TIMEOUT_MS) {
             clearInterval(pollingRef.current);
             reject(new Error("Tiempo de espera agotado. Intenta de nuevo."));
@@ -1028,6 +1029,7 @@ export default function CampanasScreen({
               .select("estado, resultado")
               .eq("id", campanaId)
               .single();
+            console.log('[Polling] data recibida:', data);
             if (!data) return;
             if (data.estado === "error") {
               clearInterval(pollingRef.current);
@@ -1044,7 +1046,7 @@ export default function CampanasScreen({
               resolve({ tipo, variaciones: data.resultado.variaciones || [] });
             }
           } catch (e) {
-            console.error("Error polling:", e);
+            console.error('[Polling] error en consulta:', e);
           }
         }, POLLING_INTERVAL_MS);
       });
