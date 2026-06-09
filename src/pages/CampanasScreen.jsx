@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
+import { createSupabaseClient } from "../supabase";
 import { useToast } from "../context/ToastContext";
 import { useCreditos } from "../hooks/useCreditos";
 import {
@@ -892,6 +893,7 @@ export default function CampanasScreen({
   planActual,
   negocio: negocioProp,
   imagenesNegocio: imagenesNegocioProp,
+  getToken,
 }) {
   const { user } = useUser();
   const { getToken } = useAuth();
@@ -1017,26 +1019,25 @@ export default function CampanasScreen({
       const inicio = Date.now();
       return new Promise((resolve, reject) => {
         pollingRef.current = setInterval(async () => {
-          console.log('[Polling] consultando campanaId:', campanaId);
           if (Date.now() - inicio > POLLING_TIMEOUT_MS) {
             clearInterval(pollingRef.current);
             reject(new Error("Tiempo de espera agotado. Intenta de nuevo."));
             return;
           }
           try {
-            const { data } = await supabase
+            const token = await getToken({ template: "supabase" });
+            const clienteFresco = createSupabaseClient(token);
+            const { data } = await clienteFresco
               .from("campanas_generadas")
               .select("estado, resultado")
               .eq("id", campanaId)
               .single();
-            console.log('[Polling] data recibida:', data);
             if (!data) return;
             if (data.estado === "error") {
               clearInterval(pollingRef.current);
               reject(
                 new Error(
-                  data.resultado?.mensaje ||
-                    "Error al generar. Intenta de nuevo.",
+                  data.resultado?.mensaje || "Error al generar. Intenta de nuevo.",
                 ),
               );
               return;
@@ -1046,12 +1047,12 @@ export default function CampanasScreen({
               resolve({ tipo, variaciones: data.resultado.variaciones || [] });
             }
           } catch (e) {
-            console.error('[Polling] error en consulta:', e);
+            console.error("[Polling] error en consulta:", e);
           }
         }, POLLING_INTERVAL_MS);
       });
     },
-    [supabase],
+    [getToken],
   );
 
   // Progreso simulado

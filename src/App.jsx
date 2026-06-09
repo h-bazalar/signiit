@@ -235,6 +235,7 @@ function AppWithLayout() {
               planActual={planActual}
               negocio={negocio}
               imagenesNegocio={imagenesNegocio}
+              getToken={getToken}
             />
           }
         />
