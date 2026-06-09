@@ -1108,7 +1108,7 @@ export default function CampanasScreen({
           .filter((i) => imagenesSeleccionadas.includes(i.id))
           .map((i) => i.url),
       }),
-      signal: AbortSignal.timeout(120000),
+      signal: AbortSignal.timeout(480000),
     });
     if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
     const { campanaId } = await res.json();
