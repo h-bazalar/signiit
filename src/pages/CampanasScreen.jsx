@@ -896,7 +896,6 @@ export default function CampanasScreen({
   getToken,
 }) {
   const { user } = useUser();
-  const { getToken } = useAuth();
   const { addToast } = useToast();
   const {
     creditos,
