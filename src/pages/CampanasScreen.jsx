@@ -913,30 +913,22 @@ export default function CampanasScreen({
   );
 
   // Wizard
-  const [paso, setPaso] = useState(0);
+  const [paso, setPaso] = useState(() => { try { const s = localStorage.getItem('sig_paso'); return s ? parseInt(s) : 0; } catch { return 0; } });
   const [burbujaColapsada, setBurbujaColapsada] = useState(true);
   const [esMobil, setEsMobil] = useState(false);
 
   // Formulario
-  const [angulo, setAngulo] = useState({
-    promocionar: "",
-    problema: "",
-    diferencial: "",
-    tipoGeneracion: "imagenes",
-    ofertaActiva: false,
-    ofertaDetalle: "",
-    ofertaPrecio: "",
-    formato: "feed_1_1",
-    modoImagen: "ia_pura",
+  const [angulo, setAngulo] = useState(() => {
+    try { const s = localStorage.getItem('sig_angulo'); return s ? JSON.parse(s) : { promocionar: "", problema: "", diferencial: "", tipoGeneracion: "imagenes", ofertaActiva: false, ofertaDetalle: "", ofertaPrecio: "", formato: "feed_1_1", modoImagen: "ia_pura" }; } catch { return { promocionar: "", problema: "", diferencial: "", tipoGeneracion: "imagenes", ofertaActiva: false, ofertaDetalle: "", ofertaPrecio: "", formato: "feed_1_1", modoImagen: "ia_pura" }; }
   });
 
   // Generación
   const [generando, setGenerando] = useState(false);
   const [progreso, setProgreso] = useState(0);
-  const [resultado, setResultado] = useState(null);
+  const [resultado, setResultado] = useState(() => { try { const s = localStorage.getItem('sig_resultado'); return s ? JSON.parse(s) : null; } catch { return null; } });
   const [errorGen, setErrorGen] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
-  const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState([]);
+  const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState(() => { try { const s = localStorage.getItem('sig_fotos'); return s ? JSON.parse(s) : []; } catch { return []; } });
   const [fotoIncompatible, setFotoIncompatible] = useState(false);
 
   const pollingRef = useRef(null);
@@ -960,6 +952,11 @@ export default function CampanasScreen({
     },
     [],
   );
+
+  useEffect(() => { localStorage.setItem('sig_angulo', JSON.stringify(angulo)); }, [angulo]);
+  useEffect(() => { localStorage.setItem('sig_paso', paso); }, [paso]);
+  useEffect(() => { if (resultado) localStorage.setItem('sig_resultado', JSON.stringify(resultado)); else localStorage.removeItem('sig_resultado'); }, [resultado]);
+  useEffect(() => { localStorage.setItem('sig_fotos', JSON.stringify(imagenesSeleccionadas)); }, [imagenesSeleccionadas]);
 
   const setA = (campo, valor) => setAngulo((a) => ({ ...a, [campo]: valor }));
 
@@ -2103,18 +2100,12 @@ export default function CampanasScreen({
                 onClick={() => {
                   setResultado(null);
                   setPaso(0);
-                  setAngulo({
-                    promocionar: "",
-                    problema: "",
-                    diferencial: "",
-                    tipoGeneracion: "imagenes",
-                    ofertaActiva: false,
-                    ofertaDetalle: "",
-                    ofertaPrecio: "",
-                    formato: "feed_1_1",
-                    modoImagen: "ia_pura",
-                  });
+                  setAngulo({ promocionar: "", problema: "", diferencial: "", tipoGeneracion: "imagenes", ofertaActiva: false, ofertaDetalle: "", ofertaPrecio: "", formato: "feed_1_1", modoImagen: "ia_pura" });
                   setImagenesSeleccionadas([]);
+                  localStorage.removeItem('sig_angulo');
+                  localStorage.removeItem('sig_paso');
+                  localStorage.removeItem('sig_resultado');
+                  localStorage.removeItem('sig_fotos');
                 }}
                 style={{
                   padding: "8px 16px",
