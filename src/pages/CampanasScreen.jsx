@@ -130,25 +130,21 @@ const IconAspect = ({ ratio }) => {
 // ── Icono señal radar (Meta Ads) ──────────────────────────────────────────────
 const IconRadar = () => (
   <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <path d="M7 10C7 10 9 7 14 7C19 7 21 10 21 10" stroke="var(--sig-forest)" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.35"/>
-    <path d="M4 14C4 14 7 8 14 8C21 8 24 14 24 14" stroke="var(--sig-forest)" strokeWidth="1.1" strokeLinecap="round" fill="none" opacity="0.2"/>
-    <path d="M9 13.5C9 13.5 10.5 11 14 11C17.5 11 19 13.5 19 13.5" stroke="var(--sig-forest)" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6"/>
-    <path d="M11.5 17L13 15.5L14 17L15.5 14L17 17L18.5 15.5" stroke="var(--sig-forest)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.4"/>
-    <rect x="10" y="19" width="8" height="1.5" rx="0.75" fill="var(--sig-forest)" opacity="0.3"/>
-    <rect x="12" y="20.5" width="4" height="3" rx="0.5" fill="var(--sig-forest)" opacity="0.25"/>
-    <path d="M12.5 16.5C12.5 16.5 13 15 14 15C15 15 15.5 16.5 15.5 16.5" stroke="var(--sig-mid)" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-    <circle cx="14" cy="17.5" r="1.2" fill="var(--sig-mid)"/>
+    <path d="M7 20L11 13L14 17L17 10L21 20" stroke="var(--sig-forest)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    <rect x="4" y="20" width="20" height="1.5" rx="0.75" fill="var(--sig-forest)" opacity="0.25"/>
+    <circle cx="14" cy="7" r="2.5" stroke="var(--sig-mid)" strokeWidth="1.4" fill="none"/>
+    <path d="M11 7h-2M17 7h2M14 4.5V3M14 11.5V10" stroke="var(--sig-mid)" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
   </svg>
 );
 
 // ── Icono onda orgánico ───────────────────────────────────────────────────────
 const IconOnda = () => (
   <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <rect x="4" y="4" width="20" height="20" rx="6" stroke="var(--sig-forest)" strokeWidth="1.2" fill="none" opacity="0.2"/>
-    <circle cx="14" cy="11" r="3.5" stroke="var(--sig-forest)" strokeWidth="1.2" fill="none" opacity="0.6"/>
-    <path d="M8.5 20C8.5 17 11 15 14 15C17 15 19.5 17 19.5 20" stroke="var(--sig-forest)" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.6"/>
-    <circle cx="20" cy="18" r="4" fill="var(--sig-mid)" opacity="0.12"/>
-    <path d="M18.5 17.5L20 16L21.5 17.5M20 16V20" stroke="var(--sig-mid)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="3" y="5" width="22" height="16" rx="3" stroke="var(--sig-forest)" strokeWidth="1.2" fill="none" opacity="0.3"/>
+    <circle cx="14" cy="13" r="4" stroke="var(--sig-forest)" strokeWidth="1.2" fill="none" opacity="0.5"/>
+    <circle cx="14" cy="13" r="1.5" fill="var(--sig-mid)"/>
+    <path d="M3 22l5-4h12l5 4" stroke="var(--sig-forest)" strokeWidth="1" strokeLinecap="round" opacity="0.25"/>
+    <path d="M14 9v-3M14 20v1.5" stroke="var(--sig-forest)" strokeWidth="1" strokeLinecap="round" opacity="0.2"/>
   </svg>
 );
 
