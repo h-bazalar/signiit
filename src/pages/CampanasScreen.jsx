@@ -1531,6 +1531,34 @@ export default function CampanasScreen({
                   );
                 })}
               </div>
+              {angulo.modoImagen === "foto_directa" && angulo.formato === "stories_9_16" && (
+                <div
+                  style={{
+                    background: "#FDF3E4",
+                    border: "0.5px solid #C07820",
+                    borderRadius: 8,
+                    padding: "12px 14px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    marginTop: 8,
+                  }}
+                >
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#7A4A10", margin: 0, lineHeight: 1.6 }}>
+                    ⚠️ Las fotos de producto suelen ser cuadradas o horizontales. En formato Stories 9:16 tu foto podría verse recortada o mal encuadrada.
+                  </p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#7A4A10", margin: 0, lineHeight: 1.6 }}>
+                    <strong>¿Qué hacemos?</strong> Con "Usar como referencia visual" la IA adapta el estilo de tu foto al formato Stories sin recortes.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setA("modoImagen", "foto_referencia")}
+                    style={{ alignSelf: "flex-start", padding: "7px 14px", borderRadius: 7, background: "#7A4A10", border: "none", color: "white", fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 500, cursor: "pointer" }}
+                  >
+                    Cambiar a referencia visual
+                  </button>
+                </div>
+              )}
               {angulo.modoImagen !== "ia_pura" && (
                 <div
                   style={{
