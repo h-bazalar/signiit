@@ -130,9 +130,8 @@ const IconAspect = ({ ratio }) => {
 // ── Icono señal radar (Meta Ads) ──────────────────────────────────────────────
 const IconRadar = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--sig-forest)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 11v2a1 1 0 0 0 1 1h1l2 4h1V8H5l-2 4z"/>
-    <path d="M11 8c3 1 5 2 7 4-2 2-4 3-7 4V8z"/>
-    <path d="M19 10a2 2 0 0 1 0 4"/>
+    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
   </svg>
 );
 
