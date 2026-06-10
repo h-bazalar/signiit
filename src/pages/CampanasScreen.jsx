@@ -937,6 +937,7 @@ export default function CampanasScreen({
   const [errorGen, setErrorGen] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
   const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState([]);
+  const [fotoIncompatible, setFotoIncompatible] = useState(false);
 
   const pollingRef = useRef(null);
   const progresoRef = useRef(null);
@@ -961,6 +962,28 @@ export default function CampanasScreen({
   );
 
   const setA = (campo, valor) => setAngulo((a) => ({ ...a, [campo]: valor }));
+
+  // Detecta si la foto seleccionada es incompatible con stories 9:16
+  useEffect(() => {
+    if (angulo.modoImagen !== "foto_directa" || angulo.formato !== "stories_9_16") {
+      setFotoIncompatible(false);
+      return;
+    }
+    if (imagenesSeleccionadas.length === 0) {
+      setFotoIncompatible(false);
+      return;
+    }
+    const fotoId = imagenesSeleccionadas[0];
+    const foto = imagenesNegocio.find((i) => i.id === fotoId);
+    if (!foto) { setFotoIncompatible(false); return; }
+    const img = new Image();
+    img.onload = () => {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      setFotoIncompatible(ratio >= 0.65);
+    };
+    img.onerror = () => setFotoIncompatible(false);
+    img.src = foto.url;
+  }, [imagenesSeleccionadas, angulo.modoImagen, angulo.formato, imagenesNegocio]);
 
   // Validación por paso
   const validarPaso = () => {
@@ -987,6 +1010,10 @@ export default function CampanasScreen({
       }
     }
     if (paso === 3) {
+      if (fotoIncompatible) {
+        addToast("Cambia el modo o el formato para continuar.", "error");
+        return false;
+      }
       if (
         angulo.modoImagen !== "ia_pura" &&
         imagenesSeleccionadas.length === 0
@@ -1568,100 +1595,129 @@ export default function CampanasScreen({
                     marginTop: 10,
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: "'Space Mono', monospace",
-                      fontSize: "9px",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "var(--sig-stone)",
-                    }}
-                  >
-                    Selecciona las fotos a usar
-                  </span>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {imagenesNegocio.map((img) => {
-                      const seleccionada = imagenesSeleccionadas.includes(
-                        img.id,
-                      );
-                      return (
-                        <div
-                          key={img.id}
-                          onClick={() => {
-                            setImagenesSeleccionadas((prev) =>
-                              prev.includes(img.id)
-                                ? prev.filter((id) => id !== img.id)
-                                : [...prev, img.id],
-                            );
-                          }}
-                          style={{
-                            position: "relative",
-                            cursor: "pointer",
-                            borderRadius: 8,
-                            border: seleccionada
-                              ? "2px solid var(--sig-mid)"
-                              : "1.5px solid var(--sig-line-s)",
-                            overflow: "hidden",
-                            width: 64,
-                            height: 64,
-                            flexShrink: 0,
-                            transition: "border 0.15s",
-                          }}
-                        >
-                          <img
-                            src={img.url}
-                            alt={img.nombre || "Referencia"}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              display: "block",
+                  {fotoIncompatible && (
+                    <div
+                      style={{
+                        background: "var(--sig-paper)",
+                        border: "0.5px solid var(--sig-line-s)",
+                        borderRadius: 8,
+                        padding: "12px 14px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "var(--sig-ink)", margin: 0, lineHeight: 1.6 }}>
+                        Esta foto es horizontal o cuadrada — no encaja bien en el formato 9:16 sin recortarse.
+                      </p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "var(--sig-ink)", margin: 0, lineHeight: 1.6 }}>
+                        Puedes cambiar a "Usar como referencia visual" y la IA adaptará el estilo de tu foto al formato Stories correctamente.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setA("modoImagen", "foto_referencia")}
+                        style={{ alignSelf: "flex-start", padding: "7px 14px", borderRadius: 7, background: "var(--sig-mid)", border: "none", color: "white", fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 500, cursor: "pointer" }}
+                      >
+                        Usar como referencia visual
+                      </button>
+                    </div>
+                  )}
+                  {!fotoIncompatible && (
+                    <span
+                      style={{
+                        fontFamily: "'Space Mono', monospace",
+                        fontSize: "9px",
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "var(--sig-stone)",
+                      }}
+                    >
+                      Selecciona las fotos a usar
+                    </span>
+                  )}
+                  {!fotoIncompatible && (
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {imagenesNegocio.map((img) => {
+                        const seleccionada = imagenesSeleccionadas.includes(img.id);
+                        return (
+                          <div
+                            key={img.id}
+                            onClick={() => {
+                              if (imagenesSeleccionadas.includes(img.id)) {
+                                setImagenExpandida(img.url);
+                              } else {
+                                setImagenesSeleccionadas([img.id]);
+                              }
                             }}
-                          />
-                          {seleccionada && (
-                            <div
+                            style={{
+                              position: "relative",
+                              cursor: "pointer",
+                              borderRadius: 8,
+                              border: seleccionada
+                                ? "2px solid var(--sig-mid)"
+                                : "1.5px solid var(--sig-line-s)",
+                              overflow: "hidden",
+                              width: 64,
+                              height: 64,
+                              flexShrink: 0,
+                              transition: "border 0.15s",
+                            }}
+                          >
+                            <img
+                              src={img.url}
+                              alt={img.nombre || "Referencia"}
                               style={{
-                                position: "absolute",
-                                inset: 0,
-                                background: "rgba(61,171,142,0.18)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                display: "block",
                               }}
-                            >
+                            />
+                            {seleccionada && (
                               <div
                                 style={{
-                                  width: 20,
-                                  height: 20,
-                                  borderRadius: "50%",
-                                  background: "var(--sig-mid)",
+                                  position: "absolute",
+                                  inset: 0,
+                                  background: "rgba(61,171,142,0.18)",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
                                 }}
                               >
-                                <svg
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 10 10"
-                                  fill="none"
+                                <div
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: "50%",
+                                    background: "var(--sig-mid)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
                                 >
-                                  <path
-                                    d="M2 5l2 2 4-4"
-                                    stroke="white"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
+                                  <svg
+                                    width="10"
+                                    height="10"
+                                    viewBox="0 0 10 10"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M2 5l2 2 4-4"
+                                      stroke="white"
+                                      strokeWidth="1.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {imagenesSeleccionadas.length === 0 && (
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {!fotoIncompatible && imagenesSeleccionadas.length === 0 && (
                     <p
                       style={{
                         fontFamily: "'DM Sans', sans-serif",
