@@ -104,7 +104,6 @@ const IconChevron = ({ dir = "down" }) => (
   </svg>
 );
 
-// Icono de proporción para formatos
 const IconAspect = ({ ratio }) => {
   const configs = {
     "1:1": { w: 16, h: 16 },
@@ -128,6 +127,53 @@ const IconAspect = ({ ratio }) => {
   );
 };
 
+// ── Icono señal radar (Meta Ads) ──────────────────────────────────────────────
+const IconRadar = () => (
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="14" r="3" fill="var(--sig-forest)" />
+    <circle
+      cx="14"
+      cy="14"
+      r="7"
+      stroke="var(--sig-forest)"
+      strokeWidth="1.1"
+      fill="none"
+      opacity="0.5"
+    />
+    <circle
+      cx="14"
+      cy="14"
+      r="12"
+      stroke="var(--sig-forest)"
+      strokeWidth="0.8"
+      fill="none"
+      opacity="0.25"
+    />
+  </svg>
+);
+
+// ── Icono onda orgánico ───────────────────────────────────────────────────────
+const IconOnda = () => (
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <path
+      d="M2 14 Q7 8 14 14 Q21 20 26 14"
+      stroke="var(--sig-forest)"
+      strokeWidth="1.8"
+      fill="none"
+      strokeLinecap="round"
+    />
+    <path
+      d="M2 19 Q7 13 14 19 Q21 25 26 19"
+      stroke="var(--sig-forest)"
+      strokeWidth="1"
+      fill="none"
+      strokeLinecap="round"
+      opacity="0.4"
+    />
+    <circle cx="14" cy="14" r="2.5" fill="var(--sig-mid)" />
+  </svg>
+);
+
 // ── Awareness labels ──────────────────────────────────────────────────────────
 const AWARENESS_LABELS = {
   solution_aware: {
@@ -144,6 +190,28 @@ const AWARENESS_LABELS = {
   },
   most_aware: {
     label: "Cierra al decidido",
+    color: "var(--sig-aware-amber)",
+    text: "var(--sig-aware-amber-text)",
+    border: "var(--sig-aware-amber-border)",
+  },
+};
+
+// ── Estilos de gancho orgánico ────────────────────────────────────────────────
+const GANCHO_LABELS = {
+  pregunta: {
+    label: "Pregunta / Problema",
+    color: "var(--sig-aware-blue)",
+    text: "var(--sig-aware-blue-text)",
+    border: "var(--sig-aware-blue-border)",
+  },
+  declaracion: {
+    label: "Declaración bold",
+    color: "var(--sig-aware-green)",
+    text: "var(--sig-aware-green-text)",
+    border: "var(--sig-aware-green-border)",
+  },
+  cta: {
+    label: "CTA directo",
     color: "var(--sig-aware-amber)",
     text: "var(--sig-aware-amber-text)",
     border: "var(--sig-aware-amber-border)",
@@ -283,7 +351,8 @@ function Progreso({ pasoActual }) {
 }
 
 // ── Burbuja educativa ─────────────────────────────────────────────────────────
-function BurbujaInfo({ colapsada, onToggle, esMobil }) {
+function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
+  const esOrganico = modoApp === "organico";
   return (
     <div
       style={{
@@ -324,7 +393,6 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
         </span>
         {esMobil && <IconChevron dir={colapsada ? "down" : "up"} />}
       </div>
-
       {!colapsada && (
         <>
           <p
@@ -337,7 +405,9 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
               fontWeight: 400,
             }}
           >
-            El creativo que convierte sabe exactamente a quién le habla.
+            {esOrganico
+              ? "Contenido que para el scroll y genera reacción."
+              : "El creativo que convierte sabe exactamente a quién le habla."}
           </p>
           <p
             style={{
@@ -348,15 +418,31 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
               margin: "0 0 14px",
             }}
           >
-            Cada generación produce{" "}
-            <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
-              3 creativos
-            </strong>{" "}
-            — uno por tipo de cliente.{" "}
-            <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
-              Un solo producto
-            </strong>{" "}
-            por campaña.
+            {esOrganico ? (
+              <>
+                Cada generación produce{" "}
+                <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
+                  3 imágenes
+                </strong>{" "}
+                — cada una con{" "}
+                <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
+                  3 variaciones de texto
+                </strong>
+                . 9 opciones para elegir.
+              </>
+            ) : (
+              <>
+                Cada generación produce{" "}
+                <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
+                  3 creativos
+                </strong>{" "}
+                — uno por tipo de cliente.{" "}
+                <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
+                  Un solo producto
+                </strong>{" "}
+                por campaña.
+              </>
+            )}
           </p>
           <div
             style={{
@@ -366,21 +452,38 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
               marginBottom: 14,
             }}
           >
-            {[
-              {
-                bold: "Tortas y alfajores",
-                resto: " — genera una campaña para cada uno.",
-              },
-              {
-                bold: "Oferta activa",
-                resto:
-                  " — actívala en el paso 3. Cambia el creativo de cierre.",
-              },
-              {
-                bold: "Sé específico",
-                resto: " — mejor input, mejor creativo.",
-              },
-            ].map((item, i) => (
+            {(esOrganico
+              ? [
+                  {
+                    bold: "3 estilos de gancho",
+                    resto:
+                      " — Pregunta, Declaración y CTA. Sube los 3 o elige el que más te guste.",
+                  },
+                  {
+                    bold: "Sé específico",
+                    resto: " — mejor descripción, imagen más potente.",
+                  },
+                  {
+                    bold: "Tu foto o IA",
+                    resto: " — si tienes fotos de tu producto, úsalas.",
+                  },
+                ]
+              : [
+                  {
+                    bold: "Tortas y alfajores",
+                    resto: " — genera una campaña para cada uno.",
+                  },
+                  {
+                    bold: "Oferta activa",
+                    resto:
+                      " — actívala en el paso 3. Cambia el creativo de cierre.",
+                  },
+                  {
+                    bold: "Sé específico",
+                    resto: " — mejor input, mejor creativo.",
+                  },
+                ]
+            ).map((item, i) => (
               <div
                 key={i}
                 style={{ display: "flex", alignItems: "flex-start", gap: 8 }}
@@ -430,7 +533,9 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
                 lineHeight: 1.4,
               }}
             >
-              No es magia — es criterio.
+              {esOrganico
+                ? "La imagen correcta no se busca — se genera."
+                : "No es magia — es criterio."}
             </p>
           </div>
         </>
@@ -439,7 +544,7 @@ function BurbujaInfo({ colapsada, onToggle, esMobil }) {
   );
 }
 
-// ── Cards de resultado ────────────────────────────────────────────────────────
+// ── Card resultado Meta Ads ───────────────────────────────────────────────────
 function CardImagen({ variacion, onCopy, onExpandir }) {
   const aw = AWARENESS_LABELS[variacion.awareness_level] || {
     label: "Creativo",
@@ -585,13 +690,14 @@ function CardImagen({ variacion, onCopy, onExpandir }) {
   );
 }
 
-function CardVideo({ variacion, onCopy }) {
-  const aw = AWARENESS_LABELS[variacion.awareness_level] || {
-    label: "Video Ad",
-    color: "var(--sig-aware-green)",
-    text: "var(--sig-aware-green-text)",
-    border: "var(--sig-aware-green-border)",
-  };
+// ── Card resultado Orgánico ───────────────────────────────────────────────────
+function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir }) {
+  // imagen: { foto, gancho_style } — variaciones: [{ gancho_style, texto_overlay, caption }]
+  const [varActiva, setVarActiva] = useState(0);
+  const varActual = variaciones[varActiva];
+  const gancho =
+    GANCHO_LABELS[varActual?.gancho_style] || GANCHO_LABELS.pregunta;
+
   return (
     <div
       style={{
@@ -601,87 +707,85 @@ function CardVideo({ variacion, onCopy }) {
         overflow: "hidden",
       }}
     >
+      {/* Tabs de variación */}
       <div
-        style={{
-          background: aw.color,
-          padding: "10px 16px",
-          borderBottom: `1px solid ${aw.border}33`,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-        }}
+        style={{ display: "flex", borderBottom: "0.5px solid var(--sig-line)" }}
       >
-        <div
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: aw.border,
-          }}
-        />
-        <span
-          style={{
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "9px",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: aw.text,
-            fontWeight: 700,
-          }}
-        >
-          {aw.label}
-        </span>
+        {variaciones.map((v, i) => {
+          const g = GANCHO_LABELS[v.gancho_style] || GANCHO_LABELS.pregunta;
+          const activo = i === varActiva;
+          return (
+            <button
+              key={i}
+              onClick={() => setVarActiva(i)}
+              style={{
+                flex: 1,
+                padding: "10px 8px",
+                background: activo ? g.color : "white",
+                border: "none",
+                borderBottom: activo
+                  ? `2px solid ${g.border}`
+                  : "2px solid transparent",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: activo ? g.text : "var(--sig-stone)",
+                  fontWeight: activo ? 700 : 400,
+                }}
+              >
+                {g.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        <div style={{ flex: "0 0 200px", padding: 16 }}>
-          <video
-            controls
+        {/* Imagen */}
+        <div style={{ flex: "0 0 160px", padding: 16 }}>
+          <img
+            src={imagen.foto}
+            alt="Orgánico"
+            onClick={() => onExpandir(imagen.foto)}
             style={{
               width: "100%",
+              aspectRatio: "1/1",
+              objectFit: "cover",
               borderRadius: 8,
               border: "0.5px solid var(--sig-line)",
-              background: "#000",
+              cursor: "pointer",
             }}
-            src={variacion.video}
-          >
-            Tu navegador no soporta video.
-          </video>
-          <a
-            href={variacion.video}
-            download
-            target="_blank"
-            rel="noreferrer"
+          />
+          <p
             style={{
-              marginTop: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              padding: "8px 12px",
-              borderRadius: 7,
-              background: "var(--sig-forest)",
-              color: "var(--sig-warm)",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "12px",
-              fontWeight: 500,
-              textDecoration: "none",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "9px",
+              color: "var(--sig-stone)",
+              textAlign: "center",
+              marginTop: 6,
             }}
           >
-            <IconDownload /> Descargar
-          </a>
+            Clic para ampliar
+          </p>
         </div>
-        {[
-          { titulo: "5 Títulos", items: variacion.titulos },
-          { titulo: "5 Copies", items: variacion.copies },
-        ].map(({ titulo, items }) => (
-          <div
-            key={titulo}
-            style={{
-              flex: "1 1 180px",
-              padding: 16,
-              borderLeft: "0.5px solid var(--sig-line)",
-            }}
-          >
+        {/* Texto overlay + caption */}
+        <div
+          style={{
+            flex: "1 1 220px",
+            padding: 16,
+            borderLeft: "0.5px solid var(--sig-line)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          <div>
             <p
               style={{
                 fontFamily: "'Space Mono', monospace",
@@ -689,60 +793,115 @@ function CardVideo({ variacion, onCopy }) {
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 color: "var(--sig-stone)",
-                marginBottom: 10,
+                marginBottom: 8,
               }}
             >
-              {titulo}
+              Texto en la imagen
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              {(items || []).map((t, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 7,
-                    background: "var(--sig-paper)",
-                    borderRadius: 6,
-                    padding: "6px 9px",
-                  }}
-                >
-                  <span
-                    style={{
-                      flex: 1,
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "11px",
-                      color: "var(--sig-forest)",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {t}
-                  </span>
-                  <button
-                    onClick={() => onCopy(t)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "var(--sig-stone)",
-                      cursor: "pointer",
-                      flexShrink: 0,
-                      padding: 2,
-                    }}
-                  >
-                    <IconCopy />
-                  </button>
-                </div>
-              ))}
+            <div
+              style={{
+                background: "var(--sig-paper)",
+                borderRadius: 8,
+                padding: "10px 12px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  flex: 1,
+                  fontFamily: "'DM Serif Display', serif",
+                  fontSize: "14px",
+                  color: "var(--sig-forest)",
+                  lineHeight: 1.4,
+                }}
+              >
+                {varActual?.texto_overlay}
+              </span>
+              <button
+                onClick={() => onCopy(varActual?.texto_overlay)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--sig-stone)",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  padding: 2,
+                }}
+              >
+                <IconCopy />
+              </button>
             </div>
           </div>
-        ))}
+          <div>
+            <p
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "9px",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "var(--sig-stone)",
+                marginBottom: 8,
+              }}
+            >
+              Caption sugerido
+            </p>
+            <div
+              style={{
+                background: "var(--sig-paper)",
+                borderRadius: 8,
+                padding: "10px 12px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  flex: 1,
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "12px",
+                  color: "var(--sig-forest)",
+                  lineHeight: 1.55,
+                }}
+              >
+                {varActual?.caption}
+              </span>
+              <button
+                onClick={() => onCopy(varActual?.caption)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--sig-stone)",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  padding: 2,
+                }}
+              >
+                <IconCopy />
+              </button>
+            </div>
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "10px",
+                color: "var(--sig-stone)",
+                marginTop: 6,
+                lineHeight: 1.5,
+              }}
+            >
+              Sugerencia — modifícalo a tu estilo antes de publicar.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
 // ── Barra de progreso circular ────────────────────────────────────────────────
-function ProgresoCircular({ progreso, tipo }) {
+function ProgresoCircular({ progreso }) {
   const r = 38;
   const circunferencia = 2 * Math.PI * r;
   return (
@@ -809,9 +968,7 @@ function ProgresoCircular({ progreso, tipo }) {
             marginBottom: 4,
           }}
         >
-          {tipo === "video"
-            ? "Generando Video Ads..."
-            : "Generando creativos..."}
+          Generando creativos...
         </p>
         <p
           style={{
@@ -821,7 +978,7 @@ function ProgresoCircular({ progreso, tipo }) {
             lineHeight: 1.6,
           }}
         >
-          {tipo === "video" ? "Aprox. 2-3 minutos." : "Aprox. 1-2 minutos."}
+          Aprox. 1-2 minutos.
         </p>
       </div>
     </div>
@@ -887,6 +1044,114 @@ function ModalImagen({ src, onClose }) {
   );
 }
 
+// ── Pantalla selección de modo (Paso 0) ───────────────────────────────────────
+function SeleccionModo({ onSeleccionar }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <p
+        style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "13px",
+          color: "var(--sig-stone)",
+          marginBottom: 4,
+        }}
+      >
+        ¿Para qué vas a usar estos creativos?
+      </p>
+      {[
+        {
+          id: "meta_ads",
+          icono: <IconRadar />,
+          label: "Anuncios pagados",
+          sub: "Campañas en Facebook e Instagram Ads",
+          detalle: "3 creativos con copies optimizados para conversión",
+        },
+        {
+          id: "organico",
+          icono: <IconOnda />,
+          label: "Contenido orgánico",
+          sub: "Instagram, WhatsApp, TikTok y más",
+          detalle: "9 imágenes con texto integrado y caption sugerido",
+        },
+      ].map((op) => (
+        <button
+          key={op.id}
+          type="button"
+          onClick={() => onSeleccionar(op.id)}
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 16,
+            padding: "18px 20px",
+            borderRadius: 10,
+            background: "white",
+            border: "0.5px solid var(--sig-line-s)",
+            cursor: "pointer",
+            textAlign: "left",
+            transition: "border-color 0.15s, background 0.15s",
+            width: "100%",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "var(--sig-mid)";
+            e.currentTarget.style.background = "rgba(61,171,142,0.03)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "var(--sig-line-s)";
+            e.currentTarget.style.background = "white";
+          }}
+        >
+          <div style={{ flexShrink: 0, marginTop: 2 }}>{op.icono}</div>
+          <div style={{ flex: 1 }}>
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "var(--sig-forest)",
+                margin: "0 0 3px",
+              }}
+            >
+              {op.label}
+            </p>
+            <p
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "9px",
+                color: "var(--sig-mid)",
+                margin: "0 0 6px",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {op.sub}
+            </p>
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px",
+                color: "var(--sig-stone)",
+                margin: 0,
+                lineHeight: 1.5,
+              }}
+            >
+              {op.detalle}
+            </p>
+          </div>
+          <div
+            style={{
+              flexShrink: 0,
+              alignSelf: "center",
+              color: "var(--sig-stone)",
+              fontSize: 18,
+            }}
+          >
+            →
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ── Pantalla principal ────────────────────────────────────────────────────────
 export default function CampanasScreen({
   supabase,
@@ -904,38 +1169,87 @@ export default function CampanasScreen({
   } = useCreditos(supabase);
 
   const plan = PLANES[planActual] || PLANES.free;
-  const videoDisponible = planActual !== "free";
 
-  // Negocio e imágenes de referencia
   const [negocio, setNegocio] = useState(negocioProp ?? null);
   const [imagenesNegocio, setImagenesNegocio] = useState(
     imagenesNegocioProp ?? [],
   );
 
-  // Wizard
-  const [paso, setPaso] = useState(() => { try { const s = localStorage.getItem('sig_paso'); return s ? parseInt(s) : 0; } catch { return 0; } });
+  // Modo app: null = selección, "meta_ads" | "organico"
+  const [modoApp, setModoApp] = useState(() => {
+    try {
+      return localStorage.getItem("sig_modo") || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [paso, setPaso] = useState(() => {
+    try {
+      const s = localStorage.getItem("sig_paso");
+      return s ? parseInt(s) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [burbujaColapsada, setBurbujaColapsada] = useState(true);
   const [esMobil, setEsMobil] = useState(false);
 
-  // Formulario
   const [angulo, setAngulo] = useState(() => {
-    try { const s = localStorage.getItem('sig_angulo'); return s ? JSON.parse(s) : { promocionar: "", problema: "", diferencial: "", tipoGeneracion: "imagenes", ofertaActiva: false, ofertaDetalle: "", ofertaPrecio: "", formato: "feed_1_1", modoImagen: "ia_pura" }; } catch { return { promocionar: "", problema: "", diferencial: "", tipoGeneracion: "imagenes", ofertaActiva: false, ofertaDetalle: "", ofertaPrecio: "", formato: "feed_1_1", modoImagen: "ia_pura" }; }
+    try {
+      const s = localStorage.getItem("sig_angulo");
+      return s
+        ? JSON.parse(s)
+        : {
+            promocionar: "",
+            problema: "",
+            diferencial: "",
+            ofertaActiva: false,
+            ofertaDetalle: "",
+            ofertaPrecio: "",
+            formato: "feed_1_1",
+            modoImagen: "ia_pura",
+          };
+    } catch {
+      return {
+        promocionar: "",
+        problema: "",
+        diferencial: "",
+        ofertaActiva: false,
+        ofertaDetalle: "",
+        ofertaPrecio: "",
+        formato: "feed_1_1",
+        modoImagen: "ia_pura",
+      };
+    }
   });
 
-  // Generación
   const [generando, setGenerando] = useState(false);
   const [progreso, setProgreso] = useState(0);
-  const [resultado, setResultado] = useState(() => { try { const s = localStorage.getItem('sig_resultado'); return s ? JSON.parse(s) : null; } catch { return null; } });
+  const [resultado, setResultado] = useState(() => {
+    try {
+      const s = localStorage.getItem("sig_resultado");
+      return s ? JSON.parse(s) : null;
+    } catch {
+      return null;
+    }
+  });
   const [errorGen, setErrorGen] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
-  const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState(() => { try { const s = localStorage.getItem('sig_fotos'); return s ? JSON.parse(s) : []; } catch { return []; } });
+  const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState(() => {
+    try {
+      const s = localStorage.getItem("sig_fotos");
+      return s ? JSON.parse(s) : [];
+    } catch {
+      return [];
+    }
+  });
   const [fotoIncompatible, setFotoIncompatible] = useState(false);
 
   const pollingRef = useRef(null);
   const progresoRef = useRef(null);
   const abortRef = useRef(null);
 
-  // Detectar móvil
   useEffect(() => {
     const check = () => setEsMobil(window.innerWidth < 640);
     check();
@@ -943,7 +1257,6 @@ export default function CampanasScreen({
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Cleanup
   useEffect(
     () => () => {
       clearInterval(pollingRef.current);
@@ -953,16 +1266,35 @@ export default function CampanasScreen({
     [],
   );
 
-  useEffect(() => { localStorage.setItem('sig_angulo', JSON.stringify(angulo)); }, [angulo]);
-  useEffect(() => { localStorage.setItem('sig_paso', paso); }, [paso]);
-  useEffect(() => { if (resultado) localStorage.setItem('sig_resultado', JSON.stringify(resultado)); else localStorage.removeItem('sig_resultado'); }, [resultado]);
-  useEffect(() => { localStorage.setItem('sig_fotos', JSON.stringify(imagenesSeleccionadas)); }, [imagenesSeleccionadas]);
+  useEffect(() => {
+    try {
+      if (modoApp) localStorage.setItem("sig_modo", modoApp);
+      else localStorage.removeItem("sig_modo");
+    } catch {}
+  }, [modoApp]);
+  useEffect(() => {
+    localStorage.setItem("sig_angulo", JSON.stringify(angulo));
+  }, [angulo]);
+  useEffect(() => {
+    localStorage.setItem("sig_paso", paso);
+  }, [paso]);
+  useEffect(() => {
+    if (resultado)
+      localStorage.setItem("sig_resultado", JSON.stringify(resultado));
+    else localStorage.removeItem("sig_resultado");
+  }, [resultado]);
+  useEffect(() => {
+    localStorage.setItem("sig_fotos", JSON.stringify(imagenesSeleccionadas));
+  }, [imagenesSeleccionadas]);
 
   const setA = (campo, valor) => setAngulo((a) => ({ ...a, [campo]: valor }));
 
-  // Detecta si la foto seleccionada es incompatible con stories 9:16
+  // Detecta incompatibilidad foto_directa + stories_9_16
   useEffect(() => {
-    if (angulo.modoImagen !== "foto_directa" || angulo.formato !== "stories_9_16") {
+    if (
+      angulo.modoImagen !== "foto_directa" ||
+      angulo.formato !== "stories_9_16"
+    ) {
       setFotoIncompatible(false);
       return;
     }
@@ -970,19 +1302,47 @@ export default function CampanasScreen({
       setFotoIncompatible(false);
       return;
     }
-    const fotoId = imagenesSeleccionadas[0];
-    const foto = imagenesNegocio.find((i) => i.id === fotoId);
-    if (!foto) { setFotoIncompatible(false); return; }
+    const foto = imagenesNegocio.find((i) => i.id === imagenesSeleccionadas[0]);
+    if (!foto) {
+      setFotoIncompatible(false);
+      return;
+    }
     const img = new Image();
-    img.onload = () => {
-      const ratio = img.naturalWidth / img.naturalHeight;
-      setFotoIncompatible(ratio >= 0.65);
-    };
+    img.onload = () =>
+      setFotoIncompatible(img.naturalWidth / img.naturalHeight >= 0.65);
     img.onerror = () => setFotoIncompatible(false);
     img.src = foto.url;
-  }, [imagenesSeleccionadas, angulo.modoImagen, angulo.formato, imagenesNegocio]);
+  }, [
+    imagenesSeleccionadas,
+    angulo.modoImagen,
+    angulo.formato,
+    imagenesNegocio,
+  ]);
 
-  // Validación por paso
+  const limpiarTodo = () => {
+    setModoApp(null);
+    setResultado(null);
+    setPaso(0);
+    setAngulo({
+      promocionar: "",
+      problema: "",
+      diferencial: "",
+      ofertaActiva: false,
+      ofertaDetalle: "",
+      ofertaPrecio: "",
+      formato: "feed_1_1",
+      modoImagen: "ia_pura",
+    });
+    setImagenesSeleccionadas([]);
+    [
+      "sig_modo",
+      "sig_angulo",
+      "sig_paso",
+      "sig_resultado",
+      "sig_fotos",
+    ].forEach((k) => localStorage.removeItem(k));
+  };
+
   const validarPaso = () => {
     if (paso === 0) {
       if (!angulo.promocionar.trim()) {
@@ -1026,17 +1386,8 @@ export default function CampanasScreen({
     if (!validarPaso()) return;
     setPaso((p) => Math.min(p + 1, PASOS.length - 1));
   };
-
   const anteriorPaso = () => setPaso((p) => Math.max(p - 1, 0));
 
-  const puedeGenerar =
-    angulo.tipoGeneracion === "ambos"
-      ? tieneCredito.imagenes && tieneCredito.videos
-      : angulo.tipoGeneracion === "video"
-        ? tieneCredito.videos
-        : tieneCredito.imagenes;
-
-  // Polling
   const iniciarPolling = useCallback(
     (campanaId, tipo) => {
       const inicio = Date.now();
@@ -1060,7 +1411,8 @@ export default function CampanasScreen({
               clearInterval(pollingRef.current);
               reject(
                 new Error(
-                  data.resultado?.mensaje || "Error al generar. Intenta de nuevo.",
+                  data.resultado?.mensaje ||
+                    "Error al generar. Intenta de nuevo.",
                 ),
               );
               return;
@@ -1070,7 +1422,7 @@ export default function CampanasScreen({
               resolve({ tipo, variaciones: data.resultado.variaciones || [] });
             }
           } catch (e) {
-            console.error("[Polling] error en consulta:", e);
+            console.error("[Polling] error:", e);
           }
         }, POLLING_INTERVAL_MS);
       });
@@ -1078,7 +1430,6 @@ export default function CampanasScreen({
     [getToken],
   );
 
-  // Progreso simulado
   const iniciarProgreso = () => {
     setProgreso(0);
     clearInterval(progresoRef.current);
@@ -1093,7 +1444,6 @@ export default function CampanasScreen({
     }, 1000);
   };
 
-  // Copiar
   const handleCopy = async (texto) => {
     try {
       if (navigator.clipboard?.writeText)
@@ -1114,12 +1464,9 @@ export default function CampanasScreen({
     }
   };
 
-  // Generar una campaña
-  const generarUna = async (tipo) => {
-    const endpoint =
-      tipo === "video" ? "/api/generar-videos" : "/api/generar-imagen";
+  const generarUna = async () => {
     const token = await getToken();
-    const res = await fetch(endpoint, {
+    const res = await fetch("/api/generar-imagen", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1130,6 +1477,7 @@ export default function CampanasScreen({
         angulo,
         formato: angulo.formato,
         modoImagen: angulo.modoImagen,
+        modoApp,
         imagenesReferencia: imagenesNegocio
           .filter((i) => imagenesSeleccionadas.includes(i.id))
           .map((i) => i.url),
@@ -1139,13 +1487,12 @@ export default function CampanasScreen({
     if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
     const { campanaId } = await res.json();
     if (!campanaId) throw new Error("No se recibió ID de campaña");
-    return await iniciarPolling(campanaId, tipo);
+    return await iniciarPolling(campanaId, "imagenes");
   };
 
-  // Generar
   const handleGenerar = async () => {
-    if (!puedeGenerar) {
-      addToast("Sin créditos suficientes para esta generación.", "error");
+    if (!tieneCredito.imagenes) {
+      addToast("Sin créditos suficientes.", "error");
       return;
     }
     setGenerando(true);
@@ -1153,26 +1500,15 @@ export default function CampanasScreen({
     setErrorGen(null);
     iniciarProgreso();
     try {
-      let resultados = [];
-      if (angulo.tipoGeneracion === "ambos") {
-        const [resImg, resVid] = await Promise.all([
-          generarUna("imagenes"),
-          generarUna("video"),
-        ]);
-        resultados = [resImg, resVid];
-      } else {
-        const res = await generarUna(angulo.tipoGeneracion);
-        resultados = [res];
-      }
+      const res = await generarUna();
       clearInterval(progresoRef.current);
       setProgreso(100);
       setTimeout(() => setProgreso(0), 800);
-      setResultado(resultados);
+      setResultado(res);
       addToast("¡Creativos generados con éxito!", "success");
       await refetchCreditos();
     } catch (err) {
       if (err.name === "AbortError") return;
-      console.error("Error generando:", err);
       setErrorGen(err.message || "Ocurrió un error. Intenta de nuevo.");
       addToast(err.message || "Error al generar.", "error");
     } finally {
@@ -1205,7 +1541,6 @@ export default function CampanasScreen({
     resize: "none",
     boxSizing: "border-box",
   };
-
   const labelStyle = {
     fontFamily: "'Space Mono', monospace",
     fontSize: "9px",
@@ -1215,10 +1550,7 @@ export default function CampanasScreen({
     marginBottom: 6,
     display: "block",
   };
-
-  // ── Helpers del paso 4 ────────────────────────────────────────────────────────
   const tieneImagenes = imagenesNegocio.length > 0;
-
   const opcionBtn = (activo, bloqueado = false) => ({
     padding: "10px 14px",
     borderRadius: 8,
@@ -1234,22 +1566,19 @@ export default function CampanasScreen({
       : "0.5px solid var(--sig-line-s)",
     opacity: bloqueado ? 0.5 : 1,
   });
-
   const opcionLabel = (activo) => ({
     fontFamily: "'DM Sans', sans-serif",
     fontSize: "13px",
     fontWeight: activo ? 500 : 400,
     margin: 0,
-    color: activo ? "var(--sig-forest)" : "var(--sig-forest)",
+    color: "var(--sig-forest)",
   });
-
   const opcionSub = (activo) => ({
     fontFamily: "'Space Mono', monospace",
     fontSize: "8px",
     margin: 0,
     color: activo ? "var(--sig-mid)" : "var(--sig-stone)",
   });
-
   const puntito = (activo) => ({
     width: 8,
     height: 8,
@@ -1258,7 +1587,61 @@ export default function CampanasScreen({
     background: activo ? "var(--sig-mint)" : "var(--sig-line-s)",
   });
 
-  // ── Contenido de cada paso ────────────────────────────────────────────────────
+  // ── Formatos según modo ───────────────────────────────────────────────────────
+  const formatosDisponibles =
+    modoApp === "meta_ads"
+      ? [
+          {
+            id: "feed_1_1",
+            ratio: "1:1",
+            label: "Feed cuadrado",
+            sub: "1:1 · Meta Ads Feed",
+          },
+          {
+            id: "feed_4_5",
+            ratio: "4:5",
+            label: "Feed vertical",
+            sub: "4:5 · Meta Ads Feed",
+          },
+        ]
+      : [
+          {
+            id: "feed_1_1",
+            ratio: "1:1",
+            label: "Feed cuadrado",
+            sub: "1:1 · Instagram Feed",
+          },
+          {
+            id: "feed_4_5",
+            ratio: "4:5",
+            label: "Feed vertical",
+            sub: "4:5 · Instagram Feed",
+          },
+          {
+            id: "stories_9_16",
+            ratio: "9:16",
+            label: "Stories / Reels",
+            sub: "9:16 · Stories, Reels, WhatsApp",
+          },
+        ];
+
+  // ── Label paso 1 según modo ───────────────────────────────────────────────────
+  const labelPorQue =
+    modoApp === "organico"
+      ? "¿Qué quieres destacar en este contenido?"
+      : "Por qué elegirte para esto";
+
+  const placeholderPorQue =
+    modoApp === "organico"
+      ? "Ej: La frescura de mis ingredientes y que se prepara al momento."
+      : "Ej: Entrega a domicilio el mismo día. / Ingredientes importados sin conservantes.";
+
+  const hintPorQue =
+    modoApp === "organico"
+      ? "Este será el eje del mensaje visual. Cuanto más concreto, más impacto."
+      : 'Evita "calidad y precio". Si tu diferencial es genérico, tu creativo también lo será.';
+
+  // ── Render de pasos ───────────────────────────────────────────────────────────
   const renderPaso = () => {
     if (paso === 0)
       return (
@@ -1291,7 +1674,7 @@ export default function CampanasScreen({
             <textarea
               rows={3}
               style={inputStyle}
-              placeholder="Ej: Quiero una torta rica para el cumple de mi hijo pero no sé dónde pedir. / Me canso todo el día y no rindo en el trabajo."
+              placeholder="Ej: Quiero una torta rica para el cumple de mi hijo pero no sé dónde pedir."
               value={angulo.problema}
               onChange={(e) => setA("problema", e.target.value)}
               onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
@@ -1315,11 +1698,11 @@ export default function CampanasScreen({
     if (paso === 1)
       return (
         <div>
-          <span style={labelStyle}>Por qué elegirte para esto</span>
+          <span style={labelStyle}>{labelPorQue}</span>
           <textarea
             rows={4}
             style={inputStyle}
-            placeholder="Ej: Entrega a domicilio el mismo día. / Ingredientes importados sin conservantes. / Descuento de lanzamiento esta semana."
+            placeholder={placeholderPorQue}
             value={angulo.diferencial}
             onChange={(e) => setA("diferencial", e.target.value)}
             onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
@@ -1333,8 +1716,7 @@ export default function CampanasScreen({
               marginTop: 4,
             }}
           >
-            Evita "calidad y precio". Si tu diferencial es genérico, tu creativo
-            también lo será.
+            {hintPorQue}
           </p>
         </div>
       );
@@ -1452,8 +1834,9 @@ export default function CampanasScreen({
                   lineHeight: 1.6,
                 }}
               >
-                Sin oferta activa. El creativo del nivel "Cierra al decidido"
-                usará tu diferencial como argumento de cierre.
+                {modoApp === "organico"
+                  ? "Sin oferta activa. El contenido se enfocará en conectar con tu audiencia."
+                  : 'Sin oferta activa. El creativo del nivel "Cierra al decidido" usará tu diferencial como argumento de cierre.'}
               </p>
             </div>
           )}
@@ -1463,30 +1846,11 @@ export default function CampanasScreen({
     if (paso === 3)
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* ── Selector de formato ── */}
+          {/* Formato */}
           <div>
             <span style={labelStyle}>Formato</span>
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-              {[
-                {
-                  id: "feed_1_1",
-                  ratio: "1:1",
-                  label: "Feed cuadrado",
-                  sub: "1:1 · Meta Ads Feed",
-                },
-                {
-                  id: "feed_4_5",
-                  ratio: "4:5",
-                  label: "Feed vertical",
-                  sub: "4:5 · Meta Ads Feed",
-                },
-                {
-                  id: "stories_9_16",
-                  ratio: "9:16",
-                  label: "Stories / Reels / WhatsApp",
-                  sub: "9:16 · vertical · mensaje integrado en la imagen",
-                },
-              ].map((f) => {
+              {formatosDisponibles.map((f) => {
                 const activo = angulo.formato === f.id;
                 return (
                   <button
@@ -1513,7 +1877,7 @@ export default function CampanasScreen({
             </div>
           </div>
 
-          {/* ── Selector de modo imagen (solo si tiene imágenes cargadas) ── */}
+          {/* Modo imagen */}
           {tieneImagenes && (
             <div>
               <span style={labelStyle}>Cómo usar tus fotos de producto</span>
@@ -1576,197 +1940,180 @@ export default function CampanasScreen({
                         gap: 8,
                       }}
                     >
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "var(--sig-ink)", margin: 0, lineHeight: 1.6 }}>
-                        Esta foto es horizontal o cuadrada — no encaja bien en el formato 9:16 sin recortarse.
+                      <p
+                        style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: "12px",
+                          color: "var(--sig-forest)",
+                          margin: 0,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        Esta foto es horizontal o cuadrada — no encaja bien en
+                        el formato 9:16 sin recortarse.
                       </p>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "var(--sig-ink)", margin: 0, lineHeight: 1.6 }}>
-                        Puedes cambiar a "Usar como referencia visual" y la IA adaptará el estilo de tu foto al formato Stories correctamente.
+                      <p
+                        style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: "12px",
+                          color: "var(--sig-forest)",
+                          margin: 0,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        Puedes cambiar a "Usar como referencia visual" y la IA
+                        adaptará el estilo de tu foto al formato Stories
+                        correctamente.
                       </p>
                       <button
                         type="button"
                         onClick={() => setA("modoImagen", "foto_referencia")}
-                        style={{ alignSelf: "flex-start", padding: "7px 14px", borderRadius: 7, background: "var(--sig-mid)", border: "none", color: "white", fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 500, cursor: "pointer" }}
+                        style={{
+                          alignSelf: "flex-start",
+                          padding: "7px 14px",
+                          borderRadius: 7,
+                          background: "var(--sig-mid)",
+                          border: "none",
+                          color: "white",
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                          cursor: "pointer",
+                        }}
                       >
                         Usar como referencia visual
                       </button>
                     </div>
                   )}
                   {!fotoIncompatible && (
-                    <span
-                      style={{
-                        fontFamily: "'Space Mono', monospace",
-                        fontSize: "9px",
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        color: "var(--sig-stone)",
-                      }}
-                    >
-                      Selecciona las fotos a usar
-                    </span>
-                  )}
-                  {angulo.modoImagen === "foto_directa" && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#C07820", margin: "0 0 4px 0" }}>
-                      Mejor resultado con el producto centrado en la foto.
-                    </p>
-                  )}
-                  {!fotoIncompatible && (
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {imagenesNegocio.map((img) => {
-                        const seleccionada = imagenesSeleccionadas.includes(img.id);
-                        return (
-                          <div
-                            key={img.id}
-                            onClick={() => {
-                              if (imagenesSeleccionadas.includes(img.id)) {
-                                setImagenExpandida(img.url);
-                              } else {
-                                setImagenesSeleccionadas([img.id]);
-                              }
-                            }}
-                            style={{
-                              position: "relative",
-                              cursor: "pointer",
-                              borderRadius: 8,
-                              border: seleccionada
-                                ? "2px solid var(--sig-mid)"
-                                : "1.5px solid var(--sig-line-s)",
-                              overflow: "hidden",
-                              width: 64,
-                              height: 64,
-                              flexShrink: 0,
-                              transition: "border 0.15s",
-                            }}
-                          >
-                            <img
-                              src={img.url}
-                              alt={img.nombre || "Referencia"}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                display: "block",
+                    <>
+                      <span
+                        style={{
+                          fontFamily: "'Space Mono', monospace",
+                          fontSize: "9px",
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          color: "var(--sig-stone)",
+                        }}
+                      >
+                        Selecciona las fotos a usar
+                      </span>
+                      {angulo.modoImagen === "foto_directa" && (
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: "11px",
+                            color: "#C07820",
+                            margin: "0 0 4px 0",
+                          }}
+                        >
+                          Mejor resultado con el producto centrado en la foto.
+                        </p>
+                      )}
+                      <div
+                        style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+                      >
+                        {imagenesNegocio.map((img) => {
+                          const seleccionada = imagenesSeleccionadas.includes(
+                            img.id,
+                          );
+                          return (
+                            <div
+                              key={img.id}
+                              onClick={() => {
+                                if (seleccionada) {
+                                  setImagenesSeleccionadas([]);
+                                } else {
+                                  setImagenesSeleccionadas([img.id]);
+                                }
                               }}
-                            />
-                            {seleccionada && (
-                              <div
+                              style={{
+                                position: "relative",
+                                cursor: "pointer",
+                                borderRadius: 8,
+                                border: seleccionada
+                                  ? "2px solid var(--sig-mid)"
+                                  : "1.5px solid var(--sig-line-s)",
+                                overflow: "hidden",
+                                width: 64,
+                                height: 64,
+                                flexShrink: 0,
+                                transition: "border 0.15s",
+                              }}
+                            >
+                              <img
+                                src={img.url}
+                                alt={img.nombre || "Referencia"}
                                 style={{
-                                  position: "absolute",
-                                  inset: 0,
-                                  background: "rgba(61,171,142,0.18)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  display: "block",
                                 }}
-                              >
+                              />
+                              {seleccionada && (
                                 <div
                                   style={{
-                                    width: 20,
-                                    height: 20,
-                                    borderRadius: "50%",
-                                    background: "var(--sig-mid)",
+                                    position: "absolute",
+                                    inset: 0,
+                                    background: "rgba(61,171,142,0.18)",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                   }}
                                 >
-                                  <svg
-                                    width="10"
-                                    height="10"
-                                    viewBox="0 0 10 10"
-                                    fill="none"
+                                  <div
+                                    style={{
+                                      width: 20,
+                                      height: 20,
+                                      borderRadius: "50%",
+                                      background: "var(--sig-mid)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
                                   >
-                                    <path
-                                      d="M2 5l2 2 4-4"
-                                      stroke="white"
-                                      strokeWidth="1.5"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
+                                    <svg
+                                      width="10"
+                                      height="10"
+                                      viewBox="0 0 10 10"
+                                      fill="none"
+                                    >
+                                      <path
+                                        d="M2 5l2 2 4-4"
+                                        stroke="white"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {!fotoIncompatible && imagenesSeleccionadas.length === 0 && (
-                    <p
-                      style={{
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: "11px",
-                        color: "#C07820",
-                        margin: 0,
-                      }}
-                    >
-                      Selecciona al menos una foto para continuar.
-                    </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {imagenesSeleccionadas.length === 0 && (
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: "11px",
+                            color: "#C07820",
+                            margin: 0,
+                          }}
+                        >
+                          Selecciona al menos una foto para continuar.
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               )}
             </div>
           )}
 
-          {/* ── Tipo de generación ── */}
-          <div>
-            <span style={labelStyle}>¿Qué quieres generar?</span>
-            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-              {[
-                {
-                  id: "imagenes",
-                  label: "Imágenes",
-                  sub: "3 creativos · 1 crédito",
-                  bloqueado: false,
-                },
-                {
-                  id: "video",
-                  label: "Video Ads",
-                  sub: videoDisponible
-                    ? "3 videos · 1 crédito"
-                    : "Requiere plan Básico",
-                  bloqueado: !videoDisponible,
-                },
-                {
-                  id: "ambos",
-                  label: "Imágenes + Video",
-                  sub: "3 creativos + 3 videos · 2 créditos",
-                  bloqueado: !videoDisponible,
-                },
-              ].map((t) => {
-                const activo = angulo.tipoGeneracion === t.id && !t.bloqueado;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => !t.bloqueado && setA("tipoGeneracion", t.id)}
-                    style={opcionBtn(activo, t.bloqueado)}
-                  >
-                    <div style={puntito(activo)} />
-                    <div style={{ flex: 1 }}>
-                      <p style={opcionLabel(activo)}>{t.label}</p>
-                      <p style={opcionSub(activo)}>{t.sub}</p>
-                    </div>
-                    {t.bloqueado && <IconLock />}
-                  </button>
-                );
-              })}
-            </div>
-            {!videoDisponible && (
-              <p
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: "11px",
-                  color: "var(--sig-stone)",
-                  marginTop: 8,
-                }}
-              >
-                Video Ads disponible desde el plan Básico.
-              </p>
-            )}
-          </div>
-
-          {/* ── Resumen de créditos ── */}
+          {/* Resumen créditos */}
           <div
             style={{
               background: "var(--sig-aware-green)",
@@ -1785,12 +2132,9 @@ export default function CampanasScreen({
                 lineHeight: 1.7,
               }}
             >
-              Esta generación consume{" "}
-              <strong>
-                {angulo.tipoGeneracion === "ambos" ? "2 créditos" : "1 crédito"}
-              </strong>
+              Esta generación consume <strong>1 crédito</strong>
               {creditos &&
-                ` · Te quedan ${angulo.tipoGeneracion === "video" ? plan.videos - creditos.videos : plan.imagenesTotal - creditos.imagenes} de imágenes y ${plan.videos - creditos.videos} de video.`}
+                ` · Te quedan ${plan.imagenesTotal - creditos.imagenes} generaciones disponibles.`}
             </p>
           </div>
         </div>
@@ -1861,16 +2205,40 @@ export default function CampanasScreen({
           >
             Generar creativos
           </p>
-          <h1
+          <div
             style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "26px",
-              color: "var(--sig-forest)",
-              lineHeight: 1.1,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
             }}
           >
-            Nueva campaña
-          </h1>
+            <h1
+              style={{
+                fontFamily: "'DM Serif Display', serif",
+                fontSize: "26px",
+                color: "var(--sig-forest)",
+                lineHeight: 1.1,
+              }}
+            >
+              Nueva campaña
+            </h1>
+            {modoApp && !generando && !resultado && (
+              <button
+                onClick={limpiarTodo}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "12px",
+                  color: "var(--sig-stone)",
+                  cursor: "pointer",
+                  padding: "4px 0",
+                }}
+              >
+                ← Cambiar modo
+              </button>
+            )}
+          </div>
           <p
             style={{
               fontFamily: "'DM Sans', sans-serif",
@@ -1879,22 +2247,52 @@ export default function CampanasScreen({
               marginTop: 6,
             }}
           >
-            {negocio ? (
-              <>
-                Para{" "}
-                <strong style={{ color: "var(--sig-forest)" }}>
-                  {negocio.nombre}
-                </strong>{" "}
-                · {negocio.rubro}
-              </>
-            ) : (
-              "Creativos para cada momento del proceso de compra."
+            Para{" "}
+            <strong style={{ color: "var(--sig-forest)" }}>
+              {negocio.nombre}
+            </strong>{" "}
+            · {negocio.rubro}
+            {modoApp && (
+              <span
+                style={{
+                  marginLeft: 8,
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.08em",
+                  color: "var(--sig-mid)",
+                  textTransform: "uppercase",
+                }}
+              >
+                ·{" "}
+                {modoApp === "meta_ads"
+                  ? "Anuncios pagados"
+                  : "Contenido orgánico"}
+              </span>
             )}
           </p>
         </div>
 
-        {/* Layout dos columnas */}
-        {!generando && !resultado && (
+        {/* Paso 0 — Selección de modo */}
+        {!modoApp && !resultado && (
+          <div
+            style={{
+              background: "white",
+              border: "0.5px solid var(--sig-line)",
+              borderRadius: 12,
+              padding: 24,
+            }}
+          >
+            <SeleccionModo
+              onSeleccionar={(modo) => {
+                setModoApp(modo);
+                setPaso(0);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Wizard */}
+        {modoApp && !generando && !resultado && (
           <div
             style={{
               display: "flex",
@@ -1907,6 +2305,7 @@ export default function CampanasScreen({
               colapsada={esMobil ? burbujaColapsada : false}
               onToggle={() => setBurbujaColapsada((c) => !c)}
               esMobil={esMobil}
+              modoApp={modoApp}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
@@ -1919,7 +2318,6 @@ export default function CampanasScreen({
               >
                 <Progreso pasoActual={paso} />
                 <div style={{ minHeight: 220 }}>{renderPaso()}</div>
-                {/* Botones de navegación */}
                 <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
                   <button
                     onClick={anteriorPaso}
@@ -1968,7 +2366,7 @@ export default function CampanasScreen({
                   ) : (
                     <button
                       onClick={handleGenerar}
-                      disabled={!puedeGenerar}
+                      disabled={!tieneCredito.imagenes}
                       style={{
                         flex: 1,
                         height: "44px",
@@ -1977,12 +2375,14 @@ export default function CampanasScreen({
                         justifyContent: "center",
                         boxSizing: "border-box",
                         borderRadius: 7,
-                        cursor: puedeGenerar ? "pointer" : "not-allowed",
-                        background: puedeGenerar
+                        cursor: tieneCredito.imagenes
+                          ? "pointer"
+                          : "not-allowed",
+                        background: tieneCredito.imagenes
                           ? "var(--sig-forest)"
                           : "var(--sig-line)",
                         border: "none",
-                        color: puedeGenerar
+                        color: tieneCredito.imagenes
                           ? "var(--sig-warm)"
                           : "var(--sig-stone)",
                         fontFamily: "'DM Sans', sans-serif",
@@ -2009,10 +2409,7 @@ export default function CampanasScreen({
               padding: 24,
             }}
           >
-            <ProgresoCircular
-              progreso={progreso}
-              tipo={angulo.tipoGeneracion}
-            />
+            <ProgresoCircular progreso={progreso} />
             <div style={{ display: "flex", justifyContent: "center" }}>
               <button
                 onClick={handleCancelar}
@@ -2097,16 +2494,7 @@ export default function CampanasScreen({
                 Creativos generados
               </p>
               <button
-                onClick={() => {
-                  setResultado(null);
-                  setPaso(0);
-                  setAngulo({ promocionar: "", problema: "", diferencial: "", tipoGeneracion: "imagenes", ofertaActiva: false, ofertaDetalle: "", ofertaPrecio: "", formato: "feed_1_1", modoImagen: "ia_pura" });
-                  setImagenesSeleccionadas([]);
-                  localStorage.removeItem('sig_angulo');
-                  localStorage.removeItem('sig_paso');
-                  localStorage.removeItem('sig_resultado');
-                  localStorage.removeItem('sig_fotos');
-                }}
+                onClick={limpiarTodo}
                 style={{
                   padding: "8px 16px",
                   borderRadius: 7,
@@ -2122,22 +2510,24 @@ export default function CampanasScreen({
                 + Nueva campaña
               </button>
             </div>
-            {resultado.map((res, ri) => (
-              <div key={ri}>
-                {res.tipo === "video"
-                  ? (res.variaciones || []).map((v, i) => (
-                      <CardVideo key={i} variacion={v} onCopy={handleCopy} />
-                    ))
-                  : (res.variaciones || []).map((v, i) => (
-                      <CardImagen
-                        key={i}
-                        variacion={v}
-                        onCopy={handleCopy}
-                        onExpandir={setImagenExpandida}
-                      />
-                    ))}
-              </div>
-            ))}
+            {modoApp === "organico"
+              ? (resultado.variaciones || []).map((img, i) => (
+                  <CardOrganicoImagen
+                    key={i}
+                    imagen={img}
+                    variaciones={img.variaciones_texto || []}
+                    onCopy={handleCopy}
+                    onExpandir={setImagenExpandida}
+                  />
+                ))
+              : (resultado.variaciones || []).map((v, i) => (
+                  <CardImagen
+                    key={i}
+                    variacion={v}
+                    onCopy={handleCopy}
+                    onExpandir={setImagenExpandida}
+                  />
+                ))}
           </div>
         )}
       </div>
@@ -2148,7 +2538,6 @@ export default function CampanasScreen({
           onClose={() => setImagenExpandida(null)}
         />
       )}
-
       <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
     </div>
   );
