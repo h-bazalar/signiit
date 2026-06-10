@@ -46,7 +46,6 @@ export default async function handler(req, res) {
       throw new Error("Error leyendo negocio: " + negocioError.message);
 
     const negocioLogoUrl = negocio?.logo_url || "";
-    console.log("[Imagen] negocioLogoUrl:", negocioLogoUrl);
 
     const { data: campana, error: insertError } = await supabaseAdmin
       .from("campanas_generadas")
