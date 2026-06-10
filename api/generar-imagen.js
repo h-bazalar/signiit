@@ -11,7 +11,14 @@ export default async function handler(req, res) {
 
   try {
     const body = req.body;
-    const { negocioId, formato, modoImagen, imagenesReferencia, angulo } = body;
+    const {
+      negocioId,
+      formato,
+      modoImagen,
+      imagenesReferencia,
+      angulo,
+      modoApp,
+    } = body;
 
     if (!negocioId)
       return res.status(400).json({ error: "negocioId requerido" });
@@ -25,6 +32,8 @@ export default async function handler(req, res) {
     const modoFinal = modosValidos.includes(modoImagen)
       ? modoImagen
       : "ia_pura";
+
+    const modoAppFinal = modoApp === "organico" ? "organico" : "meta_ads";
 
     const urlsReferencia =
       modoFinal !== "ia_pura" && Array.isArray(imagenesReferencia)
@@ -78,9 +87,10 @@ export default async function handler(req, res) {
         clerkUserId: auth.userId,
         formato,
         modoImagen: modoFinal,
+        modoApp: modoAppFinal,
         imagenesReferencia: urlsReferencia,
         angulo,
-        negocioLogoUrl: negocioLogoUrl,
+        negocioLogoUrl,
       }),
       signal: AbortSignal.timeout(480000),
     });
