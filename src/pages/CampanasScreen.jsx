@@ -129,22 +129,15 @@ const IconAspect = ({ ratio }) => {
 
 // ── Icono señal radar (Meta Ads) ──────────────────────────────────────────────
 const IconRadar = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <path d="M7 20L11 13L14 17L17 10L21 20" stroke="var(--sig-forest)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    <rect x="4" y="20" width="20" height="1.5" rx="0.75" fill="var(--sig-forest)" opacity="0.25"/>
-    <circle cx="14" cy="7" r="2.5" stroke="var(--sig-mid)" strokeWidth="1.4" fill="none"/>
-    <path d="M11 7h-2M17 7h2M14 4.5V3M14 11.5V10" stroke="var(--sig-mid)" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--sig-forest)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 11l19-9-9 19-2-8-8-2z"/>
   </svg>
 );
 
 // ── Icono onda orgánico ───────────────────────────────────────────────────────
 const IconOnda = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <rect x="3" y="5" width="22" height="16" rx="3" stroke="var(--sig-forest)" strokeWidth="1.2" fill="none" opacity="0.3"/>
-    <circle cx="14" cy="13" r="4" stroke="var(--sig-forest)" strokeWidth="1.2" fill="none" opacity="0.5"/>
-    <circle cx="14" cy="13" r="1.5" fill="var(--sig-mid)"/>
-    <path d="M3 22l5-4h12l5 4" stroke="var(--sig-forest)" strokeWidth="1" strokeLinecap="round" opacity="0.25"/>
-    <path d="M14 9v-3M14 20v1.5" stroke="var(--sig-forest)" strokeWidth="1" strokeLinecap="round" opacity="0.2"/>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--sig-forest)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
   </svg>
 );
 
