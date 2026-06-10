@@ -1607,6 +1607,11 @@ export default function CampanasScreen({
                       Selecciona las fotos a usar
                     </span>
                   )}
+                  {angulo.modoImagen === "foto_directa" && (
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "var(--sig-stone)", margin: "0 0 4px 0", opacity: 0.7 }}>
+                      Mejor resultado con el producto centrado en la foto.
+                    </p>
+                  )}
                   {!fotoIncompatible && (
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {imagenesNegocio.map((img) => {
@@ -1699,11 +1704,6 @@ export default function CampanasScreen({
                       }}
                     >
                       Selecciona al menos una foto para continuar.
-                    </p>
-                  )}
-                  {!fotoIncompatible && angulo.modoImagen === "foto_directa" && imagenesSeleccionadas.length > 0 && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "var(--sig-stone)", margin: 0, opacity: 0.7 }}>
-                      Mejor resultado con el producto centrado en la foto.
                     </p>
                   )}
                 </div>
