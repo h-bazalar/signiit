@@ -1605,7 +1605,7 @@ export default function CampanasScreen({
                     </span>
                   )}
                   {angulo.modoImagen === "foto_directa" && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "var(--sig-stone)", margin: "0 0 4px 0", opacity: 0.7 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#C07820", margin: "0 0 4px 0" }}>
                       Mejor resultado con el producto centrado en la foto.
                     </p>
                   )}
