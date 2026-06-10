@@ -1644,7 +1644,7 @@ export default function CampanasScreen({
                             key={img.id}
                             onClick={() => {
                               if (imagenesSeleccionadas.includes(img.id)) {
-                                setImagenExpandida(img.url);
+                                setImagenesSeleccionadas([]);
                               } else {
                                 setImagenesSeleccionadas([img.id]);
                               }
