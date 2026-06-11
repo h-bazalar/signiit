@@ -247,7 +247,7 @@ function AppWithLayout() {
         />
         <Route
           path="/planes"
-          element={<PlanesScreen supabase={supabase} planActual={planActual} />}
+          element={<PlanesScreen planActual={planActual} creditos={stats ? { imagenes: stats.generaciones_estaticos ?? 0 } : null} />}
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

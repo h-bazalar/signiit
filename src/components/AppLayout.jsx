@@ -5,7 +5,7 @@ import SigniitLogo from './SigniitLogo'
 
 const NAV_ITEMS = [
   { path: '/',         label: 'Inicio',   icon: '⬡' },
-  { path: '/negocios', label: 'Negocios', icon: '◎' },
+  { path: '/negocios', label: 'Mi negocio', icon: '◎' },
   { path: '/campanas', label: 'Campañas', icon: '◈' },
   { path: '/analisis', label: 'Análisis', icon: '◇' },
   { path: '/planes',   label: 'Planes',   icon: '◻' },
