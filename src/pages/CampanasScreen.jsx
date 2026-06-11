@@ -129,16 +129,34 @@ const IconAspect = ({ ratio }) => {
 
 // ── Icono señal radar (Meta Ads) ──────────────────────────────────────────────
 const IconRadar = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--sig-forest)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
-    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="var(--sig-forest)"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
   </svg>
 );
 
 // ── Icono onda orgánico ───────────────────────────────────────────────────────
 const IconOnda = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--sig-forest)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="var(--sig-forest)"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
   </svg>
 );
 
@@ -167,19 +185,19 @@ const AWARENESS_LABELS = {
 // ── Estilos de gancho orgánico ────────────────────────────────────────────────
 const GANCHO_LABELS = {
   pregunta: {
-    label: "Pregunta / Problema",
+    label: "Una pregunta que conecta",
     color: "var(--sig-aware-blue)",
     text: "var(--sig-aware-blue-text)",
     border: "var(--sig-aware-blue-border)",
   },
   declaracion: {
-    label: "Declaración bold",
+    label: "Una afirmación directa",
     color: "var(--sig-aware-green)",
     text: "var(--sig-aware-green-text)",
     border: "var(--sig-aware-green-border)",
   },
   cta: {
-    label: "CTA directo",
+    label: "Un llamado a actuar",
     color: "var(--sig-aware-amber)",
     text: "var(--sig-aware-amber-text)",
     border: "var(--sig-aware-amber-border)",
@@ -374,7 +392,7 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
             }}
           >
             {esOrganico
-              ? "Contenido que para el scroll y genera reacción."
+              ? "Contenido que detiene el scroll y genera reacción."
               : "El creativo que convierte sabe exactamente a quién le habla."}
           </p>
           <p
@@ -394,7 +412,7 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
                 </strong>{" "}
                 — cada una con{" "}
                 <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
-                  3 variaciones de texto
+                  3 estilos de gancho
                 </strong>
                 . 9 opciones para elegir.
               </>
@@ -425,7 +443,7 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
                   {
                     bold: "3 estilos de gancho",
                     resto:
-                      " — Pregunta, Declaración y CTA. Sube los 3 o elige el que más te guste.",
+                      " — Una pregunta que conecta, una afirmación directa y un llamado a actuar. Sube los 3 o elige el que más te guste.",
                   },
                   {
                     bold: "Sé específico",
@@ -660,7 +678,6 @@ function CardImagen({ variacion, onCopy, onExpandir }) {
 
 // ── Card resultado Orgánico ───────────────────────────────────────────────────
 function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir }) {
-  // imagen: { foto, gancho_style } — variaciones: [{ gancho_style, texto_overlay, caption }]
   const [varActiva, setVarActiva] = useState(0);
   const varActual = variaciones[varActiva];
   const gancho =
@@ -1120,6 +1137,52 @@ function SeleccionModo({ onSeleccionar }) {
   );
 }
 
+// ── Logo negocio (mismo tratamiento que NegociosScreen) ───────────────────────
+function LogoNegocio({ negocio, size = 32 }) {
+  if (negocio.logo_url) {
+    return (
+      <img
+        src={negocio.logo_url}
+        alt={negocio.nombre}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          objectFit: "cover",
+          border: "0.5px solid var(--sig-line-s)",
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: "var(--sig-warm)",
+        border: "0.5px solid var(--sig-line-s)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'DM Serif Display', serif",
+          fontSize: size * 0.4,
+          color: "var(--sig-forest)",
+          lineHeight: 1,
+        }}
+      >
+        {negocio.nombre?.charAt(0)?.toUpperCase() || "N"}
+      </span>
+    </div>
+  );
+}
+
 // ── Pantalla principal ────────────────────────────────────────────────────────
 export default function CampanasScreen({
   supabase,
@@ -1143,7 +1206,6 @@ export default function CampanasScreen({
     imagenesNegocioProp ?? [],
   );
 
-  // Modo app: null = selección, "meta_ads" | "organico"
   const [modoApp, setModoApp] = useState(() => {
     try {
       return localStorage.getItem("sig_modo") || null;
@@ -1257,7 +1319,6 @@ export default function CampanasScreen({
 
   const setA = (campo, valor) => setAngulo((a) => ({ ...a, [campo]: valor }));
 
-  // Detecta incompatibilidad foto_directa + stories_9_16
   useEffect(() => {
     if (
       angulo.modoImagen !== "foto_directa" ||
@@ -1555,7 +1616,6 @@ export default function CampanasScreen({
     background: activo ? "var(--sig-mint)" : "var(--sig-line-s)",
   });
 
-  // ── Formatos según modo ───────────────────────────────────────────────────────
   const formatosDisponibles =
     modoApp === "meta_ads"
       ? [
@@ -1593,7 +1653,6 @@ export default function CampanasScreen({
           },
         ];
 
-  // ── Label paso 1 según modo ───────────────────────────────────────────────────
   const labelPorQue =
     modoApp === "organico"
       ? "¿Qué quieres destacar en este contenido?"
@@ -1609,7 +1668,6 @@ export default function CampanasScreen({
       ? "Este será el eje del mensaje visual. Cuanto más concreto, más impacto."
       : 'Evita "calidad y precio". Si tu diferencial es genérico, tu creativo también lo será.';
 
-  // ── Render de pasos ───────────────────────────────────────────────────────────
   const renderPaso = () => {
     if (paso === 0)
       return (
@@ -1814,7 +1872,6 @@ export default function CampanasScreen({
     if (paso === 3)
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Formato */}
           <div>
             <span style={labelStyle}>Formato</span>
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -1845,7 +1902,6 @@ export default function CampanasScreen({
             </div>
           </div>
 
-          {/* Modo imagen */}
           {tieneImagenes && (
             <div>
               <span style={labelStyle}>Cómo usar tus fotos de producto</span>
@@ -2081,7 +2137,6 @@ export default function CampanasScreen({
             </div>
           )}
 
-          {/* Resumen créditos */}
           <div
             style={{
               background: "var(--sig-aware-green)",
@@ -2149,7 +2204,7 @@ export default function CampanasScreen({
             }}
           >
             Primero debes registrar un negocio en la sección{" "}
-            <strong>Mis negocios</strong> para poder generar creativos.
+            <strong>Mi negocio</strong> para poder generar creativos.
           </div>
         </div>
       </div>
@@ -2207,37 +2262,47 @@ export default function CampanasScreen({
               </button>
             )}
           </div>
-          <p
+          {/* Negocio con logo */}
+          <div
             style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "13px",
-              color: "var(--sig-stone)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
               marginTop: 6,
             }}
           >
-            Para{" "}
-            <strong style={{ color: "var(--sig-forest)" }}>
-              {negocio.nombre}
-            </strong>{" "}
-            · {negocio.rubro}
-            {modoApp && (
-              <span
-                style={{
-                  marginLeft: 8,
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.08em",
-                  color: "var(--sig-mid)",
-                  textTransform: "uppercase",
-                }}
-              >
-                ·{" "}
-                {modoApp === "meta_ads"
-                  ? "Anuncios pagados"
-                  : "Contenido orgánico"}
-              </span>
-            )}
-          </p>
+            <LogoNegocio negocio={negocio} size={24} />
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "13px",
+                color: "var(--sig-stone)",
+                margin: 0,
+              }}
+            >
+              <strong style={{ color: "var(--sig-forest)" }}>
+                {negocio.nombre}
+              </strong>{" "}
+              · {negocio.rubro}
+              {modoApp && (
+                <span
+                  style={{
+                    marginLeft: 8,
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "9px",
+                    letterSpacing: "0.08em",
+                    color: "var(--sig-mid)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  ·{" "}
+                  {modoApp === "meta_ads"
+                    ? "Anuncios pagados"
+                    : "Contenido orgánico"}
+                </span>
+              )}
+            </p>
+          </div>
         </div>
 
         {/* Paso 0 — Selección de modo */}
