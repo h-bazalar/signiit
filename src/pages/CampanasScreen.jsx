@@ -422,7 +422,8 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
                 <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
                   3 creativos
                 </strong>{" "}
-                — uno para cada momento del proceso de compra de tu cliente. Los 3 juntos forman una{" "}
+                — uno para cada momento del proceso de compra de tu cliente. Los
+                3 juntos forman una{" "}
                 <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
                   campaña completa
                 </strong>
