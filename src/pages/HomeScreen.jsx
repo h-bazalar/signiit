@@ -84,12 +84,6 @@ export default function HomeScreen({
               color="#3DAB8E"
             />
             <StatCard
-              label="Videos generados"
-              usado={stats?.generaciones_video || 0}
-              limite={limites.videos}
-              color="#3DAB8E"
-            />
-            <StatCard
               label="Análisis realizados"
               usado={stats?.analisis_realizados || 0}
               limite={limites.analisis}

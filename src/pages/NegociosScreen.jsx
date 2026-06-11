@@ -356,7 +356,10 @@ function UploadLogo({ negocioId, logoUrl, onLogoChange, getToken }) {
     const file = e.target.files[0];
     if (!file) return;
     const errorValidacion = validarArchivo(file);
-    if (errorValidacion) { setError(errorValidacion); return; }
+    if (errorValidacion) {
+      setError(errorValidacion);
+      return;
+    }
     setError("");
     setSubiendo(true);
     try {
@@ -364,11 +367,19 @@ function UploadLogo({ negocioId, logoUrl, onLogoChange, getToken }) {
       // Paso 1: obtener presigned URL
       const resUrl = await fetch("/api/upload-url", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ tipo: "logo", negocioId, contentType: file.type }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo: "logo",
+          negocioId,
+          contentType: file.type,
+        }),
       });
       const urlData = await resUrl.json();
-      if (!resUrl.ok) throw new Error(urlData.error || "Error obteniendo URL de subida");
+      if (!resUrl.ok)
+        throw new Error(urlData.error || "Error obteniendo URL de subida");
 
       // Paso 2: PUT directo a MinIO
       const resPut = await fetch(urlData.presignedUrl, {
@@ -381,11 +392,19 @@ function UploadLogo({ negocioId, logoUrl, onLogoChange, getToken }) {
       // Paso 3: confirmar en Supabase
       const resConfirm = await fetch("/api/upload-confirm", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ tipo: "logo", negocioId, finalUrl: urlData.finalUrl }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo: "logo",
+          negocioId,
+          finalUrl: urlData.finalUrl,
+        }),
       });
       const confirmData = await resConfirm.json();
-      if (!resConfirm.ok) throw new Error(confirmData.error || "Error confirmando subida");
+      if (!resConfirm.ok)
+        throw new Error(confirmData.error || "Error confirmando subida");
 
       onLogoChange(urlData.finalUrl);
     } catch (err) {
@@ -578,7 +597,10 @@ function UploadImagenesReferencia({
     const file = e.target.files[0];
     if (!file) return;
     const errorValidacion = validarArchivo(file);
-    if (errorValidacion) { setError(errorValidacion); return; }
+    if (errorValidacion) {
+      setError(errorValidacion);
+      return;
+    }
     setError("");
     setSubiendo(true);
     try {
@@ -588,11 +610,21 @@ function UploadImagenesReferencia({
       // Paso 1: obtener presigned URL
       const resUrl = await fetch("/api/upload-url", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ tipo: "imagen_referencia", negocioId, imagenId, contentType: file.type, nombre: file.name }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo: "imagen_referencia",
+          negocioId,
+          imagenId,
+          contentType: file.type,
+          nombre: file.name,
+        }),
       });
       const urlData = await resUrl.json();
-      if (!resUrl.ok) throw new Error(urlData.error || "Error obteniendo URL de subida");
+      if (!resUrl.ok)
+        throw new Error(urlData.error || "Error obteniendo URL de subida");
 
       // Paso 2: PUT directo a MinIO
       const resPut = await fetch(urlData.presignedUrl, {
@@ -605,13 +637,26 @@ function UploadImagenesReferencia({
       // Paso 3: confirmar en Supabase
       const resConfirm = await fetch("/api/upload-confirm", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ tipo: "imagen_referencia", negocioId, imagenId, finalUrl: urlData.finalUrl, nombre: file.name }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo: "imagen_referencia",
+          negocioId,
+          imagenId,
+          finalUrl: urlData.finalUrl,
+          nombre: file.name,
+        }),
       });
       const confirmData = await resConfirm.json();
-      if (!resConfirm.ok) throw new Error(confirmData.error || "Error confirmando subida");
+      if (!resConfirm.ok)
+        throw new Error(confirmData.error || "Error confirmando subida");
 
-      onImagenesChange([...imagenes, { id: imagenId, url: urlData.finalUrl, nombre: file.name }]);
+      onImagenesChange([
+        ...imagenes,
+        { id: imagenId, url: urlData.finalUrl, nombre: file.name },
+      ]);
     } catch (err) {
       setError(err.message || "Error subiendo la imagen");
     } finally {
@@ -1623,7 +1668,12 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken }) {
 }
 
 // ── Pantalla principal ────────────────────────────────────────────────────────
-export default function NegociosScreen({ supabase, planActual, negociosIniciales, onNegociosChange }) {
+export default function NegociosScreen({
+  supabase,
+  planActual,
+  negociosIniciales,
+  onNegociosChange,
+}) {
   const { user } = useUser();
   const { getToken } = useAuth();
   const [negocios, setNegocios] = useState(negociosIniciales ?? []);
@@ -1687,17 +1737,15 @@ export default function NegociosScreen({ supabase, planActual, negociosIniciales
         if (error) throw error;
         mostrarToast("Negocio actualizado.");
       } else {
-        const { error } = await client
-          .from("negocios")
-          .insert({
-            usuario_id: user.id,
-            nombre: formData.nombre,
-            rubro: formData.rubro,
-            producto: formData.producto,
-            publico: formData.publico,
-            diferencial: formData.diferencial,
-            tono: formData.tono,
-          });
+        const { error } = await client.from("negocios").insert({
+          usuario_id: user.id,
+          nombre: formData.nombre,
+          rubro: formData.rubro,
+          producto: formData.producto,
+          publico: formData.publico,
+          diferencial: formData.diferencial,
+          tono: formData.tono,
+        });
         if (error) throw error;
         mostrarToast(
           "Negocio creado. Ahora puedes subir tu logo e imágenes de referencia.",
@@ -1752,7 +1800,7 @@ export default function NegociosScreen({ supabase, planActual, negociosIniciales
     setNegocioEditando(null);
   };
 
-  const getTokenApi = () => getToken({ template: 'supabase' });
+  const getTokenApi = () => getToken({ template: "supabase" });
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
@@ -1799,7 +1847,7 @@ export default function NegociosScreen({ supabase, planActual, negociosIniciales
                 marginBottom: "6px",
               }}
             >
-              Mis negocios
+              Mi negocio
             </p>
             <h1
               style={{
@@ -1809,7 +1857,11 @@ export default function NegociosScreen({ supabase, planActual, negociosIniciales
                 lineHeight: 1.1,
               }}
             >
-              {cargando ? "" : negocios.length === 0 ? "Empieza aquí" : "Tus negocios"}
+              {cargando
+                ? ""
+                : negocios.length === 0
+                  ? "Empieza aquí"
+                  : "Tu negocio"}
             </h1>
             <p
               style={{
@@ -1820,9 +1872,11 @@ export default function NegociosScreen({ supabase, planActual, negociosIniciales
                 lineHeight: "1.5",
               }}
             >
-              {cargando ? ' ' : negocios.length === 0
-                ? 'Registra tu negocio para generar creativos con intención.'
-                : `${negocios.length} de ${limiteNegocios} negocios en tu plan ${plan.nombre}.`}
+              {cargando
+                ? " "
+                : negocios.length === 0
+                  ? "Registra tu negocio para generar creativos con intención."
+                  : `${negocios.length} de ${limiteNegocios} negocios en tu plan ${plan.nombre}.`}
             </p>
           </div>
           <div style={{ position: "relative" }}>
