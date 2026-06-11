@@ -131,7 +131,6 @@ export default function PlanesScreen({ planActual, creditos }) {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 16,
-            maxWidth: 680,
           }}
         >
           {PLANES_INFO.map((plan) => {
@@ -411,7 +410,6 @@ export default function PlanesScreen({ planActual, creditos }) {
             background: "white",
             border: "0.5px solid var(--sig-line)",
             borderRadius: 10,
-            maxWidth: 680,
           }}
         >
           <p

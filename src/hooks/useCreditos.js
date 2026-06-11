@@ -42,9 +42,9 @@ export function useCreditos(supabase) {
   const limites = PLANES[plan] ?? PLANES.free;
 
   const tieneCredito = {
-    imagenes: creditos ? creditos.imagenes < limites.imagenesTotal : false,
-    videos: creditos ? creditos.videos < limites.videos : false,
-    analisis: creditos ? creditos.analisis < limites.analisis : false,
+    imagenes: creditos !== null ? creditos.imagenes < limites.imagenesTotal : true,
+    videos: creditos !== null ? creditos.videos < limites.videos : false,
+    analisis: creditos !== null ? creditos.analisis < limites.analisis : false,
   };
 
   return {
