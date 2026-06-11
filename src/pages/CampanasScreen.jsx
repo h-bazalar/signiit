@@ -422,11 +422,11 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
                 <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
                   3 creativos
                 </strong>{" "}
-                — uno por tipo de cliente.{" "}
+                — uno para cada momento del proceso de compra de tu cliente. Los 3 juntos forman una{" "}
                 <strong style={{ color: "var(--sig-forest)", fontWeight: 500 }}>
-                  Un solo producto
-                </strong>{" "}
-                por campaña.
+                  campaña completa
+                </strong>
+                .
               </>
             )}
           </p>
@@ -460,9 +460,9 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
                     resto: " — genera una campaña para cada uno.",
                   },
                   {
-                    bold: "Oferta activa",
+                    bold: "Los 3 van juntos",
                     resto:
-                      " — actívala en el paso 3. Cambia el creativo de cierre.",
+                      " — no elijas uno. La campaña funciona porque habla al cliente antes, durante y cuando está listo para comprar.",
                   },
                   {
                     bold: "Sé específico",
