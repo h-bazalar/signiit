@@ -216,6 +216,7 @@ function AppWithLayout() {
               stats={stats}
               historial={historial}
               onRefetch={refetchHome}
+              negociosCount={negocios.length}
             />
           }
         />

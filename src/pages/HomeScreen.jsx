@@ -47,6 +47,7 @@ export default function HomeScreen({
   stats,
   historial,
   onRefetch,
+  negociosCount,
 }) {
   const { user } = useUser();
   const [hoveredRow, setHoveredRow] = useState(null);
@@ -132,7 +133,7 @@ export default function HomeScreen({
             />
             <StatCard
               label="Negocios activos"
-              usado={stats?.negocios_count || 0}
+              usado={negociosCount ?? 0}
               limite={limites.negocios}
               color="#3DAB8E"
             />
