@@ -201,6 +201,7 @@ export default function HomeScreen({
   const navigate = useNavigate();
   const [expandidoId, setExpandidoId] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
+  const [verTodosAnteriores, setVerTodosAnteriores] = useState(false);
 
   const limites = PLANES[planActual] || PLANES.free;
   const nombre = user?.firstName || user?.fullName?.split(" ")[0] || "Usuario";
@@ -214,6 +215,7 @@ export default function HomeScreen({
   const anteriores = historialListo.filter(
     (item) => !esReciente(item.created_at),
   );
+  const listaAnteriores = verTodosAnteriores ? anteriores : anteriores.slice(0, 3);
 
   const toggleExpandido = (id) => {
     setExpandidoId((prev) => (prev === id ? null : id));
@@ -603,7 +605,7 @@ export default function HomeScreen({
                     Anteriores
                   </span>
                 </div>
-                {anteriores.map((item, i) => (
+                {listaAnteriores.map((item, i) => (
                   <div
                     key={item.id}
                     style={{
@@ -612,7 +614,7 @@ export default function HomeScreen({
                       justifyContent: "space-between",
                       padding: "10px 20px",
                       borderBottom:
-                        i < anteriores.length - 1
+                        i < listaAnteriores.length - 1
                           ? "0.5px solid rgba(15,74,56,0.08)"
                           : "none",
                     }}
@@ -670,6 +672,42 @@ export default function HomeScreen({
                     </span>
                   </div>
                 ))}
+                {anteriores.length > 3 && !verTodosAnteriores && (
+                  <button
+                    onClick={() => setVerTodosAnteriores(true)}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "10px 20px",
+                      width: "100%",
+                      textAlign: "left",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "12px",
+                      color: "var(--sig-mid)",
+                    }}
+                  >
+                    Ver todos los anteriores ({anteriores.length - 3} más) →
+                  </button>
+                )}
+                {verTodosAnteriores && anteriores.length > 3 && (
+                  <button
+                    onClick={() => setVerTodosAnteriores(false)}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "10px 20px",
+                      width: "100%",
+                      textAlign: "left",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "12px",
+                      color: "var(--sig-mid)",
+                    }}
+                  >
+                    ← Mostrar menos
+                  </button>
+                )}
               </div>
             )}
           </>
