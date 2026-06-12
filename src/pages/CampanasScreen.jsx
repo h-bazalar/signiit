@@ -1545,8 +1545,10 @@ export default function CampanasScreen({
       setTimeout(() => setProgreso(0), 800);
       setResultado(res);
       campanaIdRef.current = null;
-      await refetchCreditos();
-      setTimeout(() => addToast("¡Creativos generados con éxito!", "success"), 400);
+      setTimeout(async () => {
+        await refetchCreditos();
+        addToast("¡Creativos generados con éxito!", "success");
+      }, 400);
     } catch (err) {
       if (err.name === "AbortError") return;
       setErrorGen(err.message || "Ocurrió un error. Intenta de nuevo.");
@@ -2567,9 +2569,26 @@ export default function CampanasScreen({
                 + Nueva campaña
               </button>
             </div>
-            <div style={{ background: "var(--sig-aware-green)", border: "0.5px solid var(--sig-aware-green-border)", borderRadius: 8, padding: "10px 16px" }}>
-              <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.06em", color: "var(--sig-aware-green-text)", margin: 0, lineHeight: 1.7 }}>
-                Tus creativos están disponibles por <strong>24 horas</strong> — descárgalos antes de que expiren.
+            <div
+              style={{
+                background: "var(--sig-aware-green)",
+                border: "0.5px solid var(--sig-aware-green-border)",
+                borderRadius: 8,
+                padding: "10px 16px",
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.06em",
+                  color: "var(--sig-aware-green-text)",
+                  margin: 0,
+                  lineHeight: 1.7,
+                }}
+              >
+                Tus creativos están disponibles por <strong>24 horas</strong> —
+                descárgalos antes de que expiren.
               </p>
             </div>
             {modoApp === "organico"
