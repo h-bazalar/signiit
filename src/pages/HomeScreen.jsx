@@ -611,33 +611,32 @@ function StatCard({ label, usado, limite, color, planActual }) {
       </div>
       <div
         style={{
-          fontFamily: "'DM Serif Display', serif",
-          fontSize: "28px",
-          color: "#0F4A38",
-          marginBottom: "2px",
-          lineHeight: 1,
-        }}
-      >
-        {usado}
-        <span
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: "14px",
-            color: "#8C8880",
-            fontWeight: "400",
-          }}
-        >
-          /{limite}
-        </span>
-      </div>
-      <div
-        style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "11px",
-          color: "#8C8880",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           marginBottom: "12px",
         }}
       >
+        <div
+          style={{
+            fontFamily: "'DM Serif Display', serif",
+            fontSize: "28px",
+            color: "#0F4A38",
+            lineHeight: 1,
+          }}
+        >
+          {usado}
+          <span
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "14px",
+              color: "#8C8880",
+              fontWeight: "400",
+            }}
+          >
+            /{limite}
+          </span>
+        </div>
         {limite === 0 ? (
           <button
             onClick={() => navigate("/planes")}
@@ -659,7 +658,15 @@ function StatCard({ label, usado, limite, color, planActual }) {
             Activar VIP →
           </button>
         ) : (
-          `${Math.max(0, limite - usado)} disponibles`
+          <span
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "11px",
+              color: "#8C8880",
+            }}
+          >
+            {Math.max(0, limite - usado)} disponibles
+          </span>
         )}
       </div>
       <div
