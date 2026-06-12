@@ -1287,6 +1287,7 @@ export default function CampanasScreen({
   const pollingRef = useRef(null);
   const progresoRef = useRef(null);
   const abortRef = useRef(null);
+  const campanaIdRef = useRef(null);
 
   useEffect(() => {
     const check = () => setEsMobil(window.innerWidth < 640);
@@ -1524,6 +1525,7 @@ export default function CampanasScreen({
     if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
     const { campanaId } = await res.json();
     if (!campanaId) throw new Error("No se recibió ID de campaña");
+    campanaIdRef.current = campanaId;
     return await iniciarPolling(campanaId, "imagenes");
   };
 
@@ -1542,6 +1544,7 @@ export default function CampanasScreen({
       setProgreso(100);
       setTimeout(() => setProgreso(0), 800);
       setResultado(res);
+      campanaIdRef.current = null;
       await refetchCreditos();
       setTimeout(() => addToast("¡Creativos generados con éxito!", "success"), 400);
     } catch (err) {
@@ -1555,13 +1558,26 @@ export default function CampanasScreen({
     }
   };
 
-  const handleCancelar = () => {
+  const handleCancelar = async () => {
     clearInterval(progresoRef.current);
     clearInterval(pollingRef.current);
     if (abortRef.current) abortRef.current.abort();
     setGenerando(false);
     setProgreso(0);
     addToast("Generación cancelada.", "info");
+    if (campanaIdRef.current) {
+      try {
+        const token = await getToken({ template: "supabase" });
+        const clienteFresco = createSupabaseClient(token);
+        await clienteFresco
+          .from("campanas_generadas")
+          .update({ estado: "cancelado" })
+          .eq("id", campanaIdRef.current);
+        campanaIdRef.current = null;
+      } catch (e) {
+        console.error("Error marcando cancelacion:", e);
+      }
+    }
   };
 
   const inputStyle = {
