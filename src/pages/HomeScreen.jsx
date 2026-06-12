@@ -1,8 +1,45 @@
-import { useEffect } from "react";
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { useCreditos } from "../hooks/useCreditos";
 import { PLANES } from "../utils/constants";
+
+const VEINTE_CUATRO_HORAS = 24 * 60 * 60 * 1000;
+
+function esReciente(created_at) {
+  return Date.now() - new Date(created_at).getTime() < VEINTE_CUATRO_HORAS;
+}
+
+function formatearFecha(created_at) {
+  return new Date(created_at).toLocaleDateString("es-PE", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function obtenerFoto(item) {
+  try {
+    const vars = item.resultado?.variaciones;
+    if (Array.isArray(vars) && vars.length > 0) return vars[0].foto || null;
+  } catch {}
+  return null;
+}
+
+function etiquetaModo(item) {
+  const modo = item.resultado?.modoApp;
+  const formato = item.formato;
+  const modoLabel = modo === "organico" ? "Orgánico" : "Meta Ads";
+  const formatoLabel =
+    formato === "feed_1_1"
+      ? "1:1"
+      : formato === "feed_4_5"
+        ? "4:5"
+        : formato === "stories_9_16"
+          ? "9:16"
+          : formato;
+  return `${modoLabel} · ${formatoLabel}`;
+}
 
 export default function HomeScreen({
   supabase,
@@ -12,17 +49,21 @@ export default function HomeScreen({
   onRefetch,
 }) {
   const { user } = useUser();
-  const { ejecutarResetsCreditos } = useCreditos(supabase);
   const [hoveredRow, setHoveredRow] = useState(null);
-
-  useEffect(() => {
-    if (user && supabase) {
-      ejecutarResetsCreditos().catch(() => {});
-    }
-  }, [user, supabase]);
+  const [imagenExpandida, setImagenExpandida] = useState(null);
 
   const limites = PLANES[planActual] || PLANES.free;
   const nombre = user?.firstName || user?.fullName?.split(" ")[0] || "Usuario";
+
+  const historialListo = (historial || []).filter(
+    (item) => item.estado === "listo",
+  );
+  const recientes = historialListo.filter((item) =>
+    esReciente(item.created_at),
+  );
+  const anteriores = historialListo.filter(
+    (item) => !esReciente(item.created_at),
+  );
 
   return (
     <div style={{ maxWidth: "900px" }}>
@@ -72,7 +113,7 @@ export default function HomeScreen({
         }}
       >
         {!stats ? (
-          Array(4)
+          Array(3)
             .fill(0)
             .map((_, i) => <SkeletonCard key={i} />)
         ) : (
@@ -108,6 +149,7 @@ export default function HomeScreen({
           overflow: "hidden",
         }}
       >
+        {/* Header historial */}
         <div
           style={{
             padding: "16px 20px",
@@ -127,18 +169,26 @@ export default function HomeScreen({
           >
             Historial reciente
           </span>
-          <span
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "12px",
-              color: "#3DAB8E",
-              cursor: "pointer",
-            }}
-          >
-            Ver todo →
-          </span>
+          {recientes.length > 0 && (
+            <span
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "9px",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "#3DAB8E",
+                background: "#E4F5EF",
+                padding: "3px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              {recientes.length} disponible{recientes.length > 1 ? "s" : ""} ·
+              expira en 24h
+            </span>
+          )}
         </div>
 
+        {/* Loading */}
         {!stats ? (
           <div
             style={{
@@ -154,7 +204,7 @@ export default function HomeScreen({
                 <div
                   key={i}
                   style={{
-                    height: "40px",
+                    height: "64px",
                     background: "#F7F5F0",
                     borderRadius: "6px",
                     animation: "pulse 1.5s ease-in-out infinite",
@@ -162,7 +212,7 @@ export default function HomeScreen({
                 />
               ))}
           </div>
-        ) : historial.length === 0 ? (
+        ) : historialListo.length === 0 ? (
           <div style={{ padding: "48px 20px", textAlign: "center" }}>
             <p
               style={{
@@ -181,106 +231,279 @@ export default function HomeScreen({
                 color: "#8C8880",
               }}
             >
-              Ve a Negocios para registrar tu primer negocio y generar
-              creativos.
+              Ve a Campañas para generar tus primeros creativos.
             </p>
           </div>
         ) : (
-          historial.map((item, i) => (
-            <div
-              key={item.id}
-              onMouseEnter={() => setHoveredRow(item.id)}
-              onMouseLeave={() => setHoveredRow(null)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 20px",
-                borderBottom:
-                  i < historial.length - 1
-                    ? "0.5px solid rgba(15,74,56,0.08)"
-                    : "none",
-                background: hoveredRow === item.id ? "#F7F5F0" : "transparent",
-                transition: "background 0.1s ease",
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "12px" }}
-              >
+          <>
+            {/* Recientes — con imagen */}
+            {recientes.length > 0 && (
+              <div>
                 <div
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "14px",
-                    background: item.tipo === "imagen" ? "#E4F5EF" : "#EBF0FB",
+                    padding: "8px 20px",
+                    background: "#F7F5F0",
+                    borderBottom: "0.5px solid rgba(15,74,56,0.08)",
                   }}
                 >
-                  {item.tipo === "imagen" ? "🖼️" : "🎬"}
-                </div>
-                <div>
-                  <div
+                  <span
                     style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      color: "#0F4A38",
-                    }}
-                  >
-                    {item.tipo === "imagen"
-                      ? "Creativos de imagen"
-                      : "Video Ad"}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "11px",
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "8px",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
                       color: "#8C8880",
                     }}
                   >
-                    {new Date(item.created_at).toLocaleDateString("es-PE", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </div>
+                    Últimas 24 horas
+                  </span>
                 </div>
+                {recientes.map((item, i) => {
+                  const foto = obtenerFoto(item);
+                  return (
+                    <div
+                      key={item.id}
+                      onMouseEnter={() => setHoveredRow(item.id)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        padding: "12px 20px",
+                        borderBottom:
+                          i < recientes.length - 1 || anteriores.length > 0
+                            ? "0.5px solid rgba(15,74,56,0.08)"
+                            : "none",
+                        background:
+                          hoveredRow === item.id ? "#F7F5F0" : "transparent",
+                        transition: "background 0.1s ease",
+                      }}
+                    >
+                      {/* Miniatura */}
+                      {foto ? (
+                        <div
+                          onClick={() => setImagenExpandida(foto)}
+                          style={{
+                            width: "52px",
+                            height: "52px",
+                            borderRadius: "8px",
+                            overflow: "hidden",
+                            border: "0.5px solid rgba(15,74,56,0.12)",
+                            flexShrink: 0,
+                            cursor: "pointer",
+                          }}
+                        >
+                          <img
+                            src={foto}
+                            alt="Creativo"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            width: "52px",
+                            height: "52px",
+                            borderRadius: "8px",
+                            background: "#E4F5EF",
+                            flexShrink: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "18px",
+                          }}
+                        >
+                          🖼️
+                        </div>
+                      )}
+
+                      {/* Info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: "500",
+                            color: "#0F4A38",
+                            marginBottom: "3px",
+                          }}
+                        >
+                          Creativos generados
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "'Space Mono', monospace",
+                            fontSize: "9px",
+                            letterSpacing: "0.06em",
+                            color: "#8C8880",
+                          }}
+                        >
+                          {etiquetaModo(item)} ·{" "}
+                          {formatearFecha(item.created_at)}
+                        </div>
+                      </div>
+
+                      {/* Badge expira */}
+                      <div
+                        style={{
+                          fontFamily: "'Space Mono', monospace",
+                          fontSize: "8px",
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                          color: "#3DAB8E",
+                          background: "#E4F5EF",
+                          padding: "3px 8px",
+                          borderRadius: "4px",
+                          flexShrink: 0,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Expira pronto
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
-                <span
+            )}
+
+            {/* Anteriores — sin imagen */}
+            {anteriores.length > 0 && (
+              <div>
+                <div
                   style={{
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: "9px",
-                    letterSpacing: "0.08em",
-                    padding: "3px 8px",
-                    borderRadius: "4px",
-                    textTransform: "uppercase",
-                    background:
-                      item.estado === "listo"
-                        ? "#E4F5EF"
-                        : item.estado === "error"
-                          ? "#FDE8E8"
-                          : "#F0EDE6",
-                    color:
-                      item.estado === "listo"
-                        ? "#0F4A38"
-                        : item.estado === "error"
-                          ? "#C0392B"
-                          : "#8C8880",
+                    padding: "8px 20px",
+                    background: "#F7F5F0",
+                    borderBottom: "0.5px solid rgba(15,74,56,0.08)",
+                    borderTop:
+                      recientes.length > 0
+                        ? "0.5px solid rgba(15,74,56,0.08)"
+                        : "none",
                   }}
                 >
-                  {item.estado}
-                </span>
+                  <span
+                    style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "8px",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "#8C8880",
+                    }}
+                  >
+                    Anteriores
+                  </span>
+                </div>
+                {anteriores.map((item, i) => (
+                  <div
+                    key={item.id}
+                    onMouseEnter={() => setHoveredRow(item.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 20px",
+                      borderBottom:
+                        i < anteriores.length - 1
+                          ? "0.5px solid rgba(15,74,56,0.08)"
+                          : "none",
+                      background:
+                        hoveredRow === item.id ? "#F7F5F0" : "transparent",
+                      transition: "background 0.1s ease",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "50%",
+                          background: "rgba(15,74,56,0.15)",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <div>
+                        <div
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: "12px",
+                            color: "#0F4A38",
+                          }}
+                        >
+                          Creativos generados
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "'Space Mono', monospace",
+                            fontSize: "9px",
+                            letterSpacing: "0.06em",
+                            color: "#8C8880",
+                          }}
+                        >
+                          {etiquetaModo(item)} ·{" "}
+                          {formatearFecha(item.created_at)}
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        fontFamily: "'Space Mono', monospace",
+                        fontSize: "8px",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                        color: "#8C8880",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Expirado
+                    </span>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))
+            )}
+          </>
         )}
       </div>
+
+      {/* Modal imagen expandida */}
+      {imagenExpandida && (
+        <div
+          onClick={() => setImagenExpandida(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 10000,
+            background: "rgba(0,0,0,0.85)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+          }}
+        >
+          <img
+            src={imagenExpandida}
+            alt="Ampliado"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              objectFit: "contain",
+              borderRadius: 12,
+            }}
+          />
+        </div>
+      )}
 
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
