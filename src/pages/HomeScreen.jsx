@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { PLANES } from "../utils/constants";
 
@@ -50,6 +51,7 @@ export default function HomeScreen({
   negociosCount,
 }) {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [hoveredRow, setHoveredRow] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
 
@@ -130,6 +132,7 @@ export default function HomeScreen({
               usado={stats?.analisis_realizados || 0}
               limite={limites.analisis}
               color="#3DAB8E"
+              planActual={planActual}
             />
             <StatCard
               label="Negocios activos"
@@ -555,8 +558,9 @@ function SkeletonCard() {
   );
 }
 
-function StatCard({ label, usado, limite, color }) {
+function StatCard({ label, usado, limite, color, planActual }) {
   const [hovered, setHovered] = useState(false);
+  const navigate = useNavigate();
   const porcentaje = limite > 0 ? Math.min((usado / limite) * 100, 100) : 0;
   return (
     <div
@@ -572,15 +576,38 @@ function StatCard({ label, usado, limite, color }) {
     >
       <div
         style={{
-          fontFamily: "'Space Mono', monospace",
-          fontSize: "9px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "#8C8880",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
           marginBottom: "10px",
         }}
       >
-        {label}
+        <span
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "9px",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "#8C8880",
+          }}
+        >
+          {label}
+        </span>
+        {limite === 0 && (
+          <span
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "8px",
+              color: "var(--sig-mint)",
+              background: "rgba(94,201,173,0.12)",
+              border: "0.5px solid rgba(94,201,173,0.3)",
+              borderRadius: "4px",
+              padding: "2px 6px",
+            }}
+          >
+            ⭐ VIP
+          </span>
+        )}
       </div>
       <div
         style={{
@@ -611,9 +638,26 @@ function StatCard({ label, usado, limite, color }) {
           marginBottom: "12px",
         }}
       >
-        {limite === 0
-          ? "No incluido en tu plan"
-          : `${Math.max(0, limite - usado)} disponibles`}
+        {limite === 0 ? (
+          <button
+            onClick={() => navigate("/planes")}
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "11px",
+              fontWeight: 500,
+              color: "var(--sig-forest)",
+              background: "var(--sig-aware-green)",
+              border: "none",
+              borderRadius: "6px",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            Activar VIP →
+          </button>
+        ) : (
+          `${Math.max(0, limite - usado)} disponibles`
+        )}
       </div>
       <div
         style={{
