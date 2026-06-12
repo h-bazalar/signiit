@@ -5,6 +5,30 @@ import { PLANES } from "../utils/constants";
 
 const VEINTE_CUATRO_HORAS = 24 * 60 * 60 * 1000;
 
+const AWARENESS_LABELS = {
+  solution_aware: "Atrae nuevos clientes",
+  product_aware: "Convence al interesado",
+  most_aware: "Cierra al decidido",
+};
+
+const GANCHO_LABELS = {
+  pregunta: "Una pregunta que conecta",
+  declaracion: "Una afirmación directa",
+  cta: "Un llamado a actuar",
+};
+
+const AWARENESS_COLORS = {
+  solution_aware: { bg: "#E4F5EF", text: "#0F4A38", border: "#3DAB8E" },
+  product_aware: { bg: "#EBF0FB", text: "#1A3A7A", border: "#2E5FBE" },
+  most_aware: { bg: "#FDF3E4", text: "#7A4A10", border: "#C07820" },
+};
+
+const GANCHO_COLORS = {
+  pregunta: { bg: "#EBF0FB", text: "#1A3A7A", border: "#2E5FBE" },
+  declaracion: { bg: "#E4F5EF", text: "#0F4A38", border: "#3DAB8E" },
+  cta: { bg: "#FDF3E4", text: "#7A4A10", border: "#C07820" },
+};
+
 function esReciente(created_at) {
   return Date.now() - new Date(created_at).getTime() < VEINTE_CUATRO_HORAS;
 }
@@ -17,14 +41,6 @@ function formatearFecha(created_at) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function obtenerFoto(item) {
-  try {
-    const vars = item.resultado?.variaciones;
-    if (Array.isArray(vars) && vars.length > 0) return vars[0].foto || null;
-  } catch {}
-  return null;
 }
 
 function etiquetaModo(item) {
@@ -42,6 +58,137 @@ function etiquetaModo(item) {
   return `${modoLabel} · ${formatoLabel}`;
 }
 
+function DespliegueReciente({ item, onExpandirImagen }) {
+  const variaciones = item.resultado?.variaciones || [];
+  const esOrganico = item.resultado?.modoApp === "organico";
+
+  return (
+    <div
+      style={{
+        padding: "16px 20px",
+        background: "#F7F5F0",
+        borderTop: "0.5px solid rgba(15,74,56,0.08)",
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${variaciones.length}, 1fr)`,
+          gap: 12,
+        }}
+      >
+        {variaciones.map((v, i) => {
+          const foto = v.foto || null;
+          const esOrganicoItem = esOrganico && v.variaciones_texto?.length > 0;
+          const ganchoKey = esOrganicoItem
+            ? v.variaciones_texto[0]?.gancho_style
+            : null;
+          const awKey = v.awareness_level;
+          const colores = esOrganicoItem
+            ? GANCHO_COLORS[ganchoKey] || GANCHO_COLORS.pregunta
+            : AWARENESS_COLORS[awKey] || AWARENESS_COLORS.solution_aware;
+          const labelTexto = esOrganicoItem
+            ? GANCHO_LABELS[ganchoKey] || "Gancho"
+            : AWARENESS_LABELS[awKey] || "Creativo";
+
+          return (
+            <div
+              key={i}
+              style={{ display: "flex", flexDirection: "column", gap: 8 }}
+            >
+              {foto ? (
+                <div
+                  onClick={() => onExpandirImagen(foto)}
+                  style={{
+                    width: "100%",
+                    aspectRatio: "1/1",
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    border: "0.5px solid rgba(15,74,56,0.12)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <img
+                    src={foto}
+                    alt={labelTexto}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    aspectRatio: "1/1",
+                    borderRadius: 8,
+                    background: "#E4F5EF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 24,
+                  }}
+                >
+                  🖼️
+                </div>
+              )}
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  background: colores.bg,
+                  border: `0.5px solid ${colores.border}40`,
+                  borderRadius: 4,
+                  padding: "3px 8px",
+                }}
+              >
+                <div
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: "50%",
+                    background: colores.border,
+                    flexShrink: 0,
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: colores.text,
+                    fontWeight: 700,
+                  }}
+                >
+                  {labelTexto}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p
+        style={{
+          fontFamily: "'Space Mono', monospace",
+          fontSize: "8px",
+          letterSpacing: "0.06em",
+          color: "#8C8880",
+          marginTop: 12,
+          lineHeight: 1.6,
+        }}
+      >
+        Clic en la imagen para ampliar · Disponibles por 24 horas desde la
+        generación
+      </p>
+    </div>
+  );
+}
+
 export default function HomeScreen({
   supabase,
   planActual,
@@ -52,7 +199,7 @@ export default function HomeScreen({
 }) {
   const { user } = useUser();
   const navigate = useNavigate();
-  const [hoveredRow, setHoveredRow] = useState(null);
+  const [expandidoId, setExpandidoId] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
 
   const limites = PLANES[planActual] || PLANES.free;
@@ -67,6 +214,10 @@ export default function HomeScreen({
   const anteriores = historialListo.filter(
     (item) => !esReciente(item.created_at),
   );
+
+  const toggleExpandido = (id) => {
+    setExpandidoId((prev) => (prev === id ? null : id));
+  };
 
   return (
     <div style={{ maxWidth: "900px" }}>
@@ -240,7 +391,7 @@ export default function HomeScreen({
           </div>
         ) : (
           <>
-            {/* Recientes — con imagen */}
+            {/* Recientes — con desplegable */}
             {recientes.length > 0 && (
               <div>
                 <div
@@ -263,119 +414,170 @@ export default function HomeScreen({
                   </span>
                 </div>
                 {recientes.map((item, i) => {
-                  const foto = obtenerFoto(item);
+                  const foto = item.resultado?.variaciones?.[0]?.foto || null;
+                  const expandido = expandidoId === item.id;
                   return (
-                    <div
-                      key={item.id}
-                      onMouseEnter={() => setHoveredRow(item.id)}
-                      onMouseLeave={() => setHoveredRow(null)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "14px",
-                        padding: "12px 20px",
-                        borderBottom:
-                          i < recientes.length - 1 || anteriores.length > 0
-                            ? "0.5px solid rgba(15,74,56,0.08)"
-                            : "none",
-                        background:
-                          hoveredRow === item.id ? "#F7F5F0" : "transparent",
-                        transition: "background 0.1s ease",
-                      }}
-                    >
-                      {/* Miniatura */}
-                      {foto ? (
-                        <div
-                          onClick={() => setImagenExpandida(foto)}
-                          style={{
-                            width: "52px",
-                            height: "52px",
-                            borderRadius: "8px",
-                            overflow: "hidden",
-                            border: "0.5px solid rgba(15,74,56,0.12)",
-                            flexShrink: 0,
-                            cursor: "pointer",
-                          }}
-                        >
-                          <img
-                            src={foto}
-                            alt="Creativo"
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              display: "block",
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          style={{
-                            width: "52px",
-                            height: "52px",
-                            borderRadius: "8px",
-                            background: "#E4F5EF",
-                            flexShrink: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "18px",
-                          }}
-                        >
-                          🖼️
-                        </div>
-                      )}
-
-                      {/* Info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: "13px",
-                            fontWeight: "500",
-                            color: "#0F4A38",
-                            marginBottom: "3px",
-                          }}
-                        >
-                          Creativos generados
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: "'Space Mono', monospace",
-                            fontSize: "9px",
-                            letterSpacing: "0.06em",
-                            color: "#8C8880",
-                          }}
-                        >
-                          {etiquetaModo(item)} ·{" "}
-                          {formatearFecha(item.created_at)}
-                        </div>
-                      </div>
-
-                      {/* Badge expira */}
+                    <div key={item.id}>
                       <div
+                        onClick={() => toggleExpandido(item.id)}
                         style={{
-                          fontFamily: "'Space Mono', monospace",
-                          fontSize: "8px",
-                          letterSpacing: "0.06em",
-                          textTransform: "uppercase",
-                          color: "#3DAB8E",
-                          background: "#E4F5EF",
-                          padding: "3px 8px",
-                          borderRadius: "4px",
-                          flexShrink: 0,
-                          whiteSpace: "nowrap",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "14px",
+                          padding: "12px 20px",
+                          borderBottom:
+                            !expandido &&
+                            (i < recientes.length - 1 || anteriores.length > 0)
+                              ? "0.5px solid rgba(15,74,56,0.08)"
+                              : "none",
+                          background: expandido ? "#F0EDE6" : "transparent",
+                          cursor: "pointer",
+                          transition: "background 0.1s ease",
                         }}
                       >
-                        Expira pronto
+                        {/* Miniatura */}
+                        {foto ? (
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setImagenExpandida(foto);
+                            }}
+                            style={{
+                              width: "52px",
+                              height: "52px",
+                              borderRadius: "8px",
+                              overflow: "hidden",
+                              border: "0.5px solid rgba(15,74,56,0.12)",
+                              flexShrink: 0,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <img
+                              src={foto}
+                              alt="Creativo"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                display: "block",
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              width: "52px",
+                              height: "52px",
+                              borderRadius: "8px",
+                              background: "#E4F5EF",
+                              flexShrink: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "18px",
+                            }}
+                          >
+                            🖼️
+                          </div>
+                        )}
+
+                        {/* Info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontFamily: "'DM Sans', sans-serif",
+                              fontSize: "13px",
+                              fontWeight: "500",
+                              color: "#0F4A38",
+                              marginBottom: "3px",
+                            }}
+                          >
+                            Creativos generados
+                          </div>
+                          <div
+                            style={{
+                              fontFamily: "'Space Mono', monospace",
+                              fontSize: "9px",
+                              letterSpacing: "0.06em",
+                              color: "#8C8880",
+                            }}
+                          >
+                            {etiquetaModo(item)} ·{" "}
+                            {formatearFecha(item.created_at)}
+                          </div>
+                        </div>
+
+                        {/* Badge + chevron */}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            flexShrink: 0,
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontFamily: "'Space Mono', monospace",
+                              fontSize: "8px",
+                              letterSpacing: "0.06em",
+                              textTransform: "uppercase",
+                              color: "#3DAB8E",
+                              background: "#E4F5EF",
+                              padding: "3px 8px",
+                              borderRadius: "4px",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            Expira pronto
+                          </div>
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 12 12"
+                            fill="none"
+                            style={{
+                              transform: expandido ? "rotate(180deg)" : "none",
+                              transition: "transform 0.2s",
+                              color: "#8C8880",
+                            }}
+                          >
+                            <path
+                              d="M2 4l4 4 4-4"
+                              stroke="currentColor"
+                              strokeWidth="1.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
                       </div>
+
+                      {/* Desplegable */}
+                      {expandido && (
+                        <DespliegueReciente
+                          item={item}
+                          onExpandirImagen={setImagenExpandida}
+                        />
+                      )}
+
+                      {/* Separador después del desplegable */}
+                      {expandido &&
+                        (i < recientes.length - 1 || anteriores.length > 0) && (
+                          <div
+                            style={{
+                              height: "0.5px",
+                              background: "rgba(15,74,56,0.08)",
+                            }}
+                          />
+                        )}
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {/* Anteriores — sin imagen */}
+            {/* Anteriores — solo registro */}
             {anteriores.length > 0 && (
               <div>
                 <div
@@ -404,8 +606,6 @@ export default function HomeScreen({
                 {anteriores.map((item, i) => (
                   <div
                     key={item.id}
-                    onMouseEnter={() => setHoveredRow(item.id)}
-                    onMouseLeave={() => setHoveredRow(null)}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -415,9 +615,6 @@ export default function HomeScreen({
                         i < anteriores.length - 1
                           ? "0.5px solid rgba(15,74,56,0.08)"
                           : "none",
-                      background:
-                        hoveredRow === item.id ? "#F7F5F0" : "transparent",
-                      transition: "background 0.1s ease",
                     }}
                   >
                     <div
