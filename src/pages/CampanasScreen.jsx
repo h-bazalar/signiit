@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { createSupabaseClient } from "../supabase";
 import { useToast } from "../context/ToastContext";
-import { useCreditos } from "../hooks/useCreditos";
 import {
   PLANES,
   POLLING_INTERVAL_MS,
@@ -1191,17 +1190,25 @@ export default function CampanasScreen({
   negocio: negocioProp,
   imagenesNegocio: imagenesNegocioProp,
   getToken,
+  stats,
+  onRefetch,
 }) {
   const { user } = useUser();
   const { addToast } = useToast();
-  const {
-    creditos,
-    tieneCredito,
-    refetch: refetchCreditos,
-  } = useCreditos(supabase);
-
   const plan = PLANES[planActual] || PLANES.free;
-
+  const creditos = stats
+    ? {
+        imagenes: stats.generaciones_estaticos ?? 0,
+        videos: stats.generaciones_video ?? 0,
+        analisis: stats.analisis_realizados ?? 0,
+      }
+    : null;
+  const tieneCredito = {
+    imagenes: creditos !== null ? creditos.imagenes < plan.imagenesTotal : true,
+    videos: false,
+    analisis: false,
+  };
+  const refetchCreditos = onRefetch ?? (() => {});
   const [negocio, setNegocio] = useState(negocioProp ?? null);
   const [imagenesNegocio, setImagenesNegocio] = useState(
     imagenesNegocioProp ?? [],

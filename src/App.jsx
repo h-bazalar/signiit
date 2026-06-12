@@ -89,9 +89,12 @@ function AppWithLayout() {
           const principal = lista[0];
           setNegocio(principal);
           const tokenApi = await getToken();
-          const resImgs = await fetch(`/api/imagenes-negocio?negocioId=${principal.id}`, {
-            headers: { Authorization: `Bearer ${tokenApi}` },
-          });
+          const resImgs = await fetch(
+            `/api/imagenes-negocio?negocioId=${principal.id}`,
+            {
+              headers: { Authorization: `Bearer ${tokenApi}` },
+            },
+          );
           const imgsData = resImgs.ok ? await resImgs.json() : { imagenes: [] };
           const imgs = imgsData.imagenes || [];
           setImagenesNegocio(imgs);
@@ -236,6 +239,8 @@ function AppWithLayout() {
               negocio={negocio}
               imagenesNegocio={imagenesNegocio}
               getToken={getToken}
+              stats={stats}
+              onRefetch={refetchHome}
             />
           }
         />
@@ -247,7 +252,14 @@ function AppWithLayout() {
         />
         <Route
           path="/planes"
-          element={<PlanesScreen planActual={planActual} creditos={stats ? { imagenes: stats.generaciones_estaticos ?? 0 } : null} />}
+          element={
+            <PlanesScreen
+              planActual={planActual}
+              creditos={
+                stats ? { imagenes: stats.generaciones_estaticos ?? 0 } : null
+              }
+            />
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
