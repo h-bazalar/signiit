@@ -402,31 +402,6 @@ export default function PlanesScreen({ planActual, creditos }) {
             );
           })}
         </div>
-
-        <div
-          style={{
-            marginTop: 32,
-            padding: "14px 18px",
-            background: "white",
-            border: "0.5px solid var(--sig-line)",
-            borderRadius: 10,
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "12px",
-              color: "var(--sig-stone)",
-              margin: 0,
-              lineHeight: 1.7,
-            }}
-          >
-            Los creativos generados están disponibles por{" "}
-            <strong style={{ color: "var(--sig-forest)" }}>24 horas</strong> —
-            descárgalos antes de que expiren. El plan VIP se activa manualmente
-            tras confirmar el pago por WhatsApp.
-          </p>
-        </div>
       </div>
     </div>
   );
