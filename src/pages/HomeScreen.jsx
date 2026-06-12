@@ -645,12 +645,15 @@ function StatCard({ label, usado, limite, color, planActual }) {
               fontFamily: "'DM Sans', sans-serif",
               fontSize: "11px",
               fontWeight: 500,
-              color: "var(--sig-forest)",
-              background: "var(--sig-aware-green)",
+              color: "var(--sig-warm)",
+              background: "var(--sig-forest)",
               border: "none",
               borderRadius: "6px",
-              padding: "5px 10px",
+              padding: "6px 12px",
               cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
             }}
           >
             Activar VIP →
