@@ -58,6 +58,85 @@ function etiquetaModo(item) {
   return `${modoLabel} · ${formatoLabel}`;
 }
 
+function CeldaCreativo({ foto, colores, labelTexto, onExpandirImagen }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {foto ? (
+        <div
+          onClick={() => onExpandirImagen(foto)}
+          style={{
+            width: "100%",
+            aspectRatio: "1/1",
+            borderRadius: 8,
+            overflow: "hidden",
+            border: "0.5px solid rgba(15,74,56,0.12)",
+            cursor: "pointer",
+          }}
+        >
+          <img
+            src={foto}
+            alt={labelTexto}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        </div>
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            aspectRatio: "1/1",
+            borderRadius: 8,
+            background: "#E4F5EF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 24,
+          }}
+        >
+          🖼️
+        </div>
+      )}
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+          background: colores.bg,
+          border: `0.5px solid ${colores.border}40`,
+          borderRadius: 4,
+          padding: "3px 8px",
+        }}
+      >
+        <div
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: colores.border,
+            flexShrink: 0,
+          }}
+        />
+        <span
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "8px",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: colores.text,
+            fontWeight: 700,
+          }}
+        >
+          {labelTexto}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function DespliegueReciente({ item, onExpandirImagen }) {
   const variaciones = item.resultado?.variaciones || [];
   const esOrganico = item.resultado?.modoApp === "organico";
@@ -70,108 +149,79 @@ function DespliegueReciente({ item, onExpandirImagen }) {
         borderTop: "0.5px solid rgba(15,74,56,0.08)",
       }}
     >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${variaciones.length}, 1fr)`,
-          gap: 12,
-        }}
-      >
-        {variaciones.map((v, i) => {
-          const foto = v.foto || null;
-          const esOrganicoItem = esOrganico && v.variaciones_texto?.length > 0;
-          const ganchoKey = esOrganicoItem
-            ? v.variaciones_texto[0]?.gancho_style
-            : null;
-          const awKey = v.awareness_level;
-          const colores = esOrganicoItem
-            ? GANCHO_COLORS[ganchoKey] || GANCHO_COLORS.pregunta
-            : AWARENESS_COLORS[awKey] || AWARENESS_COLORS.solution_aware;
-          const labelTexto = esOrganicoItem
-            ? GANCHO_LABELS[ganchoKey] || "Gancho"
-            : AWARENESS_LABELS[awKey] || "Creativo";
-
-          return (
-            <div
-              key={i}
-              style={{ display: "flex", flexDirection: "column", gap: 8 }}
-            >
-              {foto ? (
-                <div
-                  onClick={() => onExpandirImagen(foto)}
-                  style={{
-                    width: "100%",
-                    aspectRatio: "1/1",
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    border: "0.5px solid rgba(15,74,56,0.12)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <img
-                    src={foto}
-                    alt={labelTexto}
+      {esOrganico ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {variaciones.map((concepto, ci) => {
+            const textos = concepto.variaciones_texto || [];
+            return (
+              <div key={ci}>
+                {concepto.tema_visual && (
+                  <p
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "8px",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: "#8C8880",
+                      marginBottom: 8,
+                      lineHeight: 1.5,
                     }}
-                  />
-                </div>
-              ) : (
+                  >
+                    {concepto.tema_visual}
+                  </p>
+                )}
                 <div
                   style={{
-                    width: "100%",
-                    aspectRatio: "1/1",
-                    borderRadius: 8,
-                    background: "#E4F5EF",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 24,
+                    display: "grid",
+                    gridTemplateColumns: `repeat(${textos.length}, 1fr)`,
+                    gap: 12,
                   }}
                 >
-                  🖼️
+                  {textos.map((vt, vi) => {
+                    const ganchoKey = vt.gancho_style;
+                    const colores =
+                      GANCHO_COLORS[ganchoKey] || GANCHO_COLORS.pregunta;
+                    const labelTexto = GANCHO_LABELS[ganchoKey] || "Gancho";
+                    return (
+                      <CeldaCreativo
+                        key={vi}
+                        foto={vt.foto || null}
+                        colores={colores}
+                        labelTexto={labelTexto}
+                        onExpandirImagen={onExpandirImagen}
+                      />
+                    );
+                  })}
                 </div>
-              )}
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  background: colores.bg,
-                  border: `0.5px solid ${colores.border}40`,
-                  borderRadius: 4,
-                  padding: "3px 8px",
-                }}
-              >
-                <div
-                  style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: "50%",
-                    background: colores.border,
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: "8px",
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                    color: colores.text,
-                    fontWeight: 700,
-                  }}
-                >
-                  {labelTexto}
-                </span>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${variaciones.length}, 1fr)`,
+            gap: 12,
+          }}
+        >
+          {variaciones.map((v, i) => {
+            const awKey = v.awareness_level;
+            const colores =
+              AWARENESS_COLORS[awKey] || AWARENESS_COLORS.solution_aware;
+            const labelTexto = AWARENESS_LABELS[awKey] || "Creativo";
+            return (
+              <CeldaCreativo
+                key={i}
+                foto={v.foto || null}
+                colores={colores}
+                labelTexto={labelTexto}
+                onExpandirImagen={onExpandirImagen}
+              />
+            );
+          })}
+        </div>
+      )}
       <p
         style={{
           fontFamily: "'Space Mono', monospace",
@@ -215,7 +265,9 @@ export default function HomeScreen({
   const anteriores = historialListo.filter(
     (item) => !esReciente(item.created_at),
   );
-  const listaAnteriores = verTodosAnteriores ? anteriores : anteriores.slice(0, 3);
+  const listaAnteriores = verTodosAnteriores
+    ? anteriores
+    : anteriores.slice(0, 3);
 
   const toggleExpandido = (id) => {
     setExpandidoId((prev) => (prev === id ? null : id));
