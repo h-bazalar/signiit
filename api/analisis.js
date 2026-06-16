@@ -1,10 +1,10 @@
 import { verificarAuth } from "./middleware.js";
 import { createClient } from "@supabase/supabase-js";
+import { resolverCicloCreditos } from "./_cicloCreditos.js";
 
 // Límite de análisis del plan VIP por ciclo mensual.
 // Mantener alineado con PLANES.vip.analisis en src/utils/constants.js.
 const LIMITE_ANALISIS_VIP = 6;
-const DIAS_CICLO = 30;
 
 // ════════════════════════════════════════════════════════════════════
 //  UMBRALES DE DECISIÓN  (única fuente de verdad — ajustar solo aquí)
@@ -820,27 +820,11 @@ export default async function handler(req, res) {
     });
   }
 
-  // ── Reset mensual perezoso (ciclo de 30 días desde creditos_reset_at) ──
-  // creditos_reset_at es único y compartido; al vencer se reinicia el ciclo
-  // completo (los tres contadores). Es el reset mensual del modelo de planes.
-  let analisisUsados = usuario.analisis_realizados ?? 0;
-  const resetAt = usuario.creditos_reset_at
-    ? new Date(usuario.creditos_reset_at)
-    : null;
-  const cicloVencido =
-    !resetAt || Date.now() - resetAt.getTime() >= DIAS_CICLO * 864e5;
-  if (cicloVencido) {
-    await supabaseAdmin
-      .from("usuarios")
-      .update({
-        generaciones_estaticos: 0,
-        generaciones_video: 0,
-        analisis_realizados: 0,
-        creditos_reset_at: new Date().toISOString(),
-      })
-      .eq("clerk_id", clerkId);
-    analisisUsados = 0;
-  }
+  // ── Reset mensual perezoso (helper compartido = fuente única de verdad) ──
+  // Solo VIP; cera los 3 contadores si el ciclo (≥30 días) venció con un
+  // creditos_reset_at real. Si reset_at es null, lo ancla a ahora SIN cerar.
+  const ciclo = await resolverCicloCreditos(supabaseAdmin, clerkId, usuario);
+  const analisisUsados = ciclo.stats.analisis_realizados;
 
   // ── Gate límite ──
   if (analisisUsados >= LIMITE_ANALISIS_VIP) {

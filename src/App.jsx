@@ -58,28 +58,30 @@ function AppWithLayout() {
         const client = createSupabaseClient(token);
         setSupabase(client);
 
-        // Todo en paralelo
-        const [
-          { data: userData },
-          { data: negociosData },
-          { data: historialData },
-        ] = await Promise.all([
-          client.from("usuarios").select("*").eq("clerk_id", user.id).single(),
-          client
-            .from("negocios")
-            .select("*")
-            .eq("usuario_id", user.id)
-            .order("created_at", { ascending: false }),
-          client
-            .from("campanas_generadas")
-            .select("*")
-            .eq("usuario_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(10),
-        ]);
+        const tokenSesion = await getToken();
 
-        if (userData?.plan) setPlanActual(userData.plan);
-        setStats(userData);
+        // Todo en paralelo
+        const [sesion, { data: negociosData }, { data: historialData }] =
+          await Promise.all([
+            fetch("/api/sesion-init", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${tokenSesion}` },
+            }).then((r) => (r.ok ? r.json() : null)),
+            client
+              .from("negocios")
+              .select("*")
+              .eq("usuario_id", user.id)
+              .order("created_at", { ascending: false }),
+            client
+              .from("campanas_generadas")
+              .select("*")
+              .eq("usuario_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(10),
+          ]);
+
+        if (sesion?.plan) setPlanActual(sesion.plan);
+        if (sesion?.stats) setStats(sesion.stats);
         if (historialData) setHistorial(historialData);
 
         const lista = negociosData || [];
