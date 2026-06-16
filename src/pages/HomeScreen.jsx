@@ -173,7 +173,7 @@ function DespliegueReciente({ item, onExpandirImagen }) {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: `repeat(${textos.length}, 1fr)`,
+                    gridTemplateColumns: `repeat(${textos.length}, minmax(0, 160px))`,
                     gap: 12,
                   }}
                 >
