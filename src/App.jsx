@@ -110,15 +110,22 @@ function AppWithLayout() {
     init();
   }, [user]);
 
-  // Refetch negocio + imágenes (llamado desde NegociosScreen tras cambios)
+  // Refetch negocio + imágenes (llamado desde NegociosScreen tras cambios).
+  // Acuña token + cliente frescos por llamada (los del init expiran ~60s) y
+  // NUNCA blanquea el estado si la query falla: solo limpia cuando de verdad
+  // no hay negocios (token válido + resultado vacío).
   const refetchNegocios = async () => {
-    if (!supabase || !user) return;
+    if (!user) return;
     try {
-      const { data: lista } = await supabase
+      const token = await getToken({ template: "supabase" });
+      const client = createSupabaseClient(token);
+
+      const { data: lista, error: errNegocios } = await client
         .from("negocios")
         .select("*")
         .eq("usuario_id", user.id)
         .order("created_at", { ascending: false });
+      if (errNegocios) throw errNegocios;
 
       const negociosActualizados = lista || [];
       setNegocios(negociosActualizados);
@@ -126,11 +133,12 @@ function AppWithLayout() {
       if (negociosActualizados.length > 0) {
         const principal = negociosActualizados[0];
         setNegocio(principal);
-        const { data: imgs } = await supabase
+        const { data: imgs, error: errImgs } = await client
           .from("negocio_imagenes")
           .select("id, url, nombre")
           .eq("negocio_id", principal.id)
           .order("created_at", { ascending: true });
+        if (errImgs) throw errImgs;
         setImagenesNegocio(imgs || []);
       } else {
         setNegocio(null);
@@ -141,19 +149,23 @@ function AppWithLayout() {
     }
   };
 
-  // Refetch historial + stats (llamado desde HomeScreen si se necesita)
+  // Refetch historial + stats (llamado desde HomeScreen si se necesita).
+  // Token + cliente frescos por llamada por la misma razón que refetchNegocios.
   const refetchHome = async () => {
-    if (!supabase || !user) return;
+    if (!user) return;
     try {
+      const token = await getToken({ template: "supabase" });
+      const client = createSupabaseClient(token);
+
       const [{ data: statsData }, { data: historialData }] = await Promise.all([
-        supabase
+        client
           .from("usuarios")
           .select(
             "generaciones_estaticos, generaciones_video, analisis_realizados, negocios_count",
           )
           .eq("clerk_id", user.id)
           .single(),
-        supabase
+        client
           .from("campanas_generadas")
           .select("*")
           .eq("usuario_id", user.id)
