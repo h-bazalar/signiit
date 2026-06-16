@@ -12,7 +12,9 @@ const DIAS_CICLO = 30;
 // ════════════════════════════════════════════════════════════════════
 const FACTOR_MALO = 1.5; // cpa7d > max(cpaMes, baseline) × esto → apagar
 const TOLERANCIA_HIST = 1.2; // histórico "bueno" = cpaMes ≤ baseline × esto
+const FACTOR_EXCELENTE = 0.8; // cpa7d ≤ baseline × esto → escala aunque sea nuevo/estable
 const MIN_RES = 5; // conversiones mínimas para juzgar (universal, no moneda)
+const MIN_RES_REVIVIR = 3; // histórico mínimo (conversiones) para considerar revivir
 const ZOMBI_RATIO = 0.1; // gastó < 10% del esperado → Meta dejó de entregar
 const FRECUENCIA_FATIGA = 2.0;
 const FRECUENCIA_ALERTA = 1.8;
@@ -309,6 +311,7 @@ const clasificar = (rep7, rep30, baseline) => {
     // Tri-estado del histórico
     const histBueno =
       cpaMes !== null &&
+      resMes >= MIN_RES_REVIVIR &&
       (baseline === null || cpaMes <= baseline * TOLERANCIA_HIST);
     const histMal = cpaMes === null && gastoMes >= (baseline || 1);
     const sinHistorial = cpaMes === null && !histMal;
@@ -339,9 +342,15 @@ const clasificar = (rep7, rep30, baseline) => {
       a.gasto >= pisoJuicio &&
       a.resultados >= MIN_RES &&
       cpa7d !== null &&
-      cpaMes !== null &&
-      cpa7d < cpaMes &&
-      (baseline === null || cpa7d <= baseline)
+      // Mejora real vs su propio histórico…
+      ((cpaMes !== null &&
+        cpa7d < cpaMes &&
+        (baseline === null || cpa7d <= baseline)) ||
+        // …o CPA muy por debajo del baseline de la cuenta (escala aunque sea
+        //   nuevo o estable), siempre que no se esté deteriorando vs su histórico.
+        (baseline !== null &&
+          cpa7d <= baseline * FACTOR_EXCELENTE &&
+          (cpaMes === null || cpa7d <= cpaMes)))
     ) {
       bucket = "escalar";
     } else if (
@@ -412,7 +421,9 @@ const construirSalida = (registros, rep7, rep30, ctx) => {
   const motivo = (r) => {
     switch (r.bucket) {
       case "escalar":
-        return `CPA reciente de ${fmt(r.cpa7d)}, mejor que tu histórico de ${fmt(r.cpaMes)}, con volumen suficiente (${r.resultados} ${objetivo.label}). Sube el presupuesto poco a poco (15–20%) en el mismo conjunto.`;
+        if (r.cpaMes !== null && r.cpa7d < r.cpaMes)
+          return `CPA reciente de ${fmt(r.cpa7d)}, mejor que tu histórico de ${fmt(r.cpaMes)}, con volumen suficiente (${r.resultados} ${objetivo.label}). Sube el presupuesto poco a poco (15–20%) en el mismo conjunto.`;
+        return `CPA reciente de ${fmt(r.cpa7d)}, muy por debajo de tu referencia de cuenta (${fmt(baseline)}), con volumen suficiente (${r.resultados} ${objetivo.label}). Sube el presupuesto poco a poco (15–20%) en el mismo conjunto.`;
       case "revivir":
         return `Funcionaba bien (${r.resMes} ${objetivo.label} a ${fmt(r.cpaMes)}) y Meta dejó de entregarlo. Reactívalo en un conjunto de anuncios nuevo para que vuelva a entrar en la subasta.`;
       case "apagar":

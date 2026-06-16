@@ -715,9 +715,10 @@ function Resultado({ data, onNuevo }) {
         <p
           style={{
             fontFamily: "'Space Mono', monospace",
-            fontSize: "9px",
-            letterSpacing: "0.08em",
-            color: "var(--sig-stone)",
+            fontSize: "11px",
+            letterSpacing: "0.04em",
+            color: "#6A665F",
+            lineHeight: 1.5,
           }}
         >
           Objetivo: {meta.objetivo} · Referencia de tu cuenta:{" "}
@@ -764,7 +765,7 @@ function Resultado({ data, onNuevo }) {
       </Fase>
 
       {/* ── FASE C — POR QUÉ ── */}
-      <Fase numero="03" titulo="Por qué">
+      <Fase numero="03" titulo="Por qué" colapsable defaultAbierto={false}>
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <Semaforo metricas={metricas} />
           <Hook hook={hook} />
@@ -776,10 +777,9 @@ function Resultado({ data, onNuevo }) {
         <p
           style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: "11px",
-            color: "var(--sig-stone)",
+            fontSize: "12px",
+            color: "#6A665F",
             lineHeight: 1.6,
-            fontStyle: "italic",
           }}
         >
           {disclaimer}
@@ -789,39 +789,84 @@ function Resultado({ data, onNuevo }) {
   );
 }
 
-function Fase({ numero, titulo, children }) {
+function Fase({
+  numero,
+  titulo,
+  colapsable = false,
+  defaultAbierto = true,
+  children,
+}) {
+  const [abierto, setAbierto] = useState(defaultAbierto);
+  const mostrar = !colapsable || abierto;
   return (
     <div>
       <div
+        onClick={colapsable ? () => setAbierto((v) => !v) : undefined}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "8px",
-          marginBottom: "14px",
+          justifyContent: "space-between",
+          marginBottom: mostrar ? "14px" : 0,
+          cursor: colapsable ? "pointer" : "default",
         }}
       >
-        <span
-          style={{
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "9px",
-            letterSpacing: "0.16em",
-            color: "var(--sig-mid)",
-          }}
-        >
-          {numero}
-        </span>
-        <h2
-          style={{
-            fontFamily: "'DM Serif Display', serif",
-            fontSize: "20px",
-            fontWeight: 400,
-            color: "var(--sig-forest)",
-          }}
-        >
-          {titulo}
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "12px",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              color: "var(--sig-mid)",
+            }}
+          >
+            {numero}
+          </span>
+          <h2
+            style={{
+              fontFamily: "'DM Serif Display', serif",
+              fontSize: "20px",
+              fontWeight: 400,
+              color: "var(--sig-forest)",
+            }}
+          >
+            {titulo}
+          </h2>
+        </div>
+        {colapsable && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px",
+                color: "var(--sig-stone)",
+              }}
+            >
+              {abierto ? "Ocultar" : "Ver detalle"}
+            </span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              style={{
+                transform: abierto ? "rotate(180deg)" : "none",
+                transition: "transform 0.2s",
+                color: "var(--sig-stone)",
+              }}
+            >
+              <path
+                d="M2 4l4 4 4-4"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        )}
       </div>
-      {children}
+      {mostrar && children}
     </div>
   );
 }
@@ -915,9 +960,10 @@ function GrupoBucket({ meta, ads, fmt, objetivo }) {
           <span
             style={{
               fontFamily: "'Space Mono', monospace",
-              fontSize: "9px",
+              fontSize: "11px",
+              letterSpacing: "0.03em",
               color: meta.text,
-              opacity: 0.7,
+              opacity: 0.85,
             }}
           >
             · {meta.sub}
