@@ -735,9 +735,9 @@ function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir }) {
         {/* Imagen */}
         <div style={{ flex: "0 0 160px", padding: 16 }}>
           <img
-            src={imagen.foto}
+            src={varActual?.foto || imagen.foto}
             alt="Orgánico"
-            onClick={() => onExpandir(imagen.foto)}
+            onClick={() => onExpandir(varActual?.foto || imagen.foto)}
             style={{
               width: "100%",
               aspectRatio: "1/1",
