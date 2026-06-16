@@ -106,7 +106,7 @@ const leerArchivo = (file) =>
 // ════════════════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ════════════════════════════════════════════════════════════════
-export default function AnalisisScreen({ planActual }) {
+export default function AnalisisScreen({ planActual, onRefetch }) {
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
@@ -148,6 +148,7 @@ export default function AnalisisScreen({ planActual }) {
       }
       setResultado(data);
       setEstado("done");
+      onRefetch?.();
     } catch (e) {
       const msg =
         e.name === "TimeoutError"

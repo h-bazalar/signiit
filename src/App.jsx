@@ -157,11 +157,14 @@ function AppWithLayout() {
       const token = await getToken({ template: "supabase" });
       const client = createSupabaseClient(token);
 
-      const [{ data: statsData }, { data: historialData }] = await Promise.all([
+      const [
+        { data: statsData, error: statsErr },
+        { data: historialData, error: histErr },
+      ] = await Promise.all([
         client
           .from("usuarios")
           .select(
-            "generaciones_estaticos, generaciones_video, analisis_realizados, negocios_count",
+            "generaciones_estaticos, generaciones_video, analisis_realizados",
           )
           .eq("clerk_id", user.id)
           .single(),
@@ -172,6 +175,8 @@ function AppWithLayout() {
           .order("created_at", { ascending: false })
           .limit(10),
       ]);
+      if (statsErr) throw statsErr;
+      if (histErr) throw histErr;
       if (statsData) setStats(statsData);
       if (historialData) setHistorial(historialData);
     } catch (e) {
@@ -260,7 +265,11 @@ function AppWithLayout() {
         <Route
           path="/analisis"
           element={
-            <AnalisisScreen supabase={supabase} planActual={planActual} />
+            <AnalisisScreen
+              supabase={supabase}
+              planActual={planActual}
+              onRefetch={refetchHome}
+            />
           }
         />
         <Route
