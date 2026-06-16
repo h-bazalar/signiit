@@ -137,6 +137,141 @@ function CeldaCreativo({ foto, colores, labelTexto, onExpandirImagen }) {
   );
 }
 
+function IconoAmpliar({ size = 10, color = "#fff", strokeWidth = 1.6 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path
+        d="M6 2H2v4M10 14h4v-4"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function FilaCreativoOrganico({ vt, onExpandirImagen, conBorde }) {
+  const foto = vt.foto || null;
+  const ganchoKey = vt.gancho_style;
+  const colores = GANCHO_COLORS[ganchoKey] || GANCHO_COLORS.pregunta;
+  const labelTexto = GANCHO_LABELS[ganchoKey] || "Gancho";
+  const overlay = vt.texto_overlay || "";
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        padding: "10px 0",
+        borderBottom: conBorde ? "0.5px solid rgba(15,74,56,0.07)" : "none",
+      }}
+    >
+      {foto ? (
+        <div
+          onClick={() => onExpandirImagen(foto)}
+          style={{
+            position: "relative",
+            width: 76,
+            height: 76,
+            flexShrink: 0,
+            borderRadius: 8,
+            border: "0.5px solid rgba(15,74,56,0.12)",
+            overflow: "hidden",
+            cursor: "pointer",
+          }}
+        >
+          <img
+            src={foto}
+            alt={labelTexto}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              bottom: 4,
+              right: 4,
+              width: 17,
+              height: 17,
+              borderRadius: 5,
+              background: "rgba(0,0,0,0.45)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconoAmpliar />
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            width: 76,
+            height: 76,
+            flexShrink: 0,
+            borderRadius: 8,
+            background: "#E4F5EF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 20,
+          }}
+        >
+          🖼️
+        </div>
+      )}
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 5,
+          }}
+        >
+          <div
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: colores.border,
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "8px",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#8C8880",
+            }}
+          >
+            {labelTexto}
+          </span>
+        </div>
+        <div
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "14px",
+            fontWeight: 500,
+            color: "#0F4A38",
+            lineHeight: 1.3,
+          }}
+        >
+          {overlay}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DespliegueReciente({ item, onExpandirImagen }) {
   const variaciones = item.resultado?.variaciones || [];
   const esOrganico = item.resultado?.modoApp === "organico";
@@ -150,49 +285,61 @@ function DespliegueReciente({ item, onExpandirImagen }) {
       }}
     >
       {esOrganico ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div
+          style={{
+            background: "#fff",
+            border: "0.5px solid rgba(15,74,56,0.10)",
+            borderRadius: 12,
+            padding: "16px 18px",
+          }}
+        >
           {variaciones.map((concepto, ci) => {
             const textos = concepto.variaciones_texto || [];
             return (
               <div key={ci}>
-                {concepto.tema_visual && (
-                  <p
+                {ci > 0 && (
+                  <div
                     style={{
-                      fontFamily: "'Space Mono', monospace",
-                      fontSize: "8px",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "#8C8880",
-                      marginBottom: 8,
-                      lineHeight: 1.5,
+                      height: "0.5px",
+                      background: "rgba(15,74,56,0.10)",
+                      margin: "14px 0",
                     }}
-                  >
-                    {concepto.tema_visual}
-                  </p>
+                  />
                 )}
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${textos.length}, minmax(0, 160px))`,
-                    gap: 12,
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: "#3DAB8E",
+                    marginBottom: 3,
                   }}
                 >
-                  {textos.map((vt, vi) => {
-                    const ganchoKey = vt.gancho_style;
-                    const colores =
-                      GANCHO_COLORS[ganchoKey] || GANCHO_COLORS.pregunta;
-                    const labelTexto = GANCHO_LABELS[ganchoKey] || "Gancho";
-                    return (
-                      <CeldaCreativo
-                        key={vi}
-                        foto={vt.foto || null}
-                        colores={colores}
-                        labelTexto={labelTexto}
-                        onExpandirImagen={onExpandirImagen}
-                      />
-                    );
-                  })}
+                  Concepto {ci + 1}
                 </div>
+                {concepto.tema_visual && (
+                  <div
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      color: "#0F4A38",
+                      lineHeight: 1.35,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {concepto.tema_visual}
+                  </div>
+                )}
+                {textos.map((vt, vi) => (
+                  <FilaCreativoOrganico
+                    key={vi}
+                    vt={vt}
+                    onExpandirImagen={onExpandirImagen}
+                    conBorde={vi < textos.length - 1}
+                  />
+                ))}
               </div>
             );
           })}
@@ -222,19 +369,26 @@ function DespliegueReciente({ item, onExpandirImagen }) {
           })}
         </div>
       )}
-      <p
+      <div
         style={{
-          fontFamily: "'Space Mono', monospace",
-          fontSize: "8px",
-          letterSpacing: "0.06em",
-          color: "#8C8880",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
           marginTop: 12,
-          lineHeight: 1.6,
+          color: "#8C8880",
         }}
       >
-        Clic en la imagen para ampliar · Disponibles por 24 horas desde la
-        generación
-      </p>
+        <IconoAmpliar size={12} color="#8C8880" strokeWidth={1.4} />
+        <span
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "11px",
+          }}
+        >
+          Toca cualquier imagen para verla completa · Disponibles por 24 horas
+          desde la generación
+        </span>
+      </div>
     </div>
   );
 }
