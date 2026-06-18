@@ -63,6 +63,22 @@ export default async function handler(req, res) {
       console.error("Error creando usuario en Supabase:", error);
       return res.status(500).json({ error: error.message });
     }
+
+    // Correo de bienvenida — no debe romper el webhook si falla
+    if (email) {
+      try {
+        await fetch(
+          "https://2appwebhookn8n.henbaz.com/webhook/signiitBienvenida",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, nombre }),
+          },
+        );
+      } catch (mailErr) {
+        console.error("Error enviando correo de bienvenida:", mailErr);
+      }
+    }
   }
 
   if (type === "user.updated") {
