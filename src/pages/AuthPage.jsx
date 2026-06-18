@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SigniitLogo from "../components/SigniitLogo";
@@ -18,11 +18,13 @@ const inputStyle = {
 
 const labelStyle = {
   display: "block",
-  fontFamily: "'DM Sans', sans-serif",
-  fontSize: "13px",
-  fontWeight: "500",
-  color: "#0F4A38",
-  marginBottom: "6px",
+  fontFamily: "'Space Mono', monospace",
+  fontSize: "10px",
+  fontWeight: "400",
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  color: "#8C8880",
+  marginBottom: "7px",
 };
 
 const btnPrimaryStyle = {
@@ -31,7 +33,7 @@ const btnPrimaryStyle = {
   color: "#F0EDE6",
   border: "none",
   borderRadius: "8px",
-  padding: "11px",
+  padding: "12px",
   fontFamily: "'DM Sans', sans-serif",
   fontSize: "14px",
   fontWeight: "500",
@@ -45,10 +47,10 @@ const btnGoogleStyle = {
   color: "#0F4A38",
   border: "0.5px solid rgba(15,74,56,0.18)",
   borderRadius: "8px",
-  padding: "10px",
+  padding: "11px",
   fontFamily: "'DM Sans', sans-serif",
   fontSize: "14px",
-  fontWeight: "400",
+  fontWeight: "500",
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
@@ -72,8 +74,41 @@ const dividerLineStyle = {
 const dividerTextStyle = {
   fontFamily: "'Space Mono', monospace",
   fontSize: "9px",
-  letterSpacing: "0.1em",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
   color: "#8C8880",
+  whiteSpace: "nowrap",
+};
+
+const tabBarStyle = {
+  display: "flex",
+  background: "#F0EDE6",
+  borderRadius: "8px",
+  padding: "4px",
+  gap: "4px",
+  marginBottom: "22px",
+};
+
+const tabStyle = (active) => ({
+  flex: 1,
+  textAlign: "center",
+  padding: "9px",
+  borderRadius: "6px",
+  fontFamily: "'DM Sans', sans-serif",
+  fontSize: "14px",
+  fontWeight: active ? "500" : "400",
+  cursor: "pointer",
+  border: "none",
+  background: active ? "#0F4A38" : "transparent",
+  color: active ? "#F0EDE6" : "#8C8880",
+  transition: "background 0.15s ease, color 0.15s ease",
+});
+
+const errorTextStyle = {
+  fontFamily: "'DM Sans', sans-serif",
+  fontSize: "13px",
+  color: "#C0392B",
+  margin: 0,
 };
 
 const GoogleIcon = () => (
@@ -97,7 +132,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-function SignInForm({ onSwitch }) {
+function SignInForm() {
   const { isLoaded, signIn, setActive } = useSignIn();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -136,20 +171,20 @@ function SignInForm({ onSwitch }) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <button style={btnGoogleStyle} onClick={handleGoogle} type="button">
-        <GoogleIcon /> Continuar con Google
+        <GoogleIcon /> Entrar con mi cuenta de Gmail
       </button>
 
       <div style={dividerStyle}>
         <div style={dividerLineStyle} />
-        <span style={dividerTextStyle}>o</span>
+        <span style={dividerTextStyle}>o ingresa con tu correo</span>
         <div style={dividerLineStyle} />
       </div>
 
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+        style={{ display: "flex", flexDirection: "column", gap: "16px" }}
       >
         <div>
           <label style={labelStyle}>Correo electrónico</label>
@@ -173,18 +208,7 @@ function SignInForm({ onSwitch }) {
             placeholder="••••••••"
           />
         </div>
-        {error && (
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "13px",
-              color: "#C0392B",
-              margin: 0,
-            }}
-          >
-            {error}
-          </p>
-        )}
+        {error && <p style={errorTextStyle}>{error}</p>}
         <button
           type="submit"
           style={{ ...btnPrimaryStyle, opacity: loading ? 0.7 : 1 }}
@@ -193,39 +217,24 @@ function SignInForm({ onSwitch }) {
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
       </form>
-
-      <p
-        style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "13px",
-          color: "#8C8880",
-          textAlign: "center",
-          margin: 0,
-        }}
-      >
-        ¿No tienes cuenta?{" "}
-        <span
-          onClick={onSwitch}
-          style={{ color: "#3DAB8E", fontWeight: "500", cursor: "pointer" }}
-        >
-          Regístrate
-        </span>
-      </p>
     </div>
   );
 }
 
-function SignUpForm({ onSwitch }) {
+function SignUpForm({ onVerifyingChange }) {
   const { isLoaded, signUp, setActive } = useSignUp();
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState("form");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    onVerifyingChange?.(step === "verify");
+  }, [step, onVerifyingChange]);
 
   const handleGoogle = async () => {
     if (!isLoaded) return;
@@ -242,6 +251,11 @@ function SignUpForm({ onSwitch }) {
     setLoading(true);
     setError("");
     try {
+      const fullName = nombre.trim().replace(/\s+/g, " ");
+      const parts = fullName ? fullName.split(" ") : [];
+      const firstName = parts[0] || "";
+      const lastName = parts.slice(1).join(" ");
+
       await signUp.create({
         firstName,
         lastName,
@@ -279,7 +293,7 @@ function SignUpForm({ onSwitch }) {
     return (
       <form
         onSubmit={handleVerify}
-        style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+        style={{ display: "flex", flexDirection: "column", gap: "16px" }}
       >
         <p
           style={{
@@ -288,6 +302,7 @@ function SignUpForm({ onSwitch }) {
             color: "#0F4A38",
             textAlign: "center",
             margin: 0,
+            lineHeight: 1.5,
           }}
         >
           Enviamos un código a <strong>{email}</strong>
@@ -310,18 +325,7 @@ function SignUpForm({ onSwitch }) {
             autoFocus
           />
         </div>
-        {error && (
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "13px",
-              color: "#C0392B",
-              margin: 0,
-            }}
-          >
-            {error}
-          </p>
-        )}
+        {error && <p style={errorTextStyle}>{error}</p>}
         <button
           type="submit"
           style={{ ...btnPrimaryStyle, opacity: loading ? 0.7 : 1 }}
@@ -329,54 +333,55 @@ function SignUpForm({ onSwitch }) {
         >
           {loading ? "Verificando..." : "Verificar cuenta"}
         </button>
+        <p
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "13px",
+            color: "#8C8880",
+            textAlign: "center",
+            margin: 0,
+          }}
+        >
+          <span
+            onClick={() => {
+              setStep("form");
+              setCode("");
+              setError("");
+            }}
+            style={{ color: "#3DAB8E", fontWeight: "500", cursor: "pointer" }}
+          >
+            Usar otro correo
+          </span>
+        </p>
       </form>
     );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <button style={btnGoogleStyle} onClick={handleGoogle} type="button">
-        <GoogleIcon /> Continuar con Google
+        <GoogleIcon /> Registrarme con mi cuenta de Gmail
       </button>
 
       <div style={dividerStyle}>
         <div style={dividerLineStyle} />
-        <span style={dividerTextStyle}>o</span>
+        <span style={dividerTextStyle}>o regístrate con tu correo</span>
         <div style={dividerLineStyle} />
       </div>
 
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+        style={{ display: "flex", flexDirection: "column", gap: "16px" }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "10px",
-          }}
-        >
-          <div>
-            <label style={labelStyle}>Nombre</label>
-            <input
-              style={inputStyle}
-              type="text"
-              required
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Juan"
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Apellido</label>
-            <input
-              style={inputStyle}
-              type="text"
-              required
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Pérez"
-            />
-          </div>
+        <div>
+          <label style={labelStyle}>Nombre completo</label>
+          <input
+            style={inputStyle}
+            type="text"
+            required
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="María García"
+          />
         </div>
         <div>
           <label style={labelStyle}>Correo electrónico</label>
@@ -400,18 +405,7 @@ function SignUpForm({ onSwitch }) {
             placeholder="••••••••"
           />
         </div>
-        {error && (
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "13px",
-              color: "#C0392B",
-              margin: 0,
-            }}
-          >
-            {error}
-          </p>
-        )}
+        {error && <p style={errorTextStyle}>{error}</p>}
         <button
           type="submit"
           style={{ ...btnPrimaryStyle, opacity: loading ? 0.7 : 1 }}
@@ -420,24 +414,6 @@ function SignUpForm({ onSwitch }) {
           {loading ? "Creando cuenta..." : "Crear cuenta"}
         </button>
       </form>
-
-      <p
-        style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "13px",
-          color: "#8C8880",
-          textAlign: "center",
-          margin: 0,
-        }}
-      >
-        ¿Ya tienes cuenta?{" "}
-        <span
-          onClick={onSwitch}
-          style={{ color: "#3DAB8E", fontWeight: "500", cursor: "pointer" }}
-        >
-          Inicia sesión
-        </span>
-      </p>
     </div>
   );
 }
@@ -446,6 +422,7 @@ export default function AuthPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const isSignUp = location.pathname.startsWith("/sign-up");
+  const [verifying, setVerifying] = useState(false);
 
   return (
     <div
@@ -496,6 +473,7 @@ export default function AuthPage() {
           strokeWidth="0.3"
         />
       </svg>
+
       <div
         style={{
           marginBottom: "32px",
@@ -519,6 +497,7 @@ export default function AuthPage() {
           Creativos con intención para Meta Ads
         </p>
       </div>
+
       <div
         style={{
           width: "100%",
@@ -529,12 +508,81 @@ export default function AuthPage() {
           padding: "32px",
         }}
       >
+        {!verifying && (
+          <div style={tabBarStyle}>
+            <button
+              type="button"
+              style={tabStyle(isSignUp)}
+              onClick={() => navigate("/sign-up")}
+            >
+              Crear cuenta
+            </button>
+            <button
+              type="button"
+              style={tabStyle(!isSignUp)}
+              onClick={() => navigate("/sign-in")}
+            >
+              Ingresar
+            </button>
+          </div>
+        )}
+
         {isSignUp ? (
-          <SignUpForm onSwitch={() => navigate("/sign-in")} />
+          <SignUpForm onVerifyingChange={setVerifying} />
         ) : (
-          <SignInForm onSwitch={() => navigate("/sign-up")} />
+          <SignInForm />
         )}
       </div>
+
+      <p
+        style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "12px",
+          color: "rgba(240,237,230,0.4)",
+          textAlign: "center",
+          marginTop: "24px",
+          maxWidth: "360px",
+          lineHeight: 1.6,
+        }}
+      >
+        {"Al continuar, aceptas nuestros "}
+        <a
+          href="https://www.signiit.com/terminos"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "rgba(240,237,230,0.7)",
+            textDecoration: "underline",
+          }}
+        >
+          Términos
+        </a>
+        {", "}
+        <a
+          href="https://www.signiit.com/privacidad"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "rgba(240,237,230,0.7)",
+            textDecoration: "underline",
+          }}
+        >
+          Privacidad
+        </a>
+        {" y "}
+        <a
+          href="https://www.signiit.com/reembolsos"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "rgba(240,237,230,0.7)",
+            textDecoration: "underline",
+          }}
+        >
+          Reembolsos
+        </a>
+        {"."}
+      </p>
     </div>
   );
 }
