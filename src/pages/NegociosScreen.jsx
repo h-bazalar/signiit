@@ -666,6 +666,7 @@ function UploadImagenesReferencia({
   };
 
   const handleEliminar = async (imagen) => {
+    if (eliminandoId === imagen.id) return;
     setEliminandoId(imagen.id);
     setError("");
     try {
@@ -682,9 +683,14 @@ function UploadImagenesReferencia({
           negocioId,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error eliminando imagen");
-      onImagenesChange(imagenes.filter((img) => img.id !== imagen.id));
+      const data = await res.json().catch(() => ({}));
+      // Exito real o idempotente (la fila ya no existia): en ambos casos la
+      // imagen debe desaparecer de la UI. Solo un fallo distinto es error.
+      if (res.ok || data.yaEliminado) {
+        onImagenesChange(imagenes.filter((img) => img.id !== imagen.id));
+      } else {
+        throw new Error(data.error || "Error eliminando imagen");
+      }
     } catch (err) {
       setError(err.message || "Error eliminando la imagen");
     } finally {
@@ -729,6 +735,7 @@ function UploadImagenesReferencia({
             <button
               onClick={() => handleEliminar(img)}
               disabled={eliminandoId === img.id}
+              aria-label={eliminandoId === img.id ? "Eliminando" : "Eliminar imagen"}
               style={{
                 position: "absolute",
                 top: "4px",
@@ -736,18 +743,33 @@ function UploadImagenesReferencia({
                 width: "20px",
                 height: "20px",
                 borderRadius: "50%",
-                background: "rgba(0,0,0,0.55)",
+                background: eliminandoId === img.id ? "rgba(0,0,0,0.75)" : "rgba(0,0,0,0.55)",
                 border: "none",
                 color: "white",
-                cursor: eliminandoId === img.id ? "not-allowed" : "pointer",
+                cursor: eliminandoId === img.id ? "wait" : "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "10px",
                 lineHeight: 1,
+                opacity: eliminandoId === img.id ? 0.85 : 1,
               }}
             >
-              {eliminandoId === img.id ? "·" : "×"}
+              {eliminandoId === img.id ? (
+                <span
+                  style={{
+                    width: "9px",
+                    height: "9px",
+                    border: "1.5px solid rgba(255,255,255,0.4)",
+                    borderTopColor: "white",
+                    borderRadius: "50%",
+                    display: "inline-block",
+                    animation: "spin 0.6s linear infinite",
+                  }}
+                />
+              ) : (
+                "×"
+              )}
             </button>
           </div>
         ))}
@@ -2074,6 +2096,7 @@ export default function NegociosScreen({
       <style>{`
         @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .tooltip-trigger:hover + .tooltip-box, .tooltip-trigger:focus + .tooltip-box { opacity: 1 !important; }
       `}</style>
     </div>
