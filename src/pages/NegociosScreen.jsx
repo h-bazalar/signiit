@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { PLANES, TONOS_MARCA } from "../utils/constants";
+import ImagenConReintento from "../components/ImagenConReintento";
 
 // ── Iconos inline ─────────────────────────────────────────────────────────────
 const IconPlus = () => (
@@ -461,7 +462,7 @@ function UploadLogo({ negocioId, logoUrl, onLogoChange, getToken }) {
               flexShrink: 0,
             }}
           >
-            <img
+            <ImagenConReintento
               src={logoUrl}
               alt="Logo"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
@@ -727,7 +728,7 @@ function UploadImagenesReferencia({
               border: "0.5px solid var(--sig-line-s)",
             }}
           >
-            <img
+            <ImagenConReintento
               src={img.url}
               alt={img.nombre || "Referencia"}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -936,7 +937,7 @@ function NegocioCard({ negocio, onEdit, onDelete }) {
             }}
           >
             {negocio.logo_url ? (
-              <img
+              <ImagenConReintento
                 src={negocio.logo_url}
                 alt="Logo"
                 style={{ width: "100%", height: "100%", objectFit: "contain" }}
