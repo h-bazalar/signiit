@@ -1296,6 +1296,14 @@ export default function CampanasScreen({
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  useEffect(() => {
+    setNegocio(negocioProp ?? null);
+  }, [negocioProp]);
+
+  useEffect(() => {
+    setImagenesNegocio(imagenesNegocioProp ?? []);
+  }, [imagenesNegocioProp]);
+
   useEffect(
     () => () => {
       clearInterval(pollingRef.current);
