@@ -1117,7 +1117,7 @@ function NegocioCard({ negocio, onEdit, onDelete }) {
 }
 
 // ── PanelNegocio ──────────────────────────────────────────────────────────────
-function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken }) {
+function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken, onAssetsChange }) {
   const esEdicion = !!negocio?.id;
 
   const [form, setForm] = useState(
@@ -1540,7 +1540,10 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken }) {
               <UploadLogo
                 negocioId={negocio.id}
                 logoUrl={logoUrl}
-                onLogoChange={setLogoUrl}
+                onLogoChange={(url) => {
+                  setLogoUrl(url);
+                  if (onAssetsChange) onAssetsChange();
+                }}
                 getToken={getToken}
               />
             </BloquePanel>
@@ -1577,7 +1580,10 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken }) {
                 <UploadImagenesReferencia
                   negocioId={negocio.id}
                   imagenes={imagenes}
-                  onImagenesChange={setImagenes}
+                  onImagenesChange={(nuevas) => {
+                    setImagenes(nuevas);
+                    if (onAssetsChange) onAssetsChange();
+                  }}
                   getToken={getToken}
                 />
               )}
@@ -2091,6 +2097,7 @@ export default function NegociosScreen({
           onGuardar={handleGuardar}
           guardando={guardando}
           getToken={getTokenApi}
+          onAssetsChange={onNegociosChange}
         />
       )}
 
