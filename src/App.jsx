@@ -154,7 +154,6 @@ function AppWithLayout() {
       if (errNegocios) throw errNegocios;
 
       const negociosActualizados = lista || [];
-      console.log("[DIAG] refetchNegocios CORRIO. negocios:", negociosActualizados.length);
       setNegocios(negociosActualizados);
 
       if (negociosActualizados.length > 0) {
@@ -167,7 +166,6 @@ function AppWithLayout() {
         );
         if (!resImgs.ok) throw new Error(`HTTP ${resImgs.status}`);
         const imgsData = await resImgs.json();
-        console.log("[DIAG] refetchNegocios setImagenesNegocio con:", (imgsData.imagenes || []).length, "imagenes");
         setImagenesNegocio(imgsData.imagenes || []);
       } else {
         setNegocio(null);
