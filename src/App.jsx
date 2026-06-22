@@ -298,7 +298,7 @@ export default function App() {
         <Routes>
           <Route
             path="/sso-callback"
-            element={<AuthenticateWithRedirectCallback />}
+            element={<AuthenticateWithRedirectCallback signInFallbackRedirectUrl="/" signUpFallbackRedirectUrl="/" />}
           />
           <Route path="/sign-in/*" element={<AuthPage />} />
           <Route path="/sign-up/*" element={<AuthPage />} />

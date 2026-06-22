@@ -132,6 +132,45 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const EyeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+    <line x1="1" y1="1" x2="23" y2="23" />
+  </svg>
+);
+
+function PasswordInput({ value, onChange, placeholder, autoComplete }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{ position: "relative" }}>
+      <input
+        style={{ ...inputStyle, paddingRight: "44px" }}
+        type={show ? "text" : "password"}
+        required
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        aria-label={show ? "Ocultar contrasena" : "Mostrar contrasena"}
+        style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", cursor: "pointer", padding: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "#8C8880" }}
+      >
+        {show ? <EyeOffIcon /> : <EyeIcon />}
+      </button>
+    </div>
+  );
+}
+
 function SignInForm() {
   const { isLoaded, signIn, setActive } = useSignIn();
   const navigate = useNavigate();
@@ -139,14 +178,22 @@ function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleGoogle = async () => {
-    if (!isLoaded) return;
-    await signIn.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
+    if (!isLoaded || googleLoading) return;
+    setGoogleLoading(true);
+    setError("");
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/",
+      });
+    } catch (err) {
+      setError(err.errors?.[0]?.longMessage || "No se pudo conectar con Google.");
+      setGoogleLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -172,8 +219,8 @@ function SignInForm() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <button style={btnGoogleStyle} onClick={handleGoogle} type="button">
-        <GoogleIcon /> Entrar con mi cuenta de Gmail
+      <button style={{ ...btnGoogleStyle, opacity: googleLoading ? 0.7 : 1, cursor: googleLoading ? "default" : "pointer" }} onClick={handleGoogle} type="button" disabled={googleLoading}>
+        {googleLoading ? "Conectando con Google..." : <><GoogleIcon /> Entrar con mi cuenta de Gmail</>}
       </button>
 
       <div style={dividerStyle}>
@@ -199,14 +246,7 @@ function SignInForm() {
         </div>
         <div>
           <label style={labelStyle}>Contraseña</label>
-          <input
-            style={inputStyle}
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="current-password" />
         </div>
         {error && <p style={errorTextStyle}>{error}</p>}
         <button
@@ -231,18 +271,26 @@ function SignUpForm({ onVerifyingChange }) {
   const [step, setStep] = useState("form");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     onVerifyingChange?.(step === "verify");
   }, [step, onVerifyingChange]);
 
   const handleGoogle = async () => {
-    if (!isLoaded) return;
-    await signUp.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
+    if (!isLoaded || googleLoading) return;
+    setGoogleLoading(true);
+    setError("");
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/",
+      });
+    } catch (err) {
+      setError(err.errors?.[0]?.longMessage || "No se pudo conectar con Google.");
+      setGoogleLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -358,8 +406,8 @@ function SignUpForm({ onVerifyingChange }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <button style={btnGoogleStyle} onClick={handleGoogle} type="button">
-        <GoogleIcon /> Registrarme con mi cuenta de Gmail
+      <button style={{ ...btnGoogleStyle, opacity: googleLoading ? 0.7 : 1, cursor: googleLoading ? "default" : "pointer" }} onClick={handleGoogle} type="button" disabled={googleLoading}>
+        {googleLoading ? "Conectando con Google..." : <><GoogleIcon /> Registrarme con mi cuenta de Gmail</>}
       </button>
 
       <div style={dividerStyle}>
@@ -396,14 +444,7 @@ function SignUpForm({ onVerifyingChange }) {
         </div>
         <div>
           <label style={labelStyle}>Contraseña</label>
-          <input
-            style={inputStyle}
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="new-password" />
         </div>
         {error && <p style={errorTextStyle}>{error}</p>}
         <button
