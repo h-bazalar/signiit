@@ -26,22 +26,6 @@ export const PLANES = {
   },
 };
 
-// ── Créditos ────────────────────────────────────────
-export const CREDITO_TIPOS = {
-  imagenes: "generaciones_estaticos", // 1 crédito = 6 imágenes
-  videos: "generaciones_video", // 1 crédito = 3 videos
-  analisis: "analisis_realizados", // 1 crédito = 1 análisis
-};
-
-// ── Output por generación ───────────────────────────
-export const OUTPUT = {
-  imagenesPorGeneracion: 6, // 2 por cada awareness level
-  videosPorGeneracion: 3, // 1 por cada awareness level
-  titulosPorImagen: 5,
-  copiesPorImagen: 5,
-  duracionVideoSeg: 15,
-};
-
 // ── Awareness levels ────────────────────────────────
 export const AWARENESS_LEVELS = [
   "solution_aware",
