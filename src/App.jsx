@@ -160,14 +160,15 @@ function AppWithLayout() {
       if (negociosActualizados.length > 0) {
         const principal = negociosActualizados[0];
         setNegocio(principal);
-        const { data: imgs, error: errImgs } = await client
-          .from("negocio_imagenes")
-          .select("id, url, nombre")
-          .eq("negocio_id", principal.id)
-          .order("created_at", { ascending: true });
-        if (errImgs) throw errImgs;
-        console.log("[DIAG] refetchNegocios setImagenesNegocio con:", (imgs || []).length, "imagenes");
-        setImagenesNegocio(imgs || []);
+        const tokenApi = await getToken();
+        const resImgs = await fetch(
+          `/api/imagenes-negocio?negocioId=${principal.id}`,
+          { headers: { Authorization: `Bearer ${tokenApi}` } },
+        );
+        if (!resImgs.ok) throw new Error(`HTTP ${resImgs.status}`);
+        const imgsData = await resImgs.json();
+        console.log("[DIAG] refetchNegocios setImagenesNegocio con:", (imgsData.imagenes || []).length, "imagenes");
+        setImagenesNegocio(imgsData.imagenes || []);
       } else {
         setNegocio(null);
         setImagenesNegocio([]);
