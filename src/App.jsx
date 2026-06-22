@@ -154,6 +154,7 @@ function AppWithLayout() {
       if (errNegocios) throw errNegocios;
 
       const negociosActualizados = lista || [];
+      console.log("[DIAG] refetchNegocios CORRIO. negocios:", negociosActualizados.length);
       setNegocios(negociosActualizados);
 
       if (negociosActualizados.length > 0) {
@@ -165,6 +166,7 @@ function AppWithLayout() {
           .eq("negocio_id", principal.id)
           .order("created_at", { ascending: true });
         if (errImgs) throw errImgs;
+        console.log("[DIAG] refetchNegocios setImagenesNegocio con:", (imgs || []).length, "imagenes");
         setImagenesNegocio(imgs || []);
       } else {
         setNegocio(null);

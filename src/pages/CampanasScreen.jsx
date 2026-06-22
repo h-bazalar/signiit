@@ -1302,6 +1302,7 @@ export default function CampanasScreen({
   }, [negocioProp]);
 
   useEffect(() => {
+    console.log("[DIAG] CampanasScreen recibio prop imagenesNegocioProp:", (imagenesNegocioProp ?? []).length, "imagenes");
     setImagenesNegocio(imagenesNegocioProp ?? []);
   }, [imagenesNegocioProp]);
 
