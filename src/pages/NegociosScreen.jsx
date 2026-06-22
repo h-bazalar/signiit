@@ -1817,9 +1817,10 @@ export default function NegociosScreen({
     setPanelAbierto(true);
   };
 
-  const cerrarPanel = () => {
+  const cerrarPanel = async () => {
     setPanelAbierto(false);
     setNegocioEditando(null);
+    if (onNegociosChange) await onNegociosChange();
   };
 
   const getTokenApi = () => getToken({ template: "supabase" });
