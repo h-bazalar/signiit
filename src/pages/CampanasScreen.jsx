@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { createSupabaseClient } from "../supabase";
+import ImagenConReintento from "../components/ImagenConReintento";
 import { useToast } from "../context/ToastContext";
 import {
   PLANES,
@@ -580,7 +581,7 @@ function CardImagen({ variacion, onCopy, onExpandir }) {
       </div>
       <div style={{ display: "flex", flexWrap: "wrap" }}>
         <div style={{ flex: "0 0 160px", padding: 16 }}>
-          <img
+          <ImagenConReintento
             src={variacion.foto}
             alt={aw.label}
             onClick={() => onExpandir(variacion.foto)}
@@ -734,7 +735,7 @@ function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir }) {
       <div style={{ display: "flex", flexWrap: "wrap" }}>
         {/* Imagen */}
         <div style={{ flex: "0 0 160px", padding: 16 }}>
-          <img
+          <ImagenConReintento
             src={varActual?.foto || imagen.foto}
             alt="Orgánico"
             onClick={() => onExpandir(varActual?.foto || imagen.foto)}
@@ -2099,7 +2100,7 @@ export default function CampanasScreen({
                                 transition: "border 0.15s",
                               }}
                             >
-                              <img
+                              <ImagenConReintento
                                 src={img.url}
                                 alt={img.nombre || "Referencia"}
                                 style={{
