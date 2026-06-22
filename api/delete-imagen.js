@@ -130,8 +130,11 @@ export async function DELETE(req) {
         .eq("usuario_id", auth.userId)
         .single();
 
-      if (fetchError || !negocio) {
+      if (fetchError) {
         return errorResponse("Negocio no encontrado", 404);
+      }
+      if (!negocio) {
+        return jsonResponse({ ok: true, yaEliminado: true });
       }
 
       if (negocio.logo_url) {
@@ -163,8 +166,11 @@ export async function DELETE(req) {
         .eq("usuario_id", auth.userId)
         .single();
 
-      if (fetchError || !imagen) {
-        return errorResponse("Imagen no encontrada", 404);
+      if (fetchError) {
+        return errorResponse("Error consultando la imagen", 500);
+      }
+      if (!imagen) {
+        return jsonResponse({ ok: true, yaEliminado: true });
       }
 
       const objectKey = imagen.url.replace(
