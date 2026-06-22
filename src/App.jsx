@@ -9,7 +9,7 @@ import {
 } from "@clerk/clerk-react";
 import { createSupabaseClient } from "./supabase";
 import { useState, useEffect } from "react";
-import { ToastProvider } from "./context/ToastContext";
+import { ToastProvider, useToast } from "./context/ToastContext";
 import AppLayout from "./components/AppLayout";
 import AuthPage from "./pages/AuthPage";
 import HomeScreen from "./pages/HomeScreen";
@@ -32,6 +32,7 @@ function ProtectedRoute({ children }) {
 function AppWithLayout() {
   const { user } = useUser();
   const { isLoaded, getToken } = useAuth();
+  const { addToast } = useToast();
   const [planActual, setPlanActual] = useState("free");
   const [supabase, setSupabase] = useState(null);
   const [inicializado, setInicializado] = useState(false);
@@ -90,16 +91,39 @@ function AppWithLayout() {
         if (lista.length > 0) {
           const principal = lista[0];
           setNegocio(principal);
-          const tokenApi = await getToken();
-          const resImgs = await fetch(
-            `/api/imagenes-negocio?negocioId=${principal.id}`,
-            {
-              headers: { Authorization: `Bearer ${tokenApi}` },
-            },
-          );
-          const imgsData = resImgs.ok ? await resImgs.json() : { imagenes: [] };
-          const imgs = imgsData.imagenes || [];
-          setImagenesNegocio(imgs);
+
+          // Carga de imagenes aislada: su fallo NO debe tumbar el init.
+          // 1 reintento ante fallo transitorio (token frio / Supabase despertando).
+          let imgsCargadas = null;
+          for (let intento = 0; intento < 2; intento++) {
+            try {
+              const tokenApi = await getToken();
+              const resImgs = await fetch(
+                `/api/imagenes-negocio?negocioId=${principal.id}`,
+                { headers: { Authorization: `Bearer ${tokenApi}` } },
+              );
+              if (!resImgs.ok) throw new Error(`HTTP ${resImgs.status}`);
+              const imgsData = await resImgs.json();
+              imgsCargadas = imgsData.imagenes || [];
+              break;
+            } catch (errImgs) {
+              console.error(
+                `Error cargando imagenes (intento ${intento + 1}):`,
+                errImgs,
+              );
+              if (intento === 0) await new Promise((r) => setTimeout(r, 800));
+            }
+          }
+
+          if (imgsCargadas !== null) {
+            setImagenesNegocio(imgsCargadas);
+          } else {
+            setImagenesNegocio([]);
+            addToast(
+              "No pudimos cargar tus imagenes de producto. Recarga la pagina para reintentar.",
+              "error",
+            );
+          }
         }
       } catch (e) {
         console.error("Error init:", e);
