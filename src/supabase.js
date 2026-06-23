@@ -7,9 +7,10 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Faltan variables de Supabase en .env.local");
 }
 
-export const createSupabaseClient = (token) =>
+// Cliente unico con token SIEMPRE fresco: la opcion accessToken le pide el JWT
+// a Clerk en CADA request, en vez de congelarlo al crear el cliente (que era la
+// causa del bug del token vencido ~60s). Recibe la funcion getToken de useAuth().
+export const createSupabaseClient = (getToken) =>
   createClient(supabaseUrl, supabaseKey, {
-    global: {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    },
+    accessToken: async () => (await getToken({ template: "supabase" })) ?? null,
   });

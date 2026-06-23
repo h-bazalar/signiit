@@ -8,7 +8,7 @@ import {
   AuthenticateWithRedirectCallback,
 } from "@clerk/clerk-react";
 import { createSupabaseClient } from "./supabase";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ToastProvider, useToast } from "./context/ToastContext";
 import AppLayout from "./components/AppLayout";
 import AuthPage from "./pages/AuthPage";
@@ -34,7 +34,7 @@ function AppWithLayout() {
   const { isLoaded, getToken } = useAuth();
   const { addToast } = useToast();
   const [planActual, setPlanActual] = useState("free");
-  const [supabase, setSupabase] = useState(null);
+  const supabase = useMemo(() => createSupabaseClient(getToken), [getToken]);
   const [inicializado, setInicializado] = useState(false);
   const [error, setError] = useState(null);
 
@@ -50,15 +50,6 @@ function AppWithLayout() {
 
     const init = async () => {
       try {
-        const token = await getToken({ template: "supabase" });
-        if (!token) {
-          setError("No se pudo obtener token de Clerk");
-          return;
-        }
-
-        const client = createSupabaseClient(token);
-        setSupabase(client);
-
         const tokenSesion = await getToken();
 
         // Todo en paralelo
@@ -68,12 +59,12 @@ function AppWithLayout() {
               method: "POST",
               headers: { Authorization: `Bearer ${tokenSesion}` },
             }).then((r) => (r.ok ? r.json() : null)),
-            client
+            supabase
               .from("negocios")
               .select("*")
               .eq("usuario_id", user.id)
               .order("created_at", { ascending: false }),
-            client
+            supabase
               .from("campanas_generadas")
               .select("*")
               .eq("usuario_id", user.id)
@@ -134,7 +125,7 @@ function AppWithLayout() {
     };
 
     init();
-  }, [user]);
+  }, [user, getToken, supabase, addToast]);
 
   // Refetch negocio + imágenes (llamado desde NegociosScreen tras cambios).
   // Acuña token + cliente frescos por llamada (los del init expiran ~60s) y
@@ -143,10 +134,7 @@ function AppWithLayout() {
   const refetchNegocios = async () => {
     if (!user) return;
     try {
-      const token = await getToken({ template: "supabase" });
-      const client = createSupabaseClient(token);
-
-      const { data: lista, error: errNegocios } = await client
+      const { data: lista, error: errNegocios } = await supabase
         .from("negocios")
         .select("*")
         .eq("usuario_id", user.id)
@@ -181,21 +169,18 @@ function AppWithLayout() {
   const refetchHome = async () => {
     if (!user) return;
     try {
-      const token = await getToken({ template: "supabase" });
-      const client = createSupabaseClient(token);
-
       const [
         { data: statsData, error: statsErr },
         { data: historialData, error: histErr },
       ] = await Promise.all([
-        client
+        supabase
           .from("usuarios")
           .select(
             "generaciones_estaticos, generaciones_video, analisis_realizados",
           )
           .eq("clerk_id", user.id)
           .single(),
-        client
+        supabase
           .from("campanas_generadas")
           .select("*")
           .eq("usuario_id", user.id)
@@ -211,7 +196,7 @@ function AppWithLayout() {
     }
   };
 
-  if (!isLoaded || !supabase || !inicializado)
+  if (!isLoaded || !inicializado)
     return (
       <div
         style={{
@@ -323,7 +308,12 @@ export default function App() {
         <Routes>
           <Route
             path="/sso-callback"
-            element={<AuthenticateWithRedirectCallback signInFallbackRedirectUrl="/" signUpFallbackRedirectUrl="/" />}
+            element={
+              <AuthenticateWithRedirectCallback
+                signInFallbackRedirectUrl="/"
+                signUpFallbackRedirectUrl="/"
+              />
+            }
           />
           <Route path="/sign-in/*" element={<AuthPage />} />
           <Route path="/sign-up/*" element={<AuthPage />} />
