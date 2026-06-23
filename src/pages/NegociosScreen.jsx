@@ -172,6 +172,8 @@ const MICROCOPY = {
     'Ej (masivo): "Mujeres de 30-50 años que quieren bajar de peso sin ir al gimnasio." — Ej (nicho): "Dueños de pymes que necesitan automatizar sus procesos sin saber programar." — Ej (local): "Familias de Miraflores y San Isidro que buscan postres para eventos o regalo."',
   diferencial:
     'Ej (producto): "Distribuidores oficiales con entrega en 24h y asesoría personalizada." — Ej (servicio): "Profesores nativos, clases 1 a 1, horarios flexibles desde las 6am." — Ej (local): "Sin conservantes, ingredientes importados, lista de espera de solo 48h."',
+  componentes_clave:
+    "Los ingredientes, materiales o método concretos detrás de tu producto o servicio. Es la prueba de lo que ofreces — Signiit la usa para crear ganchos más potentes. Opcional.",
   tono: "Define cómo le habla tu marca a tu cliente. Afecta el registro de todo el copy generado.",
 };
 
@@ -179,6 +181,7 @@ const FORM_VACIO = {
   nombre: "",
   rubro: "",
   producto: "",
+  componentes_clave: "",
   publico: "",
   diferencial: "",
   tono: "",
@@ -1127,6 +1130,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken, onAsse
           nombre: negocio.nombre || "",
           rubro: negocio.rubro || "",
           producto: negocio.producto || "",
+          componentes_clave: negocio.componentes_clave || "",
           publico: negocio.publico || "",
           diferencial: negocio.diferencial || "",
           tono: negocio.tono || "",
@@ -1366,7 +1370,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken, onAsse
               <FieldLabel microcopy={MICROCOPY.producto}>Qué vendes</FieldLabel>
               <textarea
                 style={{ ...inputStyle("producto"), minHeight: "72px" }}
-                placeholder="Ej: Batidos y suplementos Fuxión para mejorar la energía, bajar de peso y dormir mejor. Distribución a todo el Perú."
+                placeholder="Ej: Suplementos para energía y bajar de peso · Tortas y postres por encargo · Clases de inglés online para adultos"
                 value={form.producto}
                 onChange={(e) => set("producto", e.target.value)}
                 onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
@@ -1400,6 +1404,36 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken, onAsse
                   {errores.producto}
                 </p>
               )}
+            </div>
+
+            {/* De qué está hecho (opcional) */}
+            <div style={{ marginBottom: "14px" }}>
+              <FieldLabel microcopy={MICROCOPY.componentes_clave}>
+                De qué está hecho
+              </FieldLabel>
+              <textarea
+                style={{ ...inputStyle("componentes_clave"), minHeight: "60px" }}
+                placeholder="Ej: Uña de gato, achiote, guanarpo macho · Algodón pima, costura reforzada · Método de 12 semanas, 1 a 1"
+                value={form.componentes_clave}
+                onChange={(e) => set("componentes_clave", e.target.value)}
+                onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
+                onBlur={(e) =>
+                  (e.target.style.borderColor = "var(--sig-line-s)")
+                }
+              />
+              <p
+                style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "11px",
+                  color: "var(--sig-stone)",
+                  marginTop: "4px",
+                  lineHeight: "1.5",
+                }}
+              >
+                Opcional. Suplementos o comida → ingredientes. Ropa →
+                materiales. Servicios → método. Es lo que hace creíble tu
+                oferta.
+              </p>
             </div>
 
             {/* Público */}
@@ -1440,7 +1474,7 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken, onAsse
               </FieldLabel>
               <textarea
                 style={{ ...inputStyle("diferencial"), minHeight: "60px" }}
-                placeholder="Ej: Somos distribuidores oficiales con entrega en 24h y acompañamiento personalizado."
+                placeholder="Ej: Entrega en 24h y asesoría personalizada · Sin conservantes, hecho el mismo día · Profesores nativos, clases 1 a 1"
                 value={form.diferencial}
                 onChange={(e) => set("diferencial", e.target.value)}
                 onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
@@ -1751,6 +1785,7 @@ export default function NegociosScreen({
             nombre: formData.nombre,
             rubro: formData.rubro,
             producto: formData.producto,
+            componentes_clave: formData.componentes_clave,
             publico: formData.publico,
             diferencial: formData.diferencial,
             tono: formData.tono,
@@ -1765,6 +1800,7 @@ export default function NegociosScreen({
           nombre: formData.nombre,
           rubro: formData.rubro,
           producto: formData.producto,
+          componentes_clave: formData.componentes_clave,
           publico: formData.publico,
           diferencial: formData.diferencial,
           tono: formData.tono,
