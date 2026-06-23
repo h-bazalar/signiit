@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { createSupabaseClient } from "../supabase";
 import ImagenConReintento from "../components/ImagenConReintento";
 import { useToast } from "../context/ToastContext";
 import {
@@ -1446,9 +1445,7 @@ export default function CampanasScreen({
             return;
           }
           try {
-            const token = await getToken({ template: "supabase" });
-            const clienteFresco = createSupabaseClient(token);
-            const { data } = await clienteFresco
+            const { data } = await supabase
               .from("campanas_generadas")
               .select("estado, resultado")
               .eq("id", campanaId)
@@ -1578,9 +1575,7 @@ export default function CampanasScreen({
     addToast("Generación cancelada.", "info");
     if (campanaIdRef.current) {
       try {
-        const token = await getToken({ template: "supabase" });
-        const clienteFresco = createSupabaseClient(token);
-        await clienteFresco
+        await supabase
           .from("campanas_generadas")
           .update({ estado: "cancelado" })
           .eq("id", campanaIdRef.current);

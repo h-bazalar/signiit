@@ -1720,10 +1720,7 @@ export default function NegociosScreen({
     if (!user) return;
     setCargando(true);
     try {
-      const token = await getToken({ template: "supabase" });
-      const { createSupabaseClient } = await import("../supabase.js");
-      const client = createSupabaseClient(token);
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from("negocios")
         .select("*")
         .eq("usuario_id", user.id)
@@ -1747,11 +1744,8 @@ export default function NegociosScreen({
     if (!user) return;
     setGuardando(true);
     try {
-      const token = await getToken({ template: "supabase" });
-      const { createSupabaseClient } = await import("../supabase.js");
-      const client = createSupabaseClient(token);
       if (formData.id) {
-        const { error } = await client
+        const { error } = await supabase
           .from("negocios")
           .update({
             nombre: formData.nombre,
@@ -1766,7 +1760,7 @@ export default function NegociosScreen({
         if (error) throw error;
         mostrarToast("Negocio actualizado.");
       } else {
-        const { error } = await client.from("negocios").insert({
+        const { error } = await supabase.from("negocios").insert({
           usuario_id: user.id,
           nombre: formData.nombre,
           rubro: formData.rubro,
@@ -1795,10 +1789,7 @@ export default function NegociosScreen({
   const handleEliminar = async (id) => {
     if (!user) return;
     try {
-      const token = await getToken({ template: "supabase" });
-      const { createSupabaseClient } = await import("../supabase.js");
-      const client = createSupabaseClient(token);
-      const { error } = await client
+      const { error } = await supabase
         .from("negocios")
         .delete()
         .eq("id", id)
