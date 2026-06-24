@@ -159,6 +159,7 @@ export default async function handler(req, res) {
         generaciones_estaticos: 0,
         generaciones_video: 0,
         analisis_realizados: 0,
+        recordatorio_vip_enviado_at: null,
       })
       .eq("clerk_id", clerkId);
 
