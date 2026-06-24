@@ -39,14 +39,20 @@ export async function resolverCicloCreditos(supabaseAdmin, clerkId, usuario) {
   if (expiresAt && Date.now() >= expiresAt.getTime()) {
     await supabaseAdmin
       .from("usuarios")
-      .update({ plan: "free" })
+      .update({
+        plan: "free",
+        vip_expires_at: null,
+        recordatorio_vip_enviado_at: null,
+      })
       .eq("clerk_id", clerkId);
     // Contadores intactos: el ex-VIP no recibe un set nuevo de créditos free.
+    // Se limpian los campos VIP (vencimiento + marca de recordatorio): un free
+    // no debe arrastrar datos de VIP.
     return {
       plan: "free",
       stats: statsActuales,
       creditos_reset_at: usuario.creditos_reset_at ?? null,
-      vip_expires_at: usuario.vip_expires_at,
+      vip_expires_at: null,
       reseteado: false,
       vencido: true,
     };
