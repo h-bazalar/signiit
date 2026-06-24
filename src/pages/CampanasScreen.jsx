@@ -456,8 +456,8 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
                 ]
               : [
                   {
-                    bold: "Tortas y alfajores",
-                    resto: " — genera una campaña para cada uno.",
+                    bold: "Un producto por campaña",
+                    resto: " — si vendes varios, genera una campaña para cada uno.",
                   },
                   {
                     bold: "Los 3 van juntos",
@@ -1690,8 +1690,8 @@ export default function CampanasScreen({
 
   const placeholderPorQue =
     modoApp === "organico"
-      ? "Ej: La frescura de mis ingredientes y que se prepara al momento."
-      : "Ej: Entrega a domicilio el mismo día. / Ingredientes importados sin conservantes.";
+      ? "Ej: el detalle de tu producto que más enamora y se puede ver en una foto"
+      : "Ej: algo concreto y comprobable que un competidor no pueda copiar fácil";
 
   const hintPorQue =
     modoApp === "organico"
@@ -1707,7 +1707,7 @@ export default function CampanasScreen({
             <textarea
               rows={3}
               style={inputStyle}
-              placeholder="Ej: Tortas de chocolate para cumpleaños. / El batido Fuxión Energy para personas con cansancio crónico."
+              placeholder="Ej: [lo que vendes], con detalle, para [a quién va dirigido]"
               value={angulo.promocionar}
               onChange={(e) => setA("promocionar", e.target.value)}
               onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
@@ -1730,7 +1730,7 @@ export default function CampanasScreen({
             <textarea
               rows={3}
               style={inputStyle}
-              placeholder="Ej: Quiero una torta rica para el cumple de mi hijo pero no sé dónde pedir."
+              placeholder="Ej: lo que tu cliente piensa o busca justo antes de comprarte, dicho como él lo diría"
               value={angulo.problema}
               onChange={(e) => setA("problema", e.target.value)}
               onFocus={(e) => (e.target.style.borderColor = "var(--sig-mid)")}
@@ -1830,7 +1830,7 @@ export default function CampanasScreen({
                 <span style={labelStyle}>Descripción de la oferta</span>
                 <input
                   style={inputStyle}
-                  placeholder="Ej: 20% de descuento esta semana"
+                  placeholder="Ej: 20% de descuento o 2x1 — incluye hasta cuándo"
                   value={angulo.ofertaDetalle}
                   onChange={(e) =>
                     setA("ofertaDetalle", e.target.value.slice(0, 80))
@@ -1847,7 +1847,7 @@ export default function CampanasScreen({
                 <span style={labelStyle}>Precio (opcional)</span>
                 <input
                   style={inputStyle}
-                  placeholder="Ej: Tortas desde S/45 · Alfajores S/8 la docena"
+                  placeholder="Ej: desde S/50 · o tu rango si manejas varios precios"
                   value={angulo.ofertaPrecio}
                   onChange={(e) =>
                     setA("ofertaPrecio", e.target.value.slice(0, 60))
