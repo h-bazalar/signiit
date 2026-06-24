@@ -85,8 +85,28 @@ const IconEstrella = () => (
   </svg>
 );
 
-export default function PlanesScreen({ planActual, creditos }) {
+export default function PlanesScreen({ planActual, creditos, getToken }) {
   const planesOrden = ["free", "vip"];
+  const [cargandoPago, setCargandoPago] = useState(false);
+
+  const iniciarPagoVip = async () => {
+    setCargandoPago(true);
+    try {
+      const token = await getToken();
+      const res = await fetch("/api/crear-preferencia-mp", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("No se pudo iniciar el pago");
+      const { initPoint } = await res.json();
+      if (!initPoint) throw new Error("Sin URL de pago");
+      window.location.href = initPoint; // redirige al checkout de MP
+    } catch (e) {
+      console.error("Error iniciando pago:", e);
+      alert("No se pudo iniciar el pago. Intenta de nuevo en un momento.");
+      setCargandoPago(false);
+    }
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--sig-paper)" }}>
@@ -358,30 +378,51 @@ export default function PlanesScreen({ planActual, creditos }) {
                 )}
 
                 {!esPlanActual && !esPlanInferior && plan.cta && (
-                  <button
-                    onClick={() => window.open(plan.cta.url, "_blank")}
-                    style={{
-                      background: "var(--sig-mint)",
-                      color: "var(--sig-forest)",
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontWeight: 700,
-                      fontSize: "13px",
-                      padding: "12px 20px",
-                      borderRadius: 8,
-                      border: "none",
-                      cursor: "pointer",
-                      width: "100%",
-                      transition: "background 0.15s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "var(--sig-mid)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "var(--sig-mint)")
-                    }
-                  >
-                    {plan.cta.label}
-                  </button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <button
+                      onClick={iniciarPagoVip}
+                      disabled={cargandoPago}
+                      style={{
+                        background: "var(--sig-mint)",
+                        color: "var(--sig-forest)",
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "13px",
+                        padding: "12px 20px",
+                        borderRadius: 8,
+                        border: "none",
+                        cursor: cargandoPago ? "wait" : "pointer",
+                        width: "100%",
+                        opacity: cargandoPago ? 0.7 : 1,
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        !cargandoPago &&
+                        (e.currentTarget.style.background = "var(--sig-mid)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "var(--sig-mint)")
+                      }
+                    >
+                      {cargandoPago ? "Abriendo pago..." : plan.cta.label}
+                    </button>
+                    <a
+                      href={plan.cta.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: "11px",
+                        color: plan.destacado
+                          ? "rgba(240,237,230,0.5)"
+                          : "var(--sig-stone)",
+                        textAlign: "center",
+                        textDecoration: "none",
+                      }}
+                    >
+                      ¿Problemas para pagar? Escríbenos por WhatsApp
+                    </a>
+                  </div>
                 )}
 
                 {esPlanActual && plan.id === "vip" && (

@@ -17,6 +17,7 @@ import NegociosScreen from "./pages/NegociosScreen";
 import CampanasScreen from "./pages/CampanasScreen";
 import AnalisisScreen from "./pages/AnalisisScreen";
 import PlanesScreen from "./pages/PlanesScreen";
+import PagoRetorno from "./pages/PagoRetorno";
 
 function ProtectedRoute({ children }) {
   return (
@@ -289,6 +290,7 @@ function AppWithLayout() {
           element={
             <PlanesScreen
               planActual={planActual}
+              getToken={getToken}
               creditos={
                 stats ? { imagenes: stats.generaciones_estaticos ?? 0 } : null
               }
@@ -317,6 +319,30 @@ export default function App() {
           />
           <Route path="/sign-in/*" element={<AuthPage />} />
           <Route path="/sign-up/*" element={<AuthPage />} />
+          <Route
+            path="/pago-exitoso"
+            element={
+              <ProtectedRoute>
+                <PagoRetorno variante="exitoso" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pago-pendiente"
+            element={
+              <ProtectedRoute>
+                <PagoRetorno variante="pendiente" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pago-fallido"
+            element={
+              <ProtectedRoute>
+                <PagoRetorno variante="fallido" />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/*"
             element={
