@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   const { data: usuario, error: errUser } = await supabaseAdmin
     .from("usuarios")
     .select(
-      "plan, generaciones_estaticos, generaciones_video, analisis_realizados, creditos_reset_at",
+      "plan, generaciones_estaticos, generaciones_video, analisis_realizados, creditos_reset_at, vip_expires_at",
     )
     .eq("clerk_id", clerkId)
     .single();
@@ -35,10 +35,12 @@ export default async function handler(req, res) {
   try {
     const ciclo = await resolverCicloCreditos(supabaseAdmin, clerkId, usuario);
     return res.status(200).json({
-      plan: usuario.plan,
+      plan: ciclo.plan,
       stats: ciclo.stats,
       creditos_reset_at: ciclo.creditos_reset_at,
+      vip_expires_at: ciclo.vip_expires_at,
       reseteado: ciclo.reseteado,
+      vencido: ciclo.vencido,
     });
   } catch (err) {
     console.error("Error en sesion-init:", err);

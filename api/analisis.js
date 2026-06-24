@@ -803,7 +803,7 @@ export default async function handler(req, res) {
   const { data: usuario, error: errUser } = await supabaseAdmin
     .from("usuarios")
     .select(
-      "plan, generaciones_estaticos, generaciones_video, analisis_realizados, creditos_reset_at",
+      "plan, generaciones_estaticos, generaciones_video, analisis_realizados, creditos_reset_at, vip_expires_at",
     )
     .eq("clerk_id", clerkId)
     .single();
@@ -812,18 +812,22 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: "Usuario no encontrado" });
   }
 
-  // ── Gate VIP ──
-  if (usuario.plan !== "vip") {
+  // ── Vencimiento/ciclo VIP (helper compartido = fuente única de verdad) ──
+  // Corre ANTES del gate: si la ventana VIP pagada venció, el helper baja el
+  // plan a 'free' y devuelve ciclo.plan='free' → el gate de abajo lo bloquea.
+  // Gatear sobre usuario.plan (el valor viejo en DB) dejaría colar un análisis
+  // a un VIP recién vencido. Los créditos ya NO se refrescan acá: eso lo hace
+  // el pago (webhook MP). Acá solo se vence y se baja a free.
+  const ciclo = await resolverCicloCreditos(supabaseAdmin, clerkId, usuario);
+
+  // ── Gate VIP (sobre el plan ya resuelto, no el de la lectura) ──
+  if (ciclo.plan !== "vip") {
     return res.status(403).json({
       error: "El análisis de campañas está disponible solo en el plan VIP.",
       code: "PLAN_REQUERIDO",
     });
   }
 
-  // ── Reset mensual perezoso (helper compartido = fuente única de verdad) ──
-  // Solo VIP; cera los 3 contadores si el ciclo (≥30 días) venció con un
-  // creditos_reset_at real. Si reset_at es null, lo ancla a ahora SIN cerar.
-  const ciclo = await resolverCicloCreditos(supabaseAdmin, clerkId, usuario);
   const analisisUsados = ciclo.stats.analisis_realizados;
 
   // ── Gate límite ──
