@@ -21,10 +21,19 @@ export async function POST(req) {
       process.env.SUPABASE_SERVICE_KEY,
     );
 
+    // La ruta del logo en MinIO es determinística (logos/{userId}/{negocioId}.{ext}),
+    // por lo que al CAMBIAR el logo la URL resultaría idéntica a la anterior y ni
+    // React ni el navegador detectarían el cambio (se queda el logo viejo). Le
+    // agregamos una versión (?v=timestamp) para forzar el refresco en todos los
+    // lectores: panel, tarjeta del negocio, header de Campañas y pipeline n8n.
+    // Las imágenes de referencia NO lo necesitan (su id es un UUID único por subida).
+    let urlFinal = finalUrl;
+
     if (tipo === "logo") {
+      urlFinal = `${finalUrl}?v=${Date.now()}`;
       const { error } = await supabaseAdmin
         .from("negocios")
-        .update({ logo_url: finalUrl })
+        .update({ logo_url: urlFinal })
         .eq("id", negocioId)
         .eq("usuario_id", auth.userId);
       if (error)
@@ -61,7 +70,7 @@ export async function POST(req) {
         throw new Error("Error guardando imagen: " + insertError.message);
     }
 
-    return jsonResponse({ ok: true, url: finalUrl });
+    return jsonResponse({ ok: true, url: urlFinal });
   } catch (err) {
     console.error("Error en upload-confirm:", err);
     return errorResponse(err.message || "Error interno", 500);

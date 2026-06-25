@@ -410,7 +410,7 @@ function UploadLogo({ negocioId, logoUrl, onLogoChange, getToken }) {
       if (!resConfirm.ok)
         throw new Error(confirmData.error || "Error confirmando subida");
 
-      onLogoChange(urlData.finalUrl);
+      onLogoChange(confirmData.url);
     } catch (err) {
       setError(err.message || "Error subiendo el logo");
     } finally {
@@ -739,7 +739,9 @@ function UploadImagenesReferencia({
             <button
               onClick={() => handleEliminar(img)}
               disabled={eliminandoId === img.id}
-              aria-label={eliminandoId === img.id ? "Eliminando" : "Eliminar imagen"}
+              aria-label={
+                eliminandoId === img.id ? "Eliminando" : "Eliminar imagen"
+              }
               style={{
                 position: "absolute",
                 top: "4px",
@@ -747,7 +749,10 @@ function UploadImagenesReferencia({
                 width: "20px",
                 height: "20px",
                 borderRadius: "50%",
-                background: eliminandoId === img.id ? "rgba(0,0,0,0.75)" : "rgba(0,0,0,0.55)",
+                background:
+                  eliminandoId === img.id
+                    ? "rgba(0,0,0,0.75)"
+                    : "rgba(0,0,0,0.55)",
                 border: "none",
                 color: "white",
                 cursor: eliminandoId === img.id ? "wait" : "pointer",
@@ -1121,7 +1126,14 @@ function NegocioCard({ negocio, onEdit, onDelete }) {
 }
 
 // ── PanelNegocio ──────────────────────────────────────────────────────────────
-function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken, onAssetsChange }) {
+function PanelNegocio({
+  negocio,
+  onClose,
+  onGuardar,
+  guardando,
+  getToken,
+  onAssetsChange,
+}) {
   const esEdicion = !!negocio?.id;
 
   const [form, setForm] = useState(
@@ -1412,7 +1424,10 @@ function PanelNegocio({ negocio, onClose, onGuardar, guardando, getToken, onAsse
                 De qué está hecho
               </FieldLabel>
               <textarea
-                style={{ ...inputStyle("componentes_clave"), minHeight: "60px" }}
+                style={{
+                  ...inputStyle("componentes_clave"),
+                  minHeight: "60px",
+                }}
                 placeholder="Ej: Uña de gato, achiote, guanarpo macho · Algodón pima, costura reforzada · Método de 12 semanas, 1 a 1"
                 value={form.componentes_clave}
                 onChange={(e) => set("componentes_clave", e.target.value)}
