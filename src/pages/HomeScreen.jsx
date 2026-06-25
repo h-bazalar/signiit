@@ -576,7 +576,15 @@ export default function HomeScreen({
               ))}
           </div>
         ) : historialListo.length === 0 ? (
-          <div style={{ padding: "48px 20px", textAlign: "center" }}>
+          <div
+            style={{
+              padding: "48px 20px",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
             <p
               style={{
                 fontFamily: "'DM Serif Display', serif",
@@ -585,17 +593,43 @@ export default function HomeScreen({
                 marginBottom: "8px",
               }}
             >
-              Todo listo para empezar.
+              {negociosCount === 0
+                ? "Empieza por tu negocio."
+                : "Todo listo para empezar."}
             </p>
             <p
               style={{
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: "14px",
                 color: "#8C8880",
+                marginBottom: "20px",
               }}
             >
-              Ve a Campañas para generar tus primeros creativos.
+              {negociosCount === 0
+                ? "Registra tu negocio para poder generar tus primeros creativos. Es el primer paso."
+                : "Ve a Campañas para generar tus primeros creativos."}
             </p>
+            <button
+              onClick={() =>
+                navigate(negociosCount === 0 ? "/negocios" : "/campanas")
+              }
+              style={{
+                background: "#0F4A38",
+                color: "#F7F5F0",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "13px",
+                fontWeight: 500,
+                padding: "10px 20px",
+                borderRadius: "8px",
+                border: "none",
+                cursor: "pointer",
+                display: "inline-flex",
+                gap: "7px",
+                alignItems: "center",
+              }}
+            >
+              {negociosCount === 0 ? "Crear mi negocio →" : "Ir a Campañas →"}
+            </button>
           </div>
         ) : (
           <>
