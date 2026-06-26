@@ -137,6 +137,15 @@ function CeldaCreativo({ foto, colores, labelTexto, onExpandirImagen }) {
   );
 }
 
+function IconoDescargar({ size = 13, color = "#fff", strokeWidth = 1.4 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 1v8M3.5 6.5l3 3 3-3" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M1 10.5h11" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function IconoAmpliar({ size = 10, color = "#fff", strokeWidth = 1.6 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
@@ -425,6 +434,26 @@ export default function HomeScreen({
 
   const toggleExpandido = (id) => {
     setExpandidoId((prev) => (prev === id ? null : id));
+  };
+
+  const descargarImagen = async (url) => {
+    if (!url) return;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("No se pudo descargar");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+      a.download = `signiit-creativo-${Date.now()}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+      console.error("Error descargando imagen:", e);
+    }
   };
 
   return (
@@ -970,6 +999,27 @@ export default function HomeScreen({
             padding: 16,
           }}
         >
+          <button
+            onClick={(e) => { e.stopPropagation(); descargarImagen(imagenExpandida); }}
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              color: "white",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1,
+            }}
+          >
+            <IconoDescargar size={16} />
+          </button>
           <img
             src={imagenExpandida}
             alt="Ampliado"

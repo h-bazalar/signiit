@@ -531,7 +531,7 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
 }
 
 // ── Card resultado Meta Ads ───────────────────────────────────────────────────
-function CardImagen({ variacion, onCopy, onExpandir }) {
+function CardImagen({ variacion, onCopy, onExpandir, onDescargar }) {
   const aw = AWARENESS_LABELS[variacion.awareness_level] || {
     label: "Creativo",
     color: "var(--sig-aware-green)",
@@ -604,6 +604,28 @@ function CardImagen({ variacion, onCopy, onExpandir }) {
           >
             Clic para ampliar
           </p>
+          <button
+            onClick={() => onDescargar(variacion.foto)}
+            style={{
+              width: "100%",
+              marginTop: 6,
+              padding: "6px",
+              borderRadius: 6,
+              background: "transparent",
+              border: "0.5px solid var(--sig-line-s)",
+              color: "var(--sig-forest)",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "11px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 5,
+            }}
+          >
+            <IconDownload />
+            Descargar
+          </button>
         </div>
         {[
           { titulo: "5 Títulos", items: variacion.titulos },
@@ -677,7 +699,7 @@ function CardImagen({ variacion, onCopy, onExpandir }) {
 }
 
 // ── Card resultado Orgánico ───────────────────────────────────────────────────
-function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir }) {
+function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir, onDescargar }) {
   const [varActiva, setVarActiva] = useState(0);
   const varActual = variaciones[varActiva];
   const gancho =
@@ -758,6 +780,28 @@ function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir }) {
           >
             Clic para ampliar
           </p>
+          <button
+            onClick={() => onDescargar(varActual?.foto || imagen.foto)}
+            style={{
+              width: "100%",
+              marginTop: 6,
+              padding: "6px",
+              borderRadius: 6,
+              background: "transparent",
+              border: "0.5px solid var(--sig-line-s)",
+              color: "var(--sig-forest)",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "11px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 5,
+            }}
+          >
+            <IconDownload />
+            Descargar
+          </button>
         </div>
         {/* Texto overlay + caption */}
         <div
@@ -971,7 +1015,7 @@ function ProgresoCircular({ progreso }) {
 }
 
 // ── Modal imagen expandida ────────────────────────────────────────────────────
-function ModalImagen({ src, onClose }) {
+function ModalImagen({ src, onClose, onDescargar }) {
   useEffect(() => {
     const h = (e) => {
       if (e.key === "Escape") onClose();
@@ -994,6 +1038,26 @@ function ModalImagen({ src, onClose }) {
         padding: 16,
       }}
     >
+      <button
+        onClick={(e) => { e.stopPropagation(); onDescargar(src); }}
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 60,
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.15)",
+          border: "none",
+          color: "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <IconDownload />
+      </button>
       <button
         onClick={onClose}
         style={{
@@ -1486,6 +1550,27 @@ export default function CampanasScreen({
         return prev + Math.random() * 0.5 + 0.2;
       });
     }, 1000);
+  };
+
+  const descargarImagen = async (url) => {
+    if (!url) return;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("No se pudo descargar");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+      a.download = `signiit-creativo-${Date.now()}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+      addToast("Imagen descargada.", "success");
+    } catch (e) {
+      addToast("No se pudo descargar la imagen.", "error");
+    }
   };
 
   const handleCopy = async (texto) => {
@@ -2603,6 +2688,7 @@ export default function CampanasScreen({
                     variaciones={img.variaciones_texto || []}
                     onCopy={handleCopy}
                     onExpandir={setImagenExpandida}
+                    onDescargar={descargarImagen}
                   />
                 ))
               : (resultado.variaciones || []).map((v, i) => (
@@ -2611,6 +2697,7 @@ export default function CampanasScreen({
                     variacion={v}
                     onCopy={handleCopy}
                     onExpandir={setImagenExpandida}
+                    onDescargar={descargarImagen}
                   />
                 ))}
           </div>
@@ -2621,6 +2708,7 @@ export default function CampanasScreen({
         <ModalImagen
           src={imagenExpandida}
           onClose={() => setImagenExpandida(null)}
+          onDescargar={descargarImagen}
         />
       )}
       <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
