@@ -160,7 +160,16 @@ function IconoAmpliar({ size = 10, color = "#fff", strokeWidth = 1.6 }) {
   );
 }
 
-function FilaCreativoOrganico({ vt, onExpandirImagen, conBorde }) {
+function IconoCopiar({ size = 12, color = "#8C8880" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 13 13" fill="none">
+      <rect x="4" y="4" width="8" height="8" rx="1.5" stroke={color} strokeWidth="1.1" />
+      <path d="M2 9H1.5A1.5 1.5 0 010 7.5v-6A1.5 1.5 0 011.5 0h6A1.5 1.5 0 019 1.5V2" stroke={color} strokeWidth="1.1" />
+    </svg>
+  );
+}
+
+function FilaCreativoOrganico({ vt, onExpandirImagen, conBorde, onCopiar }) {
   const foto = vt.foto || null;
   const ganchoKey = vt.gancho_style;
   const colores = GANCHO_COLORS[ganchoKey] || GANCHO_COLORS.pregunta;
@@ -276,12 +285,54 @@ function FilaCreativoOrganico({ vt, onExpandirImagen, conBorde }) {
         >
           {overlay}
         </div>
+        {vt.caption && (
+          <div style={{ marginTop: 8 }}>
+            <div
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "8px",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "#8C8880",
+                marginBottom: 4,
+              }}
+            >
+              Caption sugerido
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <span
+                style={{
+                  flex: 1,
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "12px",
+                  color: "#8C8880",
+                  lineHeight: 1.55,
+                }}
+              >
+                {vt.caption}
+              </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onCopiar(vt.caption); }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 2,
+                  color: "#8C8880",
+                  flexShrink: 0,
+                }}
+              >
+                <IconoCopiar />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function DespliegueReciente({ item, onExpandirImagen }) {
+function DespliegueReciente({ item, onExpandirImagen, onCopiar }) {
   const variaciones = item.resultado?.variaciones || [];
   const esOrganico = item.resultado?.modoApp === "organico";
 
@@ -347,6 +398,7 @@ function DespliegueReciente({ item, onExpandirImagen }) {
                     vt={vt}
                     onExpandirImagen={onExpandirImagen}
                     conBorde={vi < textos.length - 1}
+                    onCopiar={onCopiar}
                   />
                 ))}
               </div>
@@ -453,6 +505,26 @@ export default function HomeScreen({
       URL.revokeObjectURL(objectUrl);
     } catch (e) {
       console.error("Error descargando imagen:", e);
+    }
+  };
+
+  const copiarTexto = async (texto) => {
+    if (!texto) return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(texto);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = texto;
+        ta.style.position = "absolute";
+        ta.style.left = "-999999px";
+        document.body.prepend(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+    } catch (e) {
+      console.error("Error copiando:", e);
     }
   };
 
@@ -829,6 +901,7 @@ export default function HomeScreen({
                         <DespliegueReciente
                           item={item}
                           onExpandirImagen={setImagenExpandida}
+                          onCopiar={copiarTexto}
                         />
                       )}
 
