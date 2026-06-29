@@ -133,14 +133,32 @@ const GoogleIcon = () => (
 );
 
 const EyeIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
 
 const EyeOffIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
     <line x1="1" y1="1" x2="23" y2="23" />
   </svg>
@@ -163,7 +181,20 @@ function PasswordInput({ value, onChange, placeholder, autoComplete }) {
         type="button"
         onClick={() => setShow((s) => !s)}
         aria-label={show ? "Ocultar contrasena" : "Mostrar contrasena"}
-        style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", cursor: "pointer", padding: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "#8C8880" }}
+        style={{
+          position: "absolute",
+          right: "8px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          padding: "6px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#8C8880",
+        }}
       >
         {show ? <EyeOffIcon /> : <EyeIcon />}
       </button>
@@ -171,14 +202,20 @@ function PasswordInput({ value, onChange, placeholder, autoComplete }) {
   );
 }
 
-function SignInForm() {
+function SignInForm({ onVerifyingChange }) {
   const { isLoaded, signIn, setActive } = useSignIn();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState("form"); // "form" | "verify"
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    onVerifyingChange?.(step === "verify");
+  }, [step, onVerifyingChange]);
 
   const handleGoogle = async () => {
     if (!isLoaded || googleLoading) return;
@@ -191,9 +228,25 @@ function SignInForm() {
         redirectUrlComplete: "/",
       });
     } catch (err) {
-      setError(err.errors?.[0]?.longMessage || "No se pudo conectar con Google.");
+      setError(
+        err.errors?.[0]?.longMessage || "No se pudo conectar con Google.",
+      );
       setGoogleLoading(false);
     }
+  };
+
+  // Prepara y envía el código de verificación por correo (Client Trust / MFA).
+  // Para la estrategia email_code, Clerk requiere el emailAddressId del factor.
+  const enviarCodigoSegundoFactor = async (signInResult) => {
+    const emailFactor = signInResult.supportedSecondFactors?.find(
+      (f) => f.strategy === "email_code",
+    );
+    await signIn.prepareSecondFactor({
+      strategy: "email_code",
+      ...(emailFactor?.emailAddressId
+        ? { emailAddressId: emailFactor.emailAddressId }
+        : {}),
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -206,21 +259,163 @@ function SignInForm() {
         identifier: email.trim(),
         password,
       });
+
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         navigate("/");
+        return;
       }
+
+      // Dispositivo nuevo (Client Trust) o cuenta con MFA → Clerk pide un código por correo.
+      // Manejamos ambos status: needs_second_factor (SDK actual) y needs_client_trust (Core 3).
+      if (
+        result.status === "needs_second_factor" ||
+        result.status === "needs_client_trust"
+      ) {
+        await enviarCodigoSegundoFactor(result);
+        setStep("verify");
+        return;
+      }
+
+      // Cualquier otro estado no contemplado: no dejar la pantalla muda.
+      setError("No se pudo completar el ingreso. Intenta de nuevo.");
+      console.error("Sign-in status inesperado:", result.status, result);
     } catch (err) {
-      setError(err.errors?.[0]?.longMessage || "Error al iniciar sesión.");
+      const errCode = err.errors?.[0]?.code;
+      if (errCode === "strategy_for_user_invalid") {
+        // La cuenta no tiene contraseña (se registró solo con Google).
+        setError(
+          "Esta cuenta se creó con Google. Entra con el botón de Gmail de arriba.",
+        );
+      } else {
+        setError(err.errors?.[0]?.longMessage || "Error al iniciar sesión.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    if (!isLoaded) return;
+    setLoading(true);
+    setError("");
+    try {
+      const result = await signIn.attemptSecondFactor({
+        strategy: "email_code",
+        code: code.trim(),
+      });
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        navigate("/");
+        return;
+      }
+      setError("No se pudo verificar el código. Intenta de nuevo.");
+      console.error("Segundo factor status inesperado:", result.status, result);
+    } catch (err) {
+      setError(err.errors?.[0]?.longMessage || "Código incorrecto.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReenviar = async () => {
+    if (!isLoaded || loading) return;
+    setError("");
+    try {
+      await signIn.prepareSecondFactor({ strategy: "email_code" });
+    } catch (err) {
+      setError(
+        err.errors?.[0]?.longMessage || "No se pudo reenviar el código.",
+      );
+    }
+  };
+
+  // Paso de verificación: dispositivo nuevo → código enviado al correo
+  if (step === "verify") {
+    return (
+      <form
+        onSubmit={handleVerifyCode}
+        style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+      >
+        <p
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "14px",
+            color: "#0F4A38",
+            textAlign: "center",
+            margin: 0,
+            lineHeight: 1.5,
+          }}
+        >
+          Por tu seguridad, enviamos un código a <strong>{email}</strong> porque
+          ingresas desde un dispositivo nuevo.
+        </p>
+        <div>
+          <label style={labelStyle}>Código de verificación</label>
+          <input
+            style={{
+              ...inputStyle,
+              textAlign: "center",
+              letterSpacing: "8px",
+              fontSize: "20px",
+            }}
+            type="text"
+            required
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="000000"
+            maxLength={6}
+            autoFocus
+          />
+        </div>
+        {error && <p style={errorTextStyle}>{error}</p>}
+        <button
+          type="submit"
+          style={{ ...btnPrimaryStyle, opacity: loading ? 0.7 : 1 }}
+          disabled={loading}
+        >
+          {loading ? "Verificando..." : "Verificar e ingresar"}
+        </button>
+        <p
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "13px",
+            color: "#8C8880",
+            textAlign: "center",
+            margin: 0,
+          }}
+        >
+          <span
+            onClick={handleReenviar}
+            style={{ color: "#3DAB8E", fontWeight: "500", cursor: "pointer" }}
+          >
+            Reenviar código
+          </span>
+        </p>
+      </form>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <button style={{ ...btnGoogleStyle, opacity: googleLoading ? 0.7 : 1, cursor: googleLoading ? "default" : "pointer" }} onClick={handleGoogle} type="button" disabled={googleLoading}>
-        {googleLoading ? "Conectando con Google..." : <><GoogleIcon /> Entrar con mi cuenta de Gmail</>}
+      <button
+        style={{
+          ...btnGoogleStyle,
+          opacity: googleLoading ? 0.7 : 1,
+          cursor: googleLoading ? "default" : "pointer",
+        }}
+        onClick={handleGoogle}
+        type="button"
+        disabled={googleLoading}
+      >
+        {googleLoading ? (
+          "Conectando con Google..."
+        ) : (
+          <>
+            <GoogleIcon /> Entrar con mi cuenta de Gmail
+          </>
+        )}
       </button>
 
       <div style={dividerStyle}>
@@ -246,7 +441,12 @@ function SignInForm() {
         </div>
         <div>
           <label style={labelStyle}>Contraseña</label>
-          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="current-password" />
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
         </div>
         {error && <p style={errorTextStyle}>{error}</p>}
         <button
@@ -288,7 +488,9 @@ function SignUpForm({ onVerifyingChange }) {
         redirectUrlComplete: "/",
       });
     } catch (err) {
-      setError(err.errors?.[0]?.longMessage || "No se pudo conectar con Google.");
+      setError(
+        err.errors?.[0]?.longMessage || "No se pudo conectar con Google.",
+      );
       setGoogleLoading(false);
     }
   };
@@ -406,8 +608,23 @@ function SignUpForm({ onVerifyingChange }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <button style={{ ...btnGoogleStyle, opacity: googleLoading ? 0.7 : 1, cursor: googleLoading ? "default" : "pointer" }} onClick={handleGoogle} type="button" disabled={googleLoading}>
-        {googleLoading ? "Conectando con Google..." : <><GoogleIcon /> Registrarme con mi cuenta de Gmail</>}
+      <button
+        style={{
+          ...btnGoogleStyle,
+          opacity: googleLoading ? 0.7 : 1,
+          cursor: googleLoading ? "default" : "pointer",
+        }}
+        onClick={handleGoogle}
+        type="button"
+        disabled={googleLoading}
+      >
+        {googleLoading ? (
+          "Conectando con Google..."
+        ) : (
+          <>
+            <GoogleIcon /> Registrarme con mi cuenta de Gmail
+          </>
+        )}
       </button>
 
       <div style={dividerStyle}>
@@ -444,7 +661,12 @@ function SignUpForm({ onVerifyingChange }) {
         </div>
         <div>
           <label style={labelStyle}>Contraseña</label>
-          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="new-password" />
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="new-password"
+          />
         </div>
         {error && <p style={errorTextStyle}>{error}</p>}
         <button
@@ -571,7 +793,7 @@ export default function AuthPage() {
         {isSignUp ? (
           <SignUpForm onVerifyingChange={setVerifying} />
         ) : (
-          <SignInForm />
+          <SignInForm onVerifyingChange={setVerifying} />
         )}
       </div>
 
