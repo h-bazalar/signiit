@@ -1,5 +1,7 @@
 import { verificarAuth } from "./middleware.js";
 import { createClient } from "@supabase/supabase-js";
+import { resolverCicloCreditos } from "./_cicloCreditos.js";
+import { PLANES } from "../src/utils/constants.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,6 +10,47 @@ export default async function handler(req, res) {
 
   const auth = await verificarAuth(req);
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+
+  const clerkId = auth.userId;
+
+  const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY,
+  );
+
+  // ── Leer usuario: plan, contador, fecha de ciclo ──
+  const { data: usuario, error: errUser } = await supabaseAdmin
+    .from("usuarios")
+    .select(
+      "plan, generaciones_estaticos, generaciones_video, analisis_realizados, creditos_reset_at, vip_expires_at",
+    )
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (errUser || !usuario) {
+    return res.status(404).json({ error: "Usuario no encontrado" });
+  }
+
+  // ── Vencimiento/ciclo VIP (misma fuente única de verdad que analisis.js) ──
+  // Corre ANTES del gate: si la ventana VIP venció, el helper baja a 'free' y
+  // resetea contadores si corresponde. Gateamos sobre el ciclo resuelto, no
+  // sobre el valor viejo de la lectura.
+  const ciclo = await resolverCicloCreditos(supabaseAdmin, clerkId, usuario);
+
+  const planUsuario = PLANES[ciclo.plan] ? ciclo.plan : "free";
+  const limiteGeneraciones = PLANES[planUsuario].imagenesTotal;
+  const generacionesUsadas = ciclo.stats.generaciones_estaticos ?? 0;
+
+  // ── Gate de créditos (mismo patrón de límite que analisis.js) ──
+  if (generacionesUsadas >= limiteGeneraciones) {
+    return res.status(429).json({
+      error:
+        planUsuario === "free"
+          ? "Usaste tu generación gratuita. Pásate a VIP para seguir generando creativos."
+          : `Alcanzaste tu límite de ${limiteGeneraciones} generaciones de este ciclo. Se renueva al inicio de tu próximo mes.`,
+      code: "LIMITE_ALCANZADO",
+    });
+  }
 
   try {
     const body = req.body;
@@ -39,11 +82,6 @@ export default async function handler(req, res) {
       modoFinal !== "ia_pura" && Array.isArray(imagenesReferencia)
         ? imagenesReferencia.slice(0, 3)
         : [];
-
-    const supabaseAdmin = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY,
-    );
 
     const { data: negocio, error: negocioError } = await supabaseAdmin
       .from("negocios")
