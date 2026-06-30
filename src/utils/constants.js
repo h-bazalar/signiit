@@ -19,7 +19,7 @@ export const PLANES = {
     precio: 99,
     moneda: "PEN",
     negocios: 1,
-    igeneracionesTotal: 36,
+    generacionesTotal: 36,
     imagenesRenuevan: true,
     videos: 0,
     analisis: 6,
