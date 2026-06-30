@@ -8,7 +8,7 @@ export const PLANES = {
     precio: 0,
     moneda: "PEN",
     negocios: 1,
-    imagenesTotal: 3,
+    imagenesTotal: 1,
     imagenesRenuevan: false,
     videos: 0,
     analisis: 0,

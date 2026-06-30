@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PLANES } from "../utils/constants";
 
 const PLANES_INFO = [
   {
@@ -10,7 +11,7 @@ const PLANES_INFO = [
     estrella: false,
     features: [
       { texto: "1 negocio activo", activo: true },
-      { texto: "3 generaciones únicas (no renuevan)", activo: true },
+      { texto: "1 generación única (no renueva)", activo: true },
       { texto: "Anuncios pagados y contenido orgánico", activo: true },
       { texto: "Análisis de campañas Meta Ads", activo: false },
     ],
@@ -371,14 +372,20 @@ export default function PlanesScreen({ planActual, creditos, getToken }) {
                         lineHeight: 1.7,
                       }}
                     >
-                      Usaste <strong>{creditos.imagenes}</strong> de 3
-                      generaciones disponibles.
+                      Usaste <strong>{creditos.imagenes}</strong> de{" "}
+                      {PLANES.free.imagenesTotal}{" "}
+                      {PLANES.free.imagenesTotal === 1
+                        ? "generación disponible"
+                        : "generaciones disponibles"}
+                      .
                     </p>
                   </div>
                 )}
 
                 {!esPlanActual && !esPlanInferior && plan.cta && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                  >
                     <button
                       onClick={iniciarPagoVip}
                       disabled={cargandoPago}
