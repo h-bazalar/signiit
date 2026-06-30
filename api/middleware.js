@@ -4,19 +4,6 @@ const clerk = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
 });
 
-function decodeJWTPayload(token) {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const payload = parts[1];
-    const padded = payload + "==".slice(0, (4 - (payload.length % 4)) % 4);
-    const decoded = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
-    return JSON.parse(decoded);
-  } catch {
-    return null;
-  }
-}
-
 export async function verificarAuth(req) {
   const authHeader = req.headers.get
     ? req.headers.get("authorization")
@@ -29,17 +16,20 @@ export async function verificarAuth(req) {
   }
 
   try {
-    // Intentar verificar con Clerk primero (token nativo de Clerk)
+    // Verificación criptográfica real de la firma del token (Clerk).
+    // Única vía de autenticación: si la firma no valida, se rechaza.
+    // NO existe fallback que decodifique el JWT sin verificar firma — eso
+    // permitía suplantar a cualquier usuario fabricando un token con su sub.
     const payload = await clerk.verifyToken(token);
-    return { ok: true, userId: payload.sub };
-  } catch {
-    // Si falla, intentar decodificar como JWT de Supabase/Clerk
-    // El token de template 'supabase' es un JWT firmado por Clerk
-    // con el sub siendo el clerk_id
-    const payload = decodeJWTPayload(token);
-    if (payload?.sub) {
-      return { ok: true, userId: payload.sub };
+    if (!payload?.sub) {
+      return { ok: false, error: "Token inválido", status: 401 };
     }
+    return { ok: true, userId: payload.sub };
+  } catch (err) {
+    // Diagnóstico (no reabre ningún bypass): deja en los logs POR QUÉ se
+    // rechazó el token, para distinguir un ataque de un token legítimo mal
+    // configurado (firma, exp, clock skew, azp...). La respuesta es siempre 401.
+    console.error("[Auth] Token rechazado:", err?.message || err);
     return { ok: false, error: "Token inválido", status: 401 };
   }
 }
