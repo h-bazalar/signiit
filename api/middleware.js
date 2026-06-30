@@ -14,11 +14,12 @@ export async function verificarAuth(req) {
   try {
     // Verificación criptográfica real de la firma del token (Clerk).
     // `verifyToken` se IMPORTA de @clerk/backend (no es método del client).
-    // Única vía de autenticación: si la firma no valida, se rechaza.
-    // NO existe fallback que decodifique el JWT sin verificar firma — eso
-    // permitía suplantar a cualquier usuario fabricando un token con su sub.
+    // `authorizedParties` protege contra CSRF: solo acepta tokens emitidos
+    // desde el origen de la app (app.signiit.com). NO existe fallback que
+    // decodifique el JWT sin verificar firma.
     const payload = await verifyToken(token, {
       secretKey: process.env.CLERK_SECRET_KEY,
+      authorizedParties: ["https://app.signiit.com"],
     });
     if (!payload?.sub) {
       return { ok: false, error: "Token inválido", status: 401 };
