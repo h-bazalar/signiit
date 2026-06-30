@@ -38,7 +38,7 @@ export default async function handler(req, res) {
   const ciclo = await resolverCicloCreditos(supabaseAdmin, clerkId, usuario);
 
   const planUsuario = PLANES[ciclo.plan] ? ciclo.plan : "free";
-  const limiteGeneraciones = PLANES[planUsuario].imagenesTotal;
+  const limiteGeneraciones = PLANES[planUsuario].generacionesTotal;
   const generacionesUsadas = ciclo.stats.generaciones_estaticos ?? 0;
 
   // ── Gate de créditos (mismo patrón de límite que analisis.js) ──

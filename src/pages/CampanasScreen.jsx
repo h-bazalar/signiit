@@ -457,7 +457,8 @@ function BurbujaInfo({ colapsada, onToggle, esMobil, modoApp }) {
               : [
                   {
                     bold: "Un producto por campaña",
-                    resto: " — si vendes varios, genera una campaña para cada uno.",
+                    resto:
+                      " — si vendes varios, genera una campaña para cada uno.",
                   },
                   {
                     bold: "Los 3 van juntos",
@@ -699,7 +700,13 @@ function CardImagen({ variacion, onCopy, onExpandir, onDescargar }) {
 }
 
 // ── Card resultado Orgánico ───────────────────────────────────────────────────
-function CardOrganicoImagen({ imagen, variaciones, onCopy, onExpandir, onDescargar }) {
+function CardOrganicoImagen({
+  imagen,
+  variaciones,
+  onCopy,
+  onExpandir,
+  onDescargar,
+}) {
   const [varActiva, setVarActiva] = useState(0);
   const varActual = variaciones[varActiva];
   const gancho =
@@ -1039,7 +1046,10 @@ function ModalImagen({ src, onClose, onDescargar }) {
       }}
     >
       <button
-        onClick={(e) => { e.stopPropagation(); onDescargar(src); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDescargar(src);
+        }}
         style={{
           position: "absolute",
           top: 16,
@@ -1268,7 +1278,8 @@ export default function CampanasScreen({
       }
     : null;
   const tieneCredito = {
-    imagenes: creditos !== null ? creditos.imagenes < plan.imagenesTotal : true,
+    imagenes:
+      creditos !== null ? creditos.imagenes < plan.generacionesTotal : true,
     videos: false,
     analisis: false,
   };
@@ -2272,7 +2283,7 @@ export default function CampanasScreen({
             >
               Esta generación consume <strong>1 crédito</strong>
               {creditos &&
-                ` · Te quedan ${plan.imagenesTotal - creditos.imagenes} generaciones disponibles.`}
+                ` · Te quedan ${plan.generacionesTotal - creditos.imagenes} generaciones disponibles.`}
             </p>
           </div>
         </div>

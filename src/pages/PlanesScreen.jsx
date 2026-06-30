@@ -373,8 +373,8 @@ export default function PlanesScreen({ planActual, creditos, getToken }) {
                       }}
                     >
                       Usaste <strong>{creditos.imagenes}</strong> de{" "}
-                      {PLANES.free.imagenesTotal}{" "}
-                      {PLANES.free.imagenesTotal === 1
+                      {PLANES.free.generacionesTotal}{" "}
+                      {PLANES.free.generacionesTotal === 1
                         ? "generación disponible"
                         : "generaciones disponibles"}
                       .

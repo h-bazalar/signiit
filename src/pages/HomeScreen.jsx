@@ -140,8 +140,19 @@ function CeldaCreativo({ foto, colores, labelTexto, onExpandirImagen }) {
 function IconoDescargar({ size = 13, color = "#fff", strokeWidth = 1.4 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 13 13" fill="none">
-      <path d="M6.5 1v8M3.5 6.5l3 3 3-3" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M1 10.5h11" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
+      <path
+        d="M6.5 1v8M3.5 6.5l3 3 3-3"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M1 10.5h11"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -163,8 +174,20 @@ function IconoAmpliar({ size = 10, color = "#fff", strokeWidth = 1.6 }) {
 function IconoCopiar({ size = 12, color = "#8C8880" }) {
   return (
     <svg width={size} height={size} viewBox="0 0 13 13" fill="none">
-      <rect x="4" y="4" width="8" height="8" rx="1.5" stroke={color} strokeWidth="1.1" />
-      <path d="M2 9H1.5A1.5 1.5 0 010 7.5v-6A1.5 1.5 0 011.5 0h6A1.5 1.5 0 019 1.5V2" stroke={color} strokeWidth="1.1" />
+      <rect
+        x="4"
+        y="4"
+        width="8"
+        height="8"
+        rx="1.5"
+        stroke={color}
+        strokeWidth="1.1"
+      />
+      <path
+        d="M2 9H1.5A1.5 1.5 0 010 7.5v-6A1.5 1.5 0 011.5 0h6A1.5 1.5 0 019 1.5V2"
+        stroke={color}
+        strokeWidth="1.1"
+      />
     </svg>
   );
 }
@@ -312,7 +335,10 @@ function FilaCreativoOrganico({ vt, onExpandirImagen, conBorde, onCopiar }) {
                 {vt.caption}
               </span>
               <button
-                onClick={(e) => { e.stopPropagation(); onCopiar(vt.caption); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCopiar(vt.caption);
+                }}
                 style={{
                   background: "none",
                   border: "none",
@@ -584,7 +610,7 @@ export default function HomeScreen({
             <StatCard
               label="Imágenes generadas"
               usado={stats?.generaciones_estaticos || 0}
-              limite={limites.imagenesTotal}
+              limite={limites.generacionesTotal}
               color="#3DAB8E"
             />
             <StatCard
@@ -1073,7 +1099,10 @@ export default function HomeScreen({
           }}
         >
           <button
-            onClick={(e) => { e.stopPropagation(); descargarImagen(imagenExpandida); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              descargarImagen(imagenExpandida);
+            }}
             style={{
               position: "absolute",
               top: 16,
