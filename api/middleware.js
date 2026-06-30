@@ -1,8 +1,4 @@
-import { createClerkClient } from "@clerk/backend";
-
-const clerk = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-});
+import { verifyToken } from "@clerk/backend";
 
 export async function verificarAuth(req) {
   const authHeader = req.headers.get
@@ -17,10 +13,13 @@ export async function verificarAuth(req) {
 
   try {
     // Verificación criptográfica real de la firma del token (Clerk).
+    // `verifyToken` se IMPORTA de @clerk/backend (no es método del client).
     // Única vía de autenticación: si la firma no valida, se rechaza.
     // NO existe fallback que decodifique el JWT sin verificar firma — eso
     // permitía suplantar a cualquier usuario fabricando un token con su sub.
-    const payload = await clerk.verifyToken(token);
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
     if (!payload?.sub) {
       return { ok: false, error: "Token inválido", status: 401 };
     }
