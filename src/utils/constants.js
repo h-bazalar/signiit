@@ -48,3 +48,5 @@ export const FETCH_TIMEOUT_MS = 120000; // 2 minutos por request
 
 // ── Supabase tabla principal ─────────────────────────
 export const TABLA_CAMPANAS = "campanas_generadas";
+
+export const WHATSAPP_NUMERO = "51965797953";

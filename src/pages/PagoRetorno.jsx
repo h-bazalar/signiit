@@ -1,8 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { WHATSAPP_NUMERO } from "../utils/constants";
 
 // Páginas de retorno de MercadoPago (back_urls). Se renderizan tras el pago.
 // El estado VIP lo activa el webhook en el server; al volver al home,
 // sesion-init relee el plan ya actualizado.
+
+const MENSAJE_RESCATE =
+  "Hola, intenté contratar el VIP de Signiit y el pago no se completó. ¿Me ayudan a activarlo?";
 
 const VARIANTES = {
   exitoso: {
@@ -124,6 +128,54 @@ export default function PagoRetorno({ variante }) {
         >
           {v.cta} →
         </button>
+
+        {variante === "fallido" && (
+          <div
+            style={{
+              marginTop: 24,
+              paddingTop: 20,
+              borderTop: "0.5px solid var(--sig-line)",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px",
+                color: "var(--sig-stone)",
+                lineHeight: 1.5,
+                marginBottom: 12,
+              }}
+            >
+              ¿El pago te rebotó y no sabes por qué? Te ayudamos a activarlo al
+              toque.
+            </p>
+
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(
+                MENSAJE_RESCATE,
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "transparent",
+                color: "var(--sig-forest)",
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+                fontSize: "13px",
+                padding: "10px 22px",
+                borderRadius: 8,
+                border: "0.5px solid var(--sig-line-s)",
+                textDecoration: "none",
+                cursor: "pointer",
+              }}
+            >
+              Resolverlo por WhatsApp
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

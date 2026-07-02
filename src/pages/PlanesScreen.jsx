@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PLANES } from "../utils/constants";
+import { PLANES, WHATSAPP_NUMERO } from "../utils/constants";
 
 const PLANES_INFO = [
   {
@@ -36,7 +36,7 @@ const PLANES_INFO = [
     ],
     cta: {
       label: "Quiero el VIP →",
-      url: "https://wa.me/51965797953?text=Hola%2C%20quiero%20activar%20el%20plan%20VIP%20de%20Signiit",
+      url: `https://wa.me/${WHATSAPP_NUMERO}?text=Hola%2C%20quiero%20activar%20el%20plan%20VIP%20de%20Signiit`,
     },
   },
 ];
