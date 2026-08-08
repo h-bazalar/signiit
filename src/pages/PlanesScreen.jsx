@@ -32,7 +32,10 @@ const PLANES_INFO = [
         activo: true,
       },
       { texto: "Anuncios pagados y contenido orgánico", activo: true },
-      { texto: "5 análisis de campañas Meta Ads/mes", activo: true },
+      {
+        texto: `${PLANES.vip.analisis} análisis de campañas Meta Ads/mes`,
+        activo: true,
+      },
     ],
     cta: {
       label: "Quiero el VIP →",
