@@ -87,12 +87,16 @@ export default async function handler(req, res) {
       .from("negocios")
       .select("logo_url")
       .eq("id", negocioId)
-      .single();
+      .eq("usuario_id", auth.userId)
+      .maybeSingle();
 
     if (negocioError)
       throw new Error("Error leyendo negocio: " + negocioError.message);
+    if (!negocio) {
+      return res.status(404).json({ error: "Negocio no encontrado" });
+    }
 
-    const negocioLogoUrl = negocio?.logo_url || "";
+    const negocioLogoUrl = negocio.logo_url || "";
 
     const { data: campana, error: insertError } = await supabaseAdmin
       .from("campanas_generadas")

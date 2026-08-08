@@ -21,6 +21,17 @@ export default async function handler(req) {
       process.env.SUPABASE_SERVICE_KEY,
     );
 
+    const { data: negocio, error: negocioError } = await supabaseAdmin
+      .from("negocios")
+      .select("id")
+      .eq("id", negocioId)
+      .eq("usuario_id", auth.userId)
+      .maybeSingle();
+
+    if (negocioError)
+      throw new Error("Error verificando negocio: " + negocioError.message);
+    if (!negocio) return errorResponse("Negocio no encontrado", 404);
+
     const { data: campana, error: insertError } = await supabaseAdmin
       .from("campanas_generadas")
       .insert({

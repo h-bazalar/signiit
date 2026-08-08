@@ -1,4 +1,5 @@
 import { verificarAuth, jsonResponse, errorResponse } from "./middleware.js";
+import { createClient } from "@supabase/supabase-js";
 
 const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
 const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY;
@@ -118,6 +119,22 @@ export async function POST(req) {
     ) {
       return errorResponse("contentType inválido", 400);
     }
+
+    const supabaseAdmin = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_KEY,
+    );
+
+    const { data: negocio, error: negocioError } = await supabaseAdmin
+      .from("negocios")
+      .select("id")
+      .eq("id", negocioId)
+      .eq("usuario_id", auth.userId)
+      .maybeSingle();
+
+    if (negocioError)
+      throw new Error("Error verificando negocio: " + negocioError.message);
+    if (!negocio) return errorResponse("Negocio no encontrado", 404);
 
     const ext = contentType.split("/")[1].replace("jpeg", "jpg");
     let objectKey;

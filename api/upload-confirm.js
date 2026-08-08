@@ -27,6 +27,17 @@ export async function POST(req) {
     // agregamos una versión (?v=timestamp) para forzar el refresco en todos los
     // lectores: panel, tarjeta del negocio, header de Campañas y pipeline n8n.
     // Las imágenes de referencia NO lo necesitan (su id es un UUID único por subida).
+    const { data: negocio, error: negocioError } = await supabaseAdmin
+      .from("negocios")
+      .select("id")
+      .eq("id", negocioId)
+      .eq("usuario_id", auth.userId)
+      .maybeSingle();
+
+    if (negocioError)
+      throw new Error("Error verificando negocio: " + negocioError.message);
+    if (!negocio) return errorResponse("Negocio no encontrado", 404);
+
     let urlFinal = finalUrl;
 
     if (tipo === "logo") {
