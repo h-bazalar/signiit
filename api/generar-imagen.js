@@ -2,6 +2,75 @@ import { verificarAuth } from "./middleware.js";
 import { createClient } from "@supabase/supabase-js";
 import { resolverCicloCreditos } from "./_cicloCreditos.js";
 import { PLANES } from "../src/utils/constants.js";
+import { validarUrlImagenReferencia } from "./_mediaUrls.js";
+
+function httpError(message, status) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
+export async function resolverUrlsReferenciaAutorizadas({
+  supabaseAdmin,
+  userId,
+  negocioId,
+  modoImagen,
+  imagenesReferencia,
+}) {
+  if (modoImagen === "ia_pura") {
+    return [];
+  }
+
+  if (imagenesReferencia == null) {
+    return [];
+  }
+
+  if (!Array.isArray(imagenesReferencia)) {
+    throw httpError("imagenesReferencia invalido", 400);
+  }
+
+  if (imagenesReferencia.length > 3) {
+    throw httpError("Maximo 3 imagenes de referencia", 400);
+  }
+
+  if (imagenesReferencia.length === 0) {
+    return [];
+  }
+
+  if (!imagenesReferencia.every((url) => typeof url === "string")) {
+    throw httpError("imagenesReferencia invalido", 400);
+  }
+
+  const { data: imagenesAutorizadas, error: imagenesError } =
+    await supabaseAdmin
+      .from("negocio_imagenes")
+      .select("id, url")
+      .eq("usuario_id", userId)
+      .eq("negocio_id", negocioId)
+      .in("url", imagenesReferencia);
+
+  if (imagenesError) {
+    throw new Error("Error verificando imagenes: " + imagenesError.message);
+  }
+
+  const imagenPorUrl = new Map(
+    (imagenesAutorizadas || []).map((imagen) => [imagen.url, imagen]),
+  );
+
+  return imagenesReferencia.map((urlSolicitada) => {
+    const imagen = imagenPorUrl.get(urlSolicitada);
+    if (!imagen) {
+      throw httpError("Imagen de referencia no autorizada", 403);
+    }
+
+    return validarUrlImagenReferencia({
+      url: imagen.url,
+      userId,
+      negocioId,
+      imagenId: imagen.id,
+    });
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -78,11 +147,6 @@ export default async function handler(req, res) {
 
     const modoAppFinal = modoApp === "organico" ? "organico" : "meta_ads";
 
-    const urlsReferencia =
-      modoFinal !== "ia_pura" && Array.isArray(imagenesReferencia)
-        ? imagenesReferencia.slice(0, 3)
-        : [];
-
     const { data: negocio, error: negocioError } = await supabaseAdmin
       .from("negocios")
       .select("logo_url")
@@ -97,6 +161,13 @@ export default async function handler(req, res) {
     }
 
     const negocioLogoUrl = negocio.logo_url || "";
+    const urlsReferencia = await resolverUrlsReferenciaAutorizadas({
+      supabaseAdmin,
+      userId: auth.userId,
+      negocioId,
+      modoImagen: modoFinal,
+      imagenesReferencia,
+    });
 
     const { data: campana, error: insertError } = await supabaseAdmin
       .from("campanas_generadas")
@@ -155,6 +226,9 @@ export default async function handler(req, res) {
       return res
         .status(504)
         .json({ error: "El proceso tardó demasiado. Intenta de nuevo." });
+    }
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message });
     }
     console.error("[Imagen] Error:", err);
     return res.status(500).json({ error: err.message || "Error interno" });

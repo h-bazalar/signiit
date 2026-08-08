@@ -1,5 +1,9 @@
 import { verificarAuth, jsonResponse, errorResponse } from "./middleware.js";
 import { createClient } from "@supabase/supabase-js";
+import {
+  validarUrlImagenReferencia,
+  validarUrlLogo,
+} from "./_mediaUrls.js";
 
 export async function POST(req) {
   const auth = await verificarAuth(req);
@@ -41,7 +45,12 @@ export async function POST(req) {
     let urlFinal = finalUrl;
 
     if (tipo === "logo") {
-      urlFinal = `${finalUrl}?v=${Date.now()}`;
+      const urlValidada = validarUrlLogo({
+        url: finalUrl,
+        userId: auth.userId,
+        negocioId,
+      });
+      urlFinal = `${urlValidada}?v=${Date.now()}`;
       const { error } = await supabaseAdmin
         .from("negocios")
         .update({ logo_url: urlFinal })
@@ -53,6 +62,14 @@ export async function POST(req) {
 
     if (tipo === "imagen_referencia") {
       if (!imagenId) return errorResponse("imagenId requerido", 400);
+
+      const urlValidada = validarUrlImagenReferencia({
+        url: finalUrl,
+        userId: auth.userId,
+        negocioId,
+        imagenId,
+      });
+      urlFinal = urlValidada;
 
       const { count, error: countError } = await supabaseAdmin
         .from("negocio_imagenes")
@@ -74,7 +91,7 @@ export async function POST(req) {
           id: imagenId,
           negocio_id: negocioId,
           usuario_id: auth.userId,
-          url: finalUrl,
+          url: urlValidada,
           nombre: nombre || null,
         });
       if (insertError)
@@ -84,6 +101,6 @@ export async function POST(req) {
     return jsonResponse({ ok: true, url: urlFinal });
   } catch (err) {
     console.error("Error en upload-confirm:", err);
-    return errorResponse(err.message || "Error interno", 500);
+    return errorResponse(err.message || "Error interno", err.status || 500);
   }
 }
