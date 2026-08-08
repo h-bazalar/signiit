@@ -72,6 +72,77 @@ export async function resolverUrlsReferenciaAutorizadas({
   });
 }
 
+export function validarConfigN8nImagenes({ n8nUrl, n8nSecret }) {
+  if (!n8nUrl) {
+    throw httpError("Webhook de imagenes no configurado", 500);
+  }
+
+  if (!n8nSecret) {
+    throw httpError("Secreto de webhook de imagenes no configurado", 500);
+  }
+
+  return { n8nUrl, n8nSecret };
+}
+
+export function crearHeadersN8nImagenes(n8nSecret) {
+  return {
+    "Content-Type": "application/json",
+    "X-Signiit-Webhook-Secret": n8nSecret,
+  };
+}
+
+export async function crearCampanaYEnviarN8nImagenes({
+  supabaseAdmin,
+  fetchImpl = fetch,
+  n8nUrl,
+  n8nSecret,
+  authUserId,
+  negocioId,
+  formato,
+  modoFinal,
+  modoAppFinal,
+  urlsReferencia,
+  angulo,
+  negocioLogoUrl,
+}) {
+  const configN8n = validarConfigN8nImagenes({ n8nUrl, n8nSecret });
+
+  const { data: campana, error: insertError } = await supabaseAdmin
+    .from("campanas_generadas")
+    .insert({
+      usuario_id: authUserId,
+      negocio_id: negocioId,
+      tipo: "imagen",
+      formato,
+      estado: "pendiente",
+    })
+    .select("id")
+    .single();
+
+  if (insertError)
+    throw new Error("Error creando registro: " + insertError.message);
+
+  const campanaId = campana.id;
+  const n8nRes = await fetchImpl(configN8n.n8nUrl, {
+    method: "POST",
+    headers: crearHeadersN8nImagenes(configN8n.n8nSecret),
+    body: JSON.stringify({
+      campanaId,
+      negocioId,
+      clerkUserId: authUserId,
+      formato,
+      modoImagen: modoFinal,
+      modoApp: modoAppFinal,
+      imagenesReferencia: urlsReferencia,
+      angulo,
+      negocioLogoUrl,
+    }),
+    signal: AbortSignal.timeout(480000),
+  });
+
+  return { campanaId, n8nRes };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -169,43 +240,20 @@ export default async function handler(req, res) {
       imagenesReferencia,
     });
 
-    const { data: campana, error: insertError } = await supabaseAdmin
-      .from("campanas_generadas")
-      .insert({
-        usuario_id: auth.userId,
-        negocio_id: negocioId,
-        tipo: "imagen",
-        formato,
-        estado: "pendiente",
-      })
-      .select("id")
-      .single();
-
-    if (insertError)
-      throw new Error("Error creando registro: " + insertError.message);
-
-    const campanaId = campana.id;
     const n8nUrl = process.env.N8N_WEBHOOK_IMAGENES;
-    if (!n8nUrl)
-      return res
-        .status(500)
-        .json({ error: "N8N_WEBHOOK_IMAGENES no configurado" });
-
-    const n8nRes = await fetch(n8nUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        campanaId,
-        negocioId,
-        clerkUserId: auth.userId,
-        formato,
-        modoImagen: modoFinal,
-        modoApp: modoAppFinal,
-        imagenesReferencia: urlsReferencia,
-        angulo,
-        negocioLogoUrl,
-      }),
-      signal: AbortSignal.timeout(480000),
+    const n8nSecret = process.env.N8N_WEBHOOK_IMAGENES_SECRET;
+    const { campanaId, n8nRes } = await crearCampanaYEnviarN8nImagenes({
+      supabaseAdmin,
+      n8nUrl,
+      n8nSecret,
+      authUserId: auth.userId,
+      negocioId,
+      formato,
+      modoFinal,
+      modoAppFinal,
+      urlsReferencia,
+      angulo,
+      negocioLogoUrl,
     });
 
     if (!n8nRes.ok) {

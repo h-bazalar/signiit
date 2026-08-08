@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { validarUrlImagenReferencia } from "./_mediaUrls.js";
-import { resolverUrlsReferenciaAutorizadas } from "./generar-imagen.js";
+import {
+  crearCampanaYEnviarN8nImagenes,
+  resolverUrlsReferenciaAutorizadas,
+} from "./generar-imagen.js";
 
 const endpoint = "https://storage.signiit.test";
 const bucket = "signiit-media";
@@ -9,9 +12,13 @@ const userId = "user_123";
 const negocioId = "negocio_456";
 const imagenId = "imagen_789";
 const urlLegitima = `${endpoint}/${bucket}/imagenes/${userId}/${negocioId}/${imagenId}.jpg`;
+const n8nUrl = "https://n8n.signiit.test/webhook/generar-imagenes";
+const n8nSecret = "secret_desde_env_test";
 
 process.env.MINIO_ENDPOINT = endpoint;
 process.env.MINIO_BUCKET = bucket;
+process.env.N8N_WEBHOOK_IMAGENES = n8nUrl;
+process.env.N8N_WEBHOOK_IMAGENES_SECRET = n8nSecret;
 
 function assertUrlRechazada(url, overrides = {}, message) {
   assert.throws(
@@ -54,6 +61,64 @@ function mockSupabaseNegocioImagenes(rows) {
         },
       };
     },
+  };
+}
+
+function mockSupabaseCampanasGeneradas() {
+  const inserts = [];
+
+  return {
+    inserts,
+    supabaseAdmin: {
+      from(table) {
+        assert.equal(table, "campanas_generadas");
+
+        return {
+          insert(payload) {
+            inserts.push(payload);
+            return this;
+          },
+          select(columns) {
+            assert.equal(columns, "id");
+            return this;
+          },
+          async single() {
+            return { data: { id: "campana_123" }, error: null };
+          },
+        };
+      },
+    },
+  };
+}
+
+function crearFetchMock() {
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    calls.push({ url, options });
+    return {
+      ok: true,
+      async json() {
+        return { campanaId: "campana_123" };
+      },
+    };
+  };
+
+  return { calls, fetchImpl };
+}
+
+function payloadGeneracionN8n(overrides = {}) {
+  return {
+    n8nUrl: process.env.N8N_WEBHOOK_IMAGENES,
+    n8nSecret: process.env.N8N_WEBHOOK_IMAGENES_SECRET,
+    authUserId: userId,
+    negocioId,
+    formato: "feed_1_1",
+    modoFinal: "foto_referencia",
+    modoAppFinal: "meta_ads",
+    urlsReferencia: [urlLegitima],
+    angulo: { formato: "feed_1_1" },
+    negocioLogoUrl: "",
+    ...overrides,
   };
 }
 
@@ -186,4 +251,61 @@ test("ia_pura ignora referencias y sigue con lista vacia", async () => {
   });
 
   assert.deepEqual(urls, []);
+});
+
+test("generar-imagen envia el secreto dedicado de env en el header hacia n8n", async () => {
+  const { inserts, supabaseAdmin } = mockSupabaseCampanasGeneradas();
+  const { calls, fetchImpl } = crearFetchMock();
+
+  await crearCampanaYEnviarN8nImagenes({
+    supabaseAdmin,
+    fetchImpl,
+    ...payloadGeneracionN8n(),
+  });
+
+  assert.equal(inserts.length, 1);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, process.env.N8N_WEBHOOK_IMAGENES);
+  assert.deepEqual(calls[0].options.headers, {
+    "Content-Type": "application/json",
+    "X-Signiit-Webhook-Secret": process.env.N8N_WEBHOOK_IMAGENES_SECRET,
+  });
+});
+
+test("generar-imagen sin N8N_WEBHOOK_IMAGENES_SECRET responde 500 sin insertar ni llamar n8n", async () => {
+  const { inserts, supabaseAdmin } = mockSupabaseCampanasGeneradas();
+  const { calls, fetchImpl } = crearFetchMock();
+
+  await assert.rejects(
+    crearCampanaYEnviarN8nImagenes({
+      supabaseAdmin,
+      fetchImpl,
+      ...payloadGeneracionN8n({ n8nSecret: undefined }),
+    }),
+    (error) =>
+      error?.status === 500 &&
+      error?.message === "Secreto de webhook de imagenes no configurado",
+  );
+
+  assert.equal(inserts.length, 0);
+  assert.equal(calls.length, 0);
+});
+
+test("generar-imagen sin N8N_WEBHOOK_IMAGENES responde 500 sin insertar ni llamar n8n", async () => {
+  const { inserts, supabaseAdmin } = mockSupabaseCampanasGeneradas();
+  const { calls, fetchImpl } = crearFetchMock();
+
+  await assert.rejects(
+    crearCampanaYEnviarN8nImagenes({
+      supabaseAdmin,
+      fetchImpl,
+      ...payloadGeneracionN8n({ n8nUrl: undefined }),
+    }),
+    (error) =>
+      error?.status === 500 &&
+      error?.message === "Webhook de imagenes no configurado",
+  );
+
+  assert.equal(inserts.length, 0);
+  assert.equal(calls.length, 0);
 });
