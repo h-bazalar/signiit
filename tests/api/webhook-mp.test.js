@@ -1,7 +1,7 @@
 import test, { afterEach, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { crearWebhookMercadoPagoHandler } from "./webhook-mp.js";
+import { crearWebhookMercadoPagoHandler } from "../../api/webhook-mp.js";
 
 const secret = "mp_webhook_secret_test";
 const accessToken = "mp_access_token_test";
