@@ -14,19 +14,40 @@ import { createClient } from "@supabase/supabase-js";
 // que MP reintente). Un pago pendiente/rechazado se ackea con 200 sin activar.
 
 const PRECIO_VIP = 99; // PEN — debe coincidir con crear-preferencia-mp.js
+const MONEDA_VIP = "PEN";
 const DIAS_VIP = 30;
 
 // Lee un header tolerando ambos estilos (Node object / Web API).
 const getHeader = (req, name) =>
   req.headers.get ? req.headers.get(name) : req.headers[name];
 
-export default async function handler(req, res) {
+export function crearWebhookMercadoPagoHandler({
+  createSupabaseClient = () =>
+    createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY),
+  fetchImpl = fetch,
+  env = process.env,
+  now = () => new Date(),
+} = {}) {
+  return (req, res) =>
+    procesarWebhookMercadoPago(req, res, {
+      createSupabaseClient,
+      fetchImpl,
+      env,
+      now,
+    });
+}
+
+async function procesarWebhookMercadoPago(
+  req,
+  res,
+  { createSupabaseClient, fetchImpl, env, now },
+) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const secret = process.env.MP_WEBHOOK_SECRET;
-  const accessToken = process.env.MP_ACCESS_TOKEN;
+  const secret = env.MP_WEBHOOK_SECRET;
+  const accessToken = env.MP_ACCESS_TOKEN;
   if (!secret || !accessToken) {
     console.error("[MP-WH] Faltan MP_WEBHOOK_SECRET o MP_ACCESS_TOKEN");
     return res.status(500).json({ error: "Webhook no configurado" });
@@ -91,10 +112,7 @@ export default async function handler(req, res) {
   }
 
   // ── A partir de acá la notificación es auténtica ──
-  const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY,
-  );
+  const supabaseAdmin = createSupabaseClient();
 
   try {
     // ── 2) IDEMPOTENCIA: ¿ya procesamos este pago? ──
@@ -109,7 +127,7 @@ export default async function handler(req, res) {
     }
 
     // ── 3) CONSULTAR EL PAGO REAL EN MP (no confiar en el body) ──
-    const pagoRes = await fetch(
+    const pagoRes = await fetchImpl(
       `https://api.mercadopago.com/v1/payments/${dataId}`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -135,22 +153,43 @@ export default async function handler(req, res) {
     const clerkId = pago.external_reference;
     const monto = Number(pago.transaction_amount);
 
-    if (!clerkId) {
-      console.error("[MP-WH] Pago aprobado sin external_reference:", dataId);
-      return res.status(200).json({ status: "sin_referencia" });
-    }
-    if (!Number.isFinite(monto) || monto < PRECIO_VIP) {
+    if (pago.currency_id !== MONEDA_VIP) {
       console.error(
-        `[MP-WH] Monto insuficiente (${monto}) para pago ${dataId}. No se activa.`,
+        `[MP-WH] Moneda invalida (${pago.currency_id}) para pago ${dataId}. No se activa.`,
+      );
+      return res.status(200).json({ status: "moneda_invalida" });
+    }
+    if (!Number.isFinite(monto) || monto !== PRECIO_VIP) {
+      console.error(
+        `[MP-WH] Monto invalido (${pago.transaction_amount}) para pago ${dataId}. No se activa.`,
       );
       return res.status(200).json({ status: "monto_invalido" });
     }
+    if (typeof clerkId !== "string" || !clerkId.trim()) {
+      console.error("[MP-WH] Pago aprobado sin external_reference:", dataId);
+      return res.status(200).json({ status: "sin_referencia" });
+    }
+
+    const { data: usuario, error: usuarioError } = await supabaseAdmin
+      .from("usuarios")
+      .select("clerk_id")
+      .eq("clerk_id", clerkId)
+      .maybeSingle();
+
+    if (usuarioError) {
+      console.error("[MP-WH] Error verificando usuario:", usuarioError.message);
+      return res.status(500).json({ error: "No se pudo verificar el usuario" });
+    }
+    if (!usuario?.clerk_id || usuario.clerk_id !== clerkId) {
+      console.error("[MP-WH] Usuario inexistente para pago:", dataId, clerkId);
+      return res.status(200).json({ status: "usuario_inexistente" });
+    }
 
     // ── 5) ACTIVAR VIP (mismo update del modelo: plan + créditos frescos + ventana) ──
-    const ahora = new Date();
+    const ahora = now();
     const expira = new Date(ahora.getTime() + DIAS_VIP * 864e5);
 
-    const { error: updError } = await supabaseAdmin
+    const { data: usuarioActualizado, error: updError } = await supabaseAdmin
       .from("usuarios")
       .update({
         plan: "vip",
@@ -161,11 +200,17 @@ export default async function handler(req, res) {
         analisis_realizados: 0,
         recordatorio_vip_enviado_at: null,
       })
-      .eq("clerk_id", clerkId);
+      .eq("clerk_id", clerkId)
+      .select("clerk_id")
+      .maybeSingle();
 
     if (updError) {
       console.error("[MP-WH] Error activando VIP:", updError.message);
       return res.status(500).json({ error: "No se pudo activar el plan" });
+    }
+    if (!usuarioActualizado?.clerk_id || usuarioActualizado.clerk_id !== clerkId) {
+      console.error("[MP-WH] UPDATE no afecto al usuario esperado:", clerkId);
+      return res.status(500).json({ error: "No se pudo confirmar la activacion" });
     }
 
     // ── 6) Registrar el pago (cierra la idempotencia para futuros reintentos) ──
@@ -183,7 +228,7 @@ export default async function handler(req, res) {
         "[MP-WH] VIP activado pero fallo al registrar pago:",
         insError.message,
       );
-      // El VIP ya quedó activo; respondemos 200 igual para no reintentar.
+      return res.status(500).json({ error: "No se pudo registrar el pago" });
     }
 
     console.log(
@@ -198,3 +243,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Error procesando la notificación" });
   }
 }
+
+export default crearWebhookMercadoPagoHandler();
